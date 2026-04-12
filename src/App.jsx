@@ -72,7 +72,7 @@ export default function App() {
 
   return (
     <RouterContext.Provider value={router}>
-      <AppLayout auth={auth}>
+      <AppLayout auth={auth} platform={platform}>
         <ErrorBoundary>
           {route.name === 'home' ? <HomePage auth={auth} platform={platform} /> : null}
           {route.name === 'browse' ? <BrowsePage platform={platform} /> : null}

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { SeriesCard } from '../components/SeriesCard';
 import { SectionTitle } from '../components/SectionTitle';
 
-const statuses = ['all', 'published', 'in_review', 'draft'];
+const statuses = ['all', 'published', 'pending_review', 'draft', 'rejected'];
 
 export function BrowsePage({ platform }) {
   const [query, setQuery] = useState('');

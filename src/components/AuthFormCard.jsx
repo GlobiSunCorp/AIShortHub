@@ -3,7 +3,7 @@ import { useState } from 'react';
 export function AuthFormCard({ title, subtitle, cta, mode, onSubmit, footer }) {
   const isForgot = mode === 'forgot';
   const isSignup = mode === 'signup';
-  const [form, setForm] = useState({ email: '', password: '', role: 'viewer' });
+  const [form, setForm] = useState({ email: '', password: '', role: 'member' });
 
   const submit = (event) => {
     event.preventDefault();
@@ -15,7 +15,7 @@ export function AuthFormCard({ title, subtitle, cta, mode, onSubmit, footer }) {
       <aside className="auth-showcase auth-surface">
         <span className="kicker">Member Access</span>
         <h2>登录后即可进入观看、创作与管理流程。</h2>
-        <p>本项目采用 Supabase Auth 结构预留。当前默认 mock 登录，便于本地验证业务链路。</p>
+        <p>支持 guest / member / creator / admin 状态流转。当前默认 mock 登录，便于本地验证业务链路。</p>
       </aside>
 
       <form className="panel auth-form" onSubmit={submit}>
@@ -36,9 +36,9 @@ export function AuthFormCard({ title, subtitle, cta, mode, onSubmit, footer }) {
 
         {isSignup ? (
           <label>
-            Role
+            Account Type
             <select className="input" value={form.role} onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}>
-              <option value="viewer">Viewer</option>
+              <option value="member">Member</option>
               <option value="creator">Creator</option>
             </select>
           </label>

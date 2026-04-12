@@ -10,9 +10,11 @@ const nav = [
   ['/admin', 'Admin'],
 ];
 
-export function Header({ auth }) {
+export function Header({ auth, platform }) {
   const { pathname } = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const membership = auth.user ? platform.memberships.find((item) => item.profileId === auth.user.id) : null;
+  const accountState = auth.userState === 'guest' ? 'guest' : auth.user?.role;
 
   return (
     <header className="site-header">
@@ -28,6 +30,7 @@ export function Header({ auth }) {
           ))}
         </nav>
         <div className="row center header-actions">
+          <span className="meta-pill">{`Status: ${accountState}${membership ? ` · ${membership.tier}` : ''}`}</span>
           {auth.isLoggedIn ? (
             <div className="account-wrap">
               <button className="avatar" onClick={() => setMenuOpen((open) => !open)}>

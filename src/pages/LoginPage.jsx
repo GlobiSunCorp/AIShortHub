@@ -5,17 +5,16 @@ export function LoginPage({ auth }) {
   const { navigate } = useRouter();
 
   const submit = (form) => {
-    const role = form.email.includes('admin') ? 'admin' : form.email.includes('creator') ? 'creator' : 'viewer';
-    auth.login(form.email || 'mia@example.com', role);
+    auth.login(form.email);
     navigate('/');
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page stack-md">
       <AuthFormCard
         mode="login"
         title="登录"
-        subtitle="登录后继续观看、提交作品或进入管理后台。"
+        subtitle="输入邮箱和密码即可进入平台。示例：mia@example.com / creator@example.com / admin@example.com"
         cta="Log in"
         onSubmit={submit}
         footer={

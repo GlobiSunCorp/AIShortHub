@@ -4,19 +4,10 @@ export const PLATFORM_CONFIG = {
   freeEpisodeCount: 1,
 };
 
-export const tags = [
-  'Romance',
-  'Revenge',
-  'Mystery',
-  'Urban',
-  'Fantasy',
-  'Workplace',
-  'Suspense',
-  'Historical',
-];
+export const tags = ['Romance', 'Revenge', 'Mystery', 'Urban', 'Fantasy', 'Workplace', 'Suspense', 'Historical'];
 
 export const profiles = [
-  { id: 'u_viewer', name: 'Mia Viewer', email: 'mia@example.com', role: 'viewer' },
+  { id: 'u_viewer', name: 'Mia Member', email: 'mia@example.com', role: 'member' },
   { id: 'u_creator', name: 'Luma Studio', email: 'creator@example.com', role: 'creator' },
   { id: 'u_admin', name: 'Ops Admin', email: 'admin@example.com', role: 'admin' },
 ];
@@ -40,7 +31,7 @@ export const series = [
     synopsis: 'A vanished heiress returns under a new identity and rewrites every power game around her.',
     status: 'published',
     visibility: 'public',
-    coverUrl: '',
+    coverUrl: 'https://images.example.com/hidden-return-cover.jpg',
     category: 'Romance',
     tags: ['Romance', 'Revenge'],
     trailerId: 't_hidden',
@@ -54,7 +45,7 @@ export const series = [
     synopsis: 'A royal conspiracy thriller where every vow has a hidden blood price.',
     status: 'published',
     visibility: 'public',
-    coverUrl: '',
+    coverUrl: 'https://images.example.com/crimson-veil-cover.jpg',
     category: 'Mystery',
     tags: ['Mystery', 'Fantasy'],
     trailerId: 't_crimson',
@@ -66,9 +57,9 @@ export const series = [
     creatorId: 'c_luma',
     title: 'Contract Bride, Real Revenge',
     synopsis: 'A fake marriage contract ignites real vengeance inside a billionaire family.',
-    status: 'in_review',
+    status: 'pending_review',
     visibility: 'private',
-    coverUrl: '',
+    coverUrl: 'https://images.example.com/contract-bride-cover.jpg',
     category: 'Urban',
     tags: ['Urban', 'Revenge'],
     trailerId: 't_contract',
@@ -97,22 +88,18 @@ export const serviceOrders = [
     id: 'so_001',
     requesterId: 'u_creator',
     serviceType: 'TikTok Promo Pack',
-    seriesTitle: 'Her Hidden Return',
-    requirement: 'Need 5 hooks + caption templates for next launch.',
-    budgetRange: '$300-$600',
+    projectTitle: 'Her Hidden Return',
+    requestDetails: 'Need 5 hooks + caption templates for next launch.',
+    budget: '$300-$600',
     contact: '@lumastudio',
     status: 'in_progress',
     createdAt: '2026-04-08',
   },
 ];
 
-export const payments = [
-  { id: 'pay_001', profileId: 'u_viewer', amount: 19, currency: 'USD', provider: 'stripe', type: 'membership', status: 'paid', createdAt: '2026-04-01' },
-];
+export const payments = [{ id: 'pay_001', profileId: 'u_viewer', amount: 19, currency: 'USD', provider: 'stripe', type: 'membership', status: 'paid', createdAt: '2026-04-01' }];
 
-export const payouts = [
-  { id: 'po_001', creatorId: 'c_luma', grossAmount: 1240, platformFeeRate: PLATFORM_CONFIG.platformTakeRate, netAmount: 992, status: 'scheduled', createdAt: '2026-04-10' },
-];
+export const payouts = [{ id: 'po_001', creatorId: 'c_luma', grossAmount: 1240, platformFeeRate: PLATFORM_CONFIG.platformTakeRate, netAmount: 992, status: 'scheduled', createdAt: '2026-04-10' }];
 
 export const reviewLogs = [
   {
@@ -129,6 +116,4 @@ export const unlockedContent = {
   u_viewer: ['hidden-return:1'],
 };
 
-export const ordersHistory = [
-  { id: 'ord_001', profileId: 'u_viewer', item: 'Pro Monthly', amount: '$19', status: 'Paid', date: '2026-04-01' },
-];
+export const ordersHistory = [{ id: 'ord_001', profileId: 'u_viewer', item: 'Pro Monthly', amount: '$19', status: 'Paid', date: '2026-04-01' }];
