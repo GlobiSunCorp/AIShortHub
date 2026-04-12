@@ -17,7 +17,7 @@ export function SignupPage({ auth }) {
       <AuthFormCard
         mode="signup"
         title="注册"
-        subtitle="创建账户后可体验试看、会员、创作者上传与服务订单。"
+        subtitle="创建账户后可体验 Viewer Subscription、Creator Plan、上传工作流与服务下单。"
         cta="Create account"
         onSubmit={submit}
         footer={

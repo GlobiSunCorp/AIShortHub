@@ -1,22 +1,27 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { DemoRoleSwitcher } from './DemoRoleSwitcher';
 import { Link, useRouter } from '../lib/router';
 import { getStatusLabel } from '../lib/roleDisplay';
-
-const nav = [
-  ['/', 'Home'],
-  ['/browse', 'Browse'],
-  ['/creator', 'Creator'],
-  ['/pricing', 'Pricing'],
-  ['/services', 'Services'],
-  ['/admin', 'Admin'],
-];
+import { canAccessCreatorStudio, resolveMembership } from '../hooks/usePlanAccess';
 
 export function Header({ auth, platform }) {
   const { pathname } = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const membership = auth.user ? platform.memberships.find((item) => item.profileId === auth.user.id) : null;
-  const statusLabel = getStatusLabel(auth.userState, membership?.tier, auth.user?.tier);
+  const membership = auth.user ? resolveMembership(auth, platform) : null;
+  const showCreatorStudio = canAccessCreatorStudio(auth, platform);
+  const statusLabel = getStatusLabel(auth.userState, membership?.tier, auth.user?.tier, membership?.creatorPlan);
+
+  const nav = useMemo(
+    () => [
+      ['/', 'Home'],
+      ['/browse', 'Browse'],
+      ...(showCreatorStudio ? [['/creator', 'Creator Studio']] : []),
+      ['/pricing', 'Pricing'],
+      ['/services', 'Services'],
+      ['/admin', 'Admin'],
+    ],
+    [showCreatorStudio]
+  );
 
   return (
     <header className="site-header">
@@ -30,6 +35,7 @@ export function Header({ auth, platform }) {
               {label}
             </Link>
           ))}
+          {!showCreatorStudio ? <Link to="/pricing" className="nav-link">Upgrade for Creator Studio</Link> : null}
         </nav>
         <div className="row center header-actions">
           <span className="meta-pill">{statusLabel}</span>
@@ -45,7 +51,7 @@ export function Header({ auth, platform }) {
                     {auth.user.email} · {auth.user.role}
                   </small>
                   <Link to="/profile">My Profile</Link>
-                  <Link to="/creator">Creator dashboard</Link>
+                  {showCreatorStudio ? <Link to="/creator">Creator Studio</Link> : null}
                   <DemoRoleSwitcher auth={auth} compact />
                   <button className="btn btn-ghost" onClick={auth.logout}>
                     Logout

@@ -2,20 +2,21 @@ export const PLATFORM_CONFIG = {
   platformTakeRate: 0.2,
   trialSeconds: 45,
   freeEpisodeCount: 1,
+  settlementCycle: 'Monthly on the 5th business day (mock)',
 };
 
 export const tags = ['Romance', 'Revenge', 'Mystery', 'Urban', 'Fantasy', 'Workplace', 'Suspense', 'Historical'];
 
 export const profiles = [
-  { id: 'u_viewer', name: 'Mia Member', email: 'mia@example.com', role: 'member' },
-  { id: 'u_creator', name: 'Luma Studio', email: 'creator@example.com', role: 'creator' },
-  { id: 'u_admin', name: 'Ops Admin', email: 'admin@example.com', role: 'admin' },
+  { id: 'u_viewer', name: 'Mia Member', email: 'mia@example.com', role: 'member', viewerPlan: 'free', creatorPlan: null },
+  { id: 'u_creator', name: 'Luma Studio', email: 'creator@example.com', role: 'creator', viewerPlan: 'pro_viewer', creatorPlan: 'creator_pro' },
+  { id: 'u_admin', name: 'Ops Admin', email: 'admin@example.com', role: 'admin', viewerPlan: 'premium_viewer', creatorPlan: 'studio' },
 ];
 
 export const memberships = [
-  { profileId: 'u_viewer', tier: 'free', status: 'active', renewAt: null },
-  { profileId: 'u_creator', tier: 'pro_monthly', status: 'active', renewAt: '2026-05-02' },
-  { profileId: 'u_admin', tier: 'pro_yearly', status: 'active', renewAt: '2027-01-01' },
+  { profileId: 'u_viewer', tier: 'free', creatorPlan: null, status: 'active', renewAt: null },
+  { profileId: 'u_creator', tier: 'pro_viewer', creatorPlan: 'creator_pro', status: 'active', renewAt: '2026-05-02' },
+  { profileId: 'u_admin', tier: 'premium_viewer', creatorPlan: 'studio', status: 'active', renewAt: '2027-01-01' },
 ];
 
 export const creators = [
@@ -91,8 +92,11 @@ export const serviceOrders = [
     projectTitle: 'Her Hidden Return',
     requestDetails: 'Need 5 hooks + caption templates for next launch.',
     budget: '$300-$600',
-    contact: '@lumastudio',
+    contact: 'ops@lumastudio.com',
     status: 'in_progress',
+    entitlement: 'Included',
+    addOnPrice: '$0',
+    nextStep: 'Deliver first TikTok hook pack for approval.',
     createdAt: '2026-04-08',
   },
 ];

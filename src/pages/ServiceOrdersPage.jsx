@@ -1,15 +1,21 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from '../lib/router';
 import { isValidEmail, minLength } from '../lib/validation';
-
-const serviceTypes = ['Trailer Editing', 'Cover Design', 'Listing Packaging', 'TikTok Promo Pack', 'Subtitle / Localization'];
+import { ADD_ON_SERVICES, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
+import { resolveMembership } from '../hooks/usePlanAccess';
 
 export function ServiceOrdersPage({ auth, platform }) {
   const { navigate } = useRouter();
-  const [form, setForm] = useState({ serviceType: serviceTypes[0], projectTitle: '', requestDetails: '', budget: '$200-$500', contact: '' });
+  const membership = resolveMembership(auth, platform);
+  const creatorPlanId = membership.creatorPlan || 'creator_basic';
+  const [selectedServiceId, setSelectedServiceId] = useState(ADD_ON_SERVICES[0].id);
+  const [form, setForm] = useState({ projectTitle: '', requestDetails: '', budget: '$200-$500', contact: auth.user?.email || '' });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+
+  const selectedService = useMemo(() => ADD_ON_SERVICES.find((item) => item.id === selectedServiceId) || ADD_ON_SERVICES[0], [selectedServiceId]);
+  const entitlement = getServiceEntitlement(selectedService, creatorPlanId);
 
   const validate = () => {
     const next = {};
@@ -24,39 +30,39 @@ export function ServiceOrdersPage({ auth, platform }) {
   return (
     <div className="stack-lg">
       <section className="panel">
-        <h1>Services</h1>
-        <p className="small-text">提交服务订单后会进入 Admin 队列，可持续更新状态。</p>
+        <h1>Creator Services Center</h1>
+        <p className="small-text">选择 Add-on Services，查看当前 Creator Plan 的 Included / Discounted 权益，然后提交服务订单。</p>
       </section>
 
-      {feedback.message ? <section className="panel"><p className={`form-feedback ${feedback.type}`}>{feedback.message}</p></section> : null}
+      <section className="grid cards-3">
+        {ADD_ON_SERVICES.map((item) => (
+          <article key={item.id} className={`pricing-card ${selectedServiceId === item.id ? 'active-card' : ''}`}>
+            <h3>{item.name}</h3>
+            <p className="small-text">{item.description}</p>
+            <p className="price">{item.price}</p>
+            <p className="small-text">{getServiceEntitlement(item, creatorPlanId)} · {item.includedIn.length ? `Included in ${item.includedIn.join(', ')}` : 'Not included in base plans'}</p>
+            <button className="btn btn-ghost" type="button" onClick={() => setSelectedServiceId(item.id)}>选择此服务</button>
+          </article>
+        ))}
+      </section>
 
       <section className="panel form-grid">
-        <label>
-          service type
-          <select className="input" value={form.serviceType} onChange={(e) => setForm((p) => ({ ...p, serviceType: e.target.value }))}>
-            {serviceTypes.map((item) => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          project title
-          <input className="input" placeholder="项目标题" value={form.projectTitle} onChange={(e) => setForm((p) => ({ ...p, projectTitle: e.target.value }))} />
+        <h2>服务需求表单</h2>
+        <p className="small-text">Selected Service: {selectedService.name} · Current Creator Plan: {getCreatorPlan(creatorPlanId).name} · Entitlement: {entitlement}</p>
+        <label>project title
+          <input className="input" value={form.projectTitle} onChange={(e) => setForm((p) => ({ ...p, projectTitle: e.target.value }))} />
           {errors.projectTitle ? <span className="form-feedback error">{errors.projectTitle}</span> : null}
         </label>
-        <label>
-          request details
-          <textarea className="input" placeholder="需求描述" value={form.requestDetails} onChange={(e) => setForm((p) => ({ ...p, requestDetails: e.target.value }))} />
+        <label>request details
+          <textarea className="input" value={form.requestDetails} onChange={(e) => setForm((p) => ({ ...p, requestDetails: e.target.value }))} />
           {errors.requestDetails ? <span className="form-feedback error">{errors.requestDetails}</span> : null}
         </label>
-        <label>
-          budget
-          <input className="input" placeholder="预算" value={form.budget} onChange={(e) => setForm((p) => ({ ...p, budget: e.target.value }))} />
+        <label>budget
+          <input className="input" value={form.budget} onChange={(e) => setForm((p) => ({ ...p, budget: e.target.value }))} />
           {errors.budget ? <span className="form-feedback error">{errors.budget}</span> : null}
         </label>
-        <label>
-          contact email
-          <input className="input" placeholder="联系方式邮箱" value={form.contact} onChange={(e) => setForm((p) => ({ ...p, contact: e.target.value }))} />
+        <label>contact email
+          <input className="input" value={form.contact} onChange={(e) => setForm((p) => ({ ...p, contact: e.target.value }))} />
           {errors.contact ? <span className="form-feedback error">{errors.contact}</span> : null}
         </label>
         <button
@@ -68,51 +74,26 @@ export function ServiceOrdersPage({ auth, platform }) {
               setFeedback({ type: 'error', message: '提交失败，请修正错误后重试。' });
               return;
             }
-
             setIsSubmitting(true);
-            const created = platform.actions.createServiceOrder({ ...form, requesterId: auth.user?.id || 'guest' });
-            setForm({ serviceType: serviceTypes[0], projectTitle: '', requestDetails: '', budget: '$200-$500', contact: '' });
-            setErrors({});
-            setFeedback({ type: 'success', message: `提交成功，订单号 ${created.id}。` });
+            const created = platform.actions.createServiceOrder({
+              requesterId: auth.user?.id || 'guest',
+              serviceType: selectedService.name,
+              projectTitle: form.projectTitle,
+              requestDetails: form.requestDetails,
+              budget: form.budget,
+              contact: form.contact,
+              entitlement,
+              addOnPrice: entitlement === 'Included' ? '$0' : selectedService.price,
+              nextStep: '服务团队将在 24h 内回传项目排期（mock）。',
+            });
+            setFeedback({ type: 'success', message: `服务下单成功，订单号 ${created.id}` });
             setIsSubmitting(false);
             navigate(`/services/${created.id}`);
           }}
         >
-          {isSubmitting ? '提交中...' : '提交需求'}
+          {isSubmitting ? '提交中...' : '提交服务订单'}
         </button>
-      </section>
-
-      <section className="panel table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>service type</th>
-              <th>project title</th>
-              <th>budget</th>
-              <th>contact</th>
-              <th>status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {platform.serviceOrders.length ? (
-              platform.serviceOrders.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.id}</td>
-                  <td>{item.serviceType}</td>
-                  <td>{item.projectTitle}</td>
-                  <td>{item.budget}</td>
-                  <td>{item.contact}</td>
-                  <td>{item.status}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="small-text">还没有服务订单，先提交一个需求试试看。</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        {feedback.message ? <p className={`form-feedback ${feedback.type}`}>{feedback.message}</p> : null}
       </section>
     </div>
   );

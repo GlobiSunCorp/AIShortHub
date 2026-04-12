@@ -416,3 +416,46 @@ td { text-align: left; padding: 10px; border-bottom: 1px solid var(--line-soft);
   cursor: not-allowed;
   opacity: 0.65;
 }
+
+.active-card {
+  border-color: rgba(141, 224, 170, 0.6);
+  box-shadow: 0 0 0 1px rgba(141, 224, 170, 0.15) inset;
+}
+
+.creator-toolbox {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 45;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.toolbox-toggle { width: auto; }
+.toolbox-menu {
+  width: min(280px, calc(100vw - 2rem));
+  display: grid;
+  gap: 0.45rem;
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.toolbox-link {
+  font-size: 0.86rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  padding: 0.55rem 0.7rem;
+  color: var(--muted);
+}
+
+.toolbox-link:hover,
+.toolbox-link.active {
+  border-color: var(--line);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 640px) {
+  .creator-toolbox { right: 0.5rem; bottom: 0.5rem; }
+  .toolbox-menu { max-height: 48vh; }
+}
