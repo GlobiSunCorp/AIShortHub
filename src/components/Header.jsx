@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { DemoRoleSwitcher } from './DemoRoleSwitcher';
 import { Link, useRouter } from '../lib/router';
+import { getStatusLabel } from '../lib/roleDisplay';
 
 const nav = [
   ['/', 'Home'],
@@ -14,7 +16,7 @@ export function Header({ auth, platform }) {
   const { pathname } = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const membership = auth.user ? platform.memberships.find((item) => item.profileId === auth.user.id) : null;
-  const accountState = auth.userState === 'guest' ? 'guest' : auth.user?.role;
+  const statusLabel = getStatusLabel(auth.userState, membership?.tier, auth.user?.tier);
 
   return (
     <header className="site-header">
@@ -30,7 +32,7 @@ export function Header({ auth, platform }) {
           ))}
         </nav>
         <div className="row center header-actions">
-          <span className="meta-pill">{`Status: ${accountState}${membership ? ` · ${membership.tier}` : ''}`}</span>
+          <span className="meta-pill">{statusLabel}</span>
           {auth.isLoggedIn ? (
             <div className="account-wrap">
               <button className="avatar" onClick={() => setMenuOpen((open) => !open)}>
@@ -44,6 +46,7 @@ export function Header({ auth, platform }) {
                   </small>
                   <Link to="/profile">My Profile</Link>
                   <Link to="/creator">Creator dashboard</Link>
+                  <DemoRoleSwitcher auth={auth} compact />
                   <button className="btn btn-ghost" onClick={auth.logout}>
                     Logout
                   </button>

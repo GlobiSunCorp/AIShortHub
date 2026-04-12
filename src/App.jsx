@@ -13,6 +13,7 @@ import { LoginPage } from './pages/LoginPage';
 import { PricingPage } from './pages/PricingPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SeriesDetailPage } from './pages/SeriesDetailPage';
+import { ServiceOrderDetailPage } from './pages/ServiceOrderDetailPage';
 import { ServiceOrdersPage } from './pages/ServiceOrdersPage';
 import { SignupPage } from './pages/SignupPage';
 import { SubmitPage } from './pages/SubmitPage';
@@ -35,6 +36,9 @@ function resolveRoute(pathname) {
   if (pathname === '/login') return { name: 'login' };
   if (pathname === '/signup') return { name: 'signup' };
   if (pathname === '/forgot-password') return { name: 'forgot' };
+
+  const serviceOrderMatch = pathname.match(/^\/services\/([^/]+)$/);
+  if (serviceOrderMatch) return { name: 'serviceOrderDetail', id: serviceOrderMatch[1] };
 
   const seriesMatch = pathname.match(/^\/series\/([^/]+)$/);
   if (seriesMatch) return { name: 'series', id: seriesMatch[1] };
@@ -82,6 +86,7 @@ export default function App() {
           {route.name === 'creator' ? <CreatorDashboardPage auth={auth} platform={platform} /> : null}
           {route.name === 'pricing' ? <PricingPage auth={auth} platform={platform} /> : null}
           {route.name === 'services' ? <ServiceOrdersPage auth={auth} platform={platform} /> : null}
+          {route.name === 'serviceOrderDetail' ? <ServiceOrderDetailPage id={route.id} platform={platform} /> : null}
           {route.name === 'profile' ? <ProfilePage auth={auth} platform={platform} /> : null}
           {route.name === 'admin' ? <AdminPage platform={platform} auth={auth} /> : null}
           {route.name === 'login' ? <LoginPage auth={auth} /> : null}

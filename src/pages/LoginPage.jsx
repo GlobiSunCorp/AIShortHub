@@ -4,9 +4,12 @@ import { Link, useRouter } from '../lib/router';
 export function LoginPage({ auth }) {
   const { navigate } = useRouter();
 
-  const submit = (form) => {
-    auth.login(form.email);
-    navigate('/');
+  const submit = async (form) => {
+    const result = auth.login(form.email);
+    if (result.ok) {
+      navigate('/');
+    }
+    return result;
   };
 
   return (
