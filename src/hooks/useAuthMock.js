@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { DEMO_ROLE_OPTIONS } from '../lib/roleDisplay';
 
 const presetUsers = {
-  member: { id: 'u_viewer', name: 'Mia Member', email: 'mia@example.com', avatar: 'MM', role: 'member', tier: 'free' },
-  creator: { id: 'u_creator', name: 'Luma Studio', email: 'creator@example.com', avatar: 'LS', role: 'creator', tier: 'pro_monthly' },
-  admin: { id: 'u_admin', name: 'Ops Admin', email: 'admin@example.com', avatar: 'OA', role: 'admin', tier: 'pro_yearly' },
+  member: { id: 'u_viewer', name: 'Mia Member', email: 'mia@example.com', avatar: 'MM', role: 'member', tier: 'free', creatorPlan: null },
+  creator: { id: 'u_creator', name: 'Luma Studio', email: 'creator@example.com', avatar: 'LS', role: 'creator', tier: 'pro_viewer', creatorPlan: 'creator_pro' },
+  admin: { id: 'u_admin', name: 'Ops Admin', email: 'admin@example.com', avatar: 'OA', role: 'admin', tier: 'premium_viewer', creatorPlan: 'studio' },
 };
 
 function inferRoleFromEmail(email = '') {
@@ -20,7 +20,8 @@ function buildDemoUser(option, fallbackEmail) {
     ...preset,
     email: fallbackEmail || preset.email,
     role: option.role,
-    tier: option.tier || preset.tier,
+    tier: option.viewerPlan || preset.tier,
+    creatorPlan: option.creatorPlan ?? preset.creatorPlan,
   };
 }
 
@@ -44,10 +45,12 @@ export function useAuthMock() {
     const inferredRole = role || inferRoleFromEmail(email);
     const presetByEmail = Object.values(presetUsers).find((item) => item.email === email);
     const preset = presetByEmail || presetUsers[inferredRole] || presetUsers.member;
-    const loggedUser = { ...preset, email, role: inferredRole, tier: preset.tier || 'free' };
+    const loggedUser = { ...preset, email, role: inferredRole, tier: preset.tier || 'free', creatorPlan: preset.creatorPlan || null };
     setUser(loggedUser);
 
-    const matchedDemo = DEMO_ROLE_OPTIONS.find((item) => item.role === loggedUser.role && (item.tier || 'free') === (loggedUser.tier || 'free'));
+    const matchedDemo = DEMO_ROLE_OPTIONS.find(
+      (item) => item.role === loggedUser.role && (item.viewerPlan || 'free') === (loggedUser.tier || 'free') && (item.creatorPlan || null) === (loggedUser.creatorPlan || null)
+    );
     setDemoRole(matchedDemo?.value || (loggedUser.role === 'member' ? 'member_free' : loggedUser.role));
     setNotice('');
     return { ok: true, message: '登录成功，欢迎回来。' };
@@ -59,7 +62,6 @@ export function useAuthMock() {
 
     const fallback = presetUsers[role] || presetUsers.member;
     const handle = (email || 'new@aishorthub.com').split('@')[0] || 'new';
-    const tier = role === 'member' ? 'pro_monthly' : role === 'creator' ? 'pro_monthly' : fallback.tier || 'pro_yearly';
 
     const nextUser = {
       id: `u_${handle.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12)}`,
@@ -67,11 +69,12 @@ export function useAuthMock() {
       email,
       avatar: handle.slice(0, 2).toUpperCase(),
       role,
-      tier,
+      tier: role === 'member' ? 'pro_viewer' : 'pro_viewer',
+      creatorPlan: role === 'creator' ? 'creator_basic' : fallback.creatorPlan || null,
     };
 
     setUser(nextUser);
-    setDemoRole(role === 'member' ? 'member_pro_monthly' : role);
+    setDemoRole(role === 'member' ? 'member_pro_viewer' : 'creator_basic');
     setNotice('');
     return { ok: true, message: '注册成功，已进入体验模式。' };
   };

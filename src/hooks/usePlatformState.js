@@ -142,9 +142,18 @@ export function usePlatformState() {
   const setMembershipTier = (profileId, tier) => {
     setAllMemberships((prev) => {
       if (!prev.some((item) => item.profileId === profileId)) {
-        return [{ profileId, tier, status: 'active', renewAt: null }, ...prev];
+        return [{ profileId, tier, creatorPlan: null, status: 'active', renewAt: null }, ...prev];
       }
       return prev.map((item) => (item.profileId === profileId ? { ...item, tier } : item));
+    });
+  };
+
+  const setCreatorPlan = (profileId, creatorPlan) => {
+    setAllMemberships((prev) => {
+      if (!prev.some((item) => item.profileId === profileId)) {
+        return [{ profileId, tier: 'free', creatorPlan, status: 'active', renewAt: null }, ...prev];
+      }
+      return prev.map((item) => (item.profileId === profileId ? { ...item, creatorPlan } : item));
     });
   };
 
@@ -173,6 +182,7 @@ export function usePlatformState() {
       createServiceOrder,
       updateServiceOrderStatus,
       setMembershipTier,
+      setCreatorPlan,
     },
   };
 }

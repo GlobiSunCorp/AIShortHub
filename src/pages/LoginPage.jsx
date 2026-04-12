@@ -17,7 +17,7 @@ export function LoginPage({ auth }) {
       <AuthFormCard
         mode="login"
         title="登录"
-        subtitle="输入邮箱和密码即可进入平台。示例：mia@example.com / creator@example.com / admin@example.com"
+        subtitle="输入邮箱和密码进入平台。示例：mia@example.com / creator@example.com / admin@example.com。支持不同 Status 演示。"
         cta="Log in"
         onSubmit={submit}
         footer={
