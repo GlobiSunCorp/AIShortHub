@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Play,
   Upload,
@@ -13,6 +13,9 @@ import {
   CheckCircle2,
   Clock3,
   AlertCircle,
+  Lock,
+  ChevronDown,
+  LogOut,
 } from "lucide-react";
 import "./index.css";
 
@@ -186,10 +189,39 @@ function SectionTitle({ title, desc }) {
 }
 
 export default function App() {
-  const [page, setPage] = useState("home");
+  const routeMap = {
+    "/": "home",
+    "/browse": "browse",
+    "/submit": "submit",
+    "/creator": "creator",
+    "/pricing": "pricing",
+    "/watch": "watch",
+    "/series": "detail",
+    "/login": "login",
+    "/signup": "signup",
+    "/admin": "admin",
+  };
+
+  const pageToPath = {
+    home: "/",
+    browse: "/browse",
+    submit: "/submit",
+    creator: "/creator",
+    pricing: "/pricing",
+    watch: "/watch",
+    detail: "/series",
+    login: "/login",
+    signup: "/signup",
+    admin: "/admin",
+  };
+
+  const [page, setPage] = useState(() => routeMap[window.location.pathname] || "home");
   const [selectedSeriesId, setSelectedSeriesId] = useState(seriesData[0].id);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [search, setSearch] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [lockedPromptOpen, setLockedPromptOpen] = useState(false);
 
   const selectedSeries = useMemo(
     () => seriesData.find((s) => s.id === selectedSeriesId) || seriesData[0],
@@ -207,16 +239,44 @@ export default function App() {
     );
   }, [search]);
 
+  useEffect(() => {
+    const onPopState = () => {
+      setPage(routeMap[window.location.pathname] || "home");
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const navigateTo = (nextPage) => {
+    setPage(nextPage);
+    const nextPath = pageToPath[nextPage] || "/";
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, "", nextPath);
+    }
+  };
+
   const openSeries = (id) => {
     setSelectedSeriesId(id);
     setSelectedEpisode(1);
-    setPage("detail");
+    navigateTo("detail");
   };
 
   const goWatch = (id, episode = 1) => {
     setSelectedSeriesId(id);
     setSelectedEpisode(episode);
-    setPage("watch");
+    navigateTo("watch");
+  };
+
+  const handleEpisodeSelect = (episode) => {
+    const isLockedEpisode = episode > selectedSeries.freeEpisodes;
+    if (isLockedEpisode && !isLoggedIn) {
+      setLockedPromptOpen(true);
+      return;
+    }
+
+    setLockedPromptOpen(false);
+    setSelectedEpisode(episode);
   };
 
   const statusClass = (status) => {
@@ -238,7 +298,7 @@ export default function App() {
     <div className="app-shell">
       <header className="site-header">
         <div className="container header-inner">
-          <button onClick={() => setPage("home")} className="brand-btn">
+          <button onClick={() => navigateTo("home")} className="brand-btn">
             AIShortHub
           </button>
 
@@ -246,7 +306,7 @@ export default function App() {
             {navItems.map(([label, key]) => (
               <button
                 key={key}
-                onClick={() => setPage(key)}
+                onClick={() => navigateTo(key)}
                 className={page === key ? "nav-btn active" : "nav-btn"}
               >
                 {label}
@@ -255,8 +315,38 @@ export default function App() {
           </nav>
 
           <div className="header-actions">
-            <button className="btn btn-outline">Login</button>
-            <button onClick={() => setPage("submit")} className="btn btn-light">
+            {!isLoggedIn ? (
+              <>
+                <button onClick={() => navigateTo("login")} className="btn btn-outline">Login</button>
+                <button onClick={() => navigateTo("signup")} className="btn btn-light">Sign Up</button>
+              </>
+            ) : (
+              <div className="account-menu-wrap">
+                <button onClick={() => setShowAccountMenu((prev) => !prev)} className="btn btn-outline account-btn">
+                  <User size={16} />
+                  <span>Olivia Chen</span>
+                  <ChevronDown size={14} />
+                </button>
+                {showAccountMenu && (
+                  <div className="account-menu">
+                    <button onClick={() => navigateTo("creator")} className="account-item">Dashboard</button>
+                    <button onClick={() => navigateTo("watch")} className="account-item">Continue Watching</button>
+                    <button
+                      onClick={() => {
+                        setIsLoggedIn(false);
+                        setShowAccountMenu(false);
+                        navigateTo("home");
+                      }}
+                      className="account-item danger"
+                    >
+                      <LogOut size={14} />
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            <button onClick={() => navigateTo("submit")} className="btn btn-light">
               Upload Your Series
             </button>
           </div>
@@ -277,10 +367,10 @@ export default function App() {
                 </p>
 
                 <div className="button-row">
-                  <button onClick={() => setPage("browse")} className="btn btn-light">
+                  <button onClick={() => navigateTo("browse")} className="btn btn-light">
                     Start Watching
                   </button>
-                  <button onClick={() => setPage("submit")} className="btn btn-outline">
+                  <button onClick={() => navigateTo("submit")} className="btn btn-outline">
                     Submit Your Series
                   </button>
                 </div>
@@ -430,7 +520,7 @@ export default function App() {
                 <div className="panel">
                   <h3>Creator / Studio</h3>
                   <p>Submitted by {selectedSeries.creator}</p>
-                  <button onClick={() => setPage("submit")} className="btn btn-outline small top-gap">
+                  <button onClick={() => navigateTo("submit")} className="btn btn-outline small top-gap">
                     Submit Your Series
                   </button>
                 </div>
@@ -466,7 +556,7 @@ export default function App() {
         {page === "watch" && (
           <section className="watch-layout">
             <div className="watch-main">
-              <button onClick={() => setPage("detail")} className="back-link">
+              <button onClick={() => navigateTo("detail")} className="back-link">
                 <ArrowLeft size={16} /> Back to Series
               </button>
 
@@ -484,22 +574,22 @@ export default function App() {
                   </div>
 
                   <div className="button-row">
-                    <button onClick={() => setSelectedEpisode(Math.max(1, selectedEpisode - 1))} className="btn btn-outline icon-btn">
+                    <button onClick={() => handleEpisodeSelect(Math.max(1, selectedEpisode - 1))} className="btn btn-outline icon-btn">
                       <ArrowLeft size={16} />
                     </button>
-                    <button onClick={() => setSelectedEpisode(Math.min(selectedSeries.episodes, selectedEpisode + 1))} className="btn btn-outline icon-btn">
+                    <button onClick={() => handleEpisodeSelect(Math.min(selectedSeries.episodes, selectedEpisode + 1))} className="btn btn-outline icon-btn">
                       <ArrowRight size={16} />
                     </button>
                   </div>
                 </div>
 
-                {selectedEpisode > selectedSeries.freeEpisodes && (
+                {lockedPromptOpen && (
                   <div className="gate-box">
-                    <h3>Continue Watching</h3>
-                    <p>Create an account to continue this series and unlock more curated AI dramas.</p>
+                    <h3><Lock size={16} /> Episode locked</h3>
+                    <p>Free episodes are open to everyone. Sign up or log in to continue watching premium episodes.</p>
                     <div className="button-row">
-                      <button className="btn btn-light">Sign Up</button>
-                      <button className="btn btn-outline">Log In</button>
+                      <button onClick={() => navigateTo("signup")} className="btn btn-light">Sign Up</button>
+                      <button onClick={() => navigateTo("login")} className="btn btn-outline">Log In</button>
                     </div>
                   </div>
                 )}
@@ -513,11 +603,11 @@ export default function App() {
                   {Array.from({ length: Math.min(selectedSeries.episodes, 10) }).map((_, i) => (
                     <button
                       key={i}
-                      onClick={() => setSelectedEpisode(i + 1)}
+                      onClick={() => handleEpisodeSelect(i + 1)}
                       className={selectedEpisode === i + 1 ? "episode-list-btn active" : "episode-list-btn"}
                     >
                       <span>Episode {i + 1}</span>
-                      <span>{i + 1 <= selectedSeries.freeEpisodes ? "Free" : "Locked"}</span>
+                      <span>{i + 1 <= selectedSeries.freeEpisodes || isLoggedIn ? "Free" : "Locked"}</span>
                     </button>
                   ))}
                 </div>
@@ -621,7 +711,7 @@ export default function App() {
             <div className="panel top-gap">
               <div className="panel-head">
                 <h3>Your Series</h3>
-                <button onClick={() => setPage("submit")} className="btn btn-light small">
+                <button onClick={() => navigateTo("submit")} className="btn btn-light small">
                   Submit New Series
                 </button>
               </div>
@@ -708,6 +798,66 @@ export default function App() {
           </section>
         )}
 
+        {page === "login" && (
+          <section className="auth-layout">
+            <div className="auth-card">
+              <div className="pill">Account Access</div>
+              <h2>Log In to AIShortHub</h2>
+              <p>Resume episodes, manage your watchlist, and access creator tools.</p>
+              <div className="form-grid">
+                {["Email", "Password"].map((field) => (
+                  <div key={field} className="form-field">
+                    <label>{field}</label>
+                    <div className="fake-input" />
+                  </div>
+                ))}
+              </div>
+              <div className="button-row top-gap">
+                <button
+                  onClick={() => {
+                    setIsLoggedIn(true);
+                    navigateTo("home");
+                  }}
+                  className="btn btn-light"
+                >
+                  Mock Log In
+                </button>
+                <button onClick={() => navigateTo("signup")} className="btn btn-outline">Go to Sign Up</button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {page === "signup" && (
+          <section className="auth-layout">
+            <div className="auth-card">
+              <div className="pill">New Account</div>
+              <h2>Create your AIShortHub account</h2>
+              <p>Unlock premium episodes and prep your profile for future onboarding flows.</p>
+              <div className="form-grid">
+                {["Email", "Password", "Confirm Password"].map((field) => (
+                  <div key={field} className="form-field">
+                    <label>{field}</label>
+                    <div className="fake-input" />
+                  </div>
+                ))}
+              </div>
+              <div className="button-row top-gap">
+                <button
+                  onClick={() => {
+                    setIsLoggedIn(true);
+                    navigateTo("home");
+                  }}
+                  className="btn btn-light"
+                >
+                  Mock Sign Up
+                </button>
+                <button onClick={() => navigateTo("login")} className="btn btn-outline">Already have an account?</button>
+              </div>
+            </div>
+          </section>
+        )}
+
         {page === "admin" && (
           <section className="section-block">
             <SectionTitle title="Admin" desc="Internal moderation and content operations panel." />
@@ -787,9 +937,9 @@ export default function App() {
           <div>
             <h4>Internal Demo</h4>
             <div className="button-row wrap">
-              <button onClick={() => setPage("creator")} className="btn btn-outline small">Creator</button>
-              <button onClick={() => setPage("admin")} className="btn btn-outline small">Admin</button>
-              <button onClick={() => setPage("pricing")} className="btn btn-outline small">Pricing</button>
+              <button onClick={() => navigateTo("creator")} className="btn btn-outline small">Creator</button>
+              <button onClick={() => navigateTo("admin")} className="btn btn-outline small">Admin</button>
+              <button onClick={() => navigateTo("pricing")} className="btn btn-outline small">Pricing</button>
             </div>
           </div>
         </div>

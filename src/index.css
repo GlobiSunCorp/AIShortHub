@@ -91,6 +91,48 @@ button {
   gap: 12px;
 }
 
+.account-menu-wrap {
+  position: relative;
+}
+
+.account-btn {
+  gap: 8px;
+}
+
+.account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: 210px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #10182c;
+  box-shadow: var(--shadow);
+  padding: 6px;
+  display: grid;
+  gap: 4px;
+  z-index: 70;
+}
+
+.account-item {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  color: rgba(255,255,255,0.88);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.account-item:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.account-item.danger {
+  color: #ffb1b1;
+}
+
 .page-content {
   padding: 32px 0 60px;
 }
@@ -491,6 +533,13 @@ button {
   background: rgba(255, 196, 87, 0.08);
 }
 
+.gate-box h3 {
+  margin: 0 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .episode-list,
 .side-list,
 .stack-col,
@@ -532,6 +581,30 @@ button {
 .submit-layout {
   display: grid;
   gap: 22px;
+}
+
+.auth-layout {
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.auth-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  border-radius: 30px;
+  padding: 30px;
+}
+
+.auth-card h2 {
+  margin: 12px 0 8px;
+  font-size: 34px;
+  letter-spacing: -0.03em;
+}
+
+.auth-card p {
+  color: var(--soft);
+  margin-top: 0;
 }
 
 .submit-head p {
