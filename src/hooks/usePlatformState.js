@@ -124,15 +124,15 @@ export function usePlatformState() {
   };
 
   const createServiceOrder = (payload) => {
-    setAllServiceOrders((prev) => [
-      {
-        id: `so_${Math.random().toString(36).slice(2, 8)}`,
-        createdAt: new Date().toISOString().slice(0, 10),
-        status: 'pending',
-        ...payload,
-      },
-      ...prev,
-    ]);
+    const createdOrder = {
+      id: `so_${Math.random().toString(36).slice(2, 8)}`,
+      createdAt: new Date().toISOString().slice(0, 10),
+      status: 'pending',
+      ...payload,
+    };
+
+    setAllServiceOrders((prev) => [createdOrder, ...prev]);
+    return createdOrder;
   };
 
   const updateServiceOrderStatus = (orderId, status) => {

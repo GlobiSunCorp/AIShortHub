@@ -1,6 +1,6 @@
-# AIShortHub MVP (Phase 2)
+# AIShortHub MVP (Phase 3)
 
-AIShortHub 现已从展示型首页升级为可演示的「业务闭环 MVP」，覆盖会员、观看、创作者审核、服务订单四条核心链路。
+AIShortHub 在第二轮业务闭环基础上，完成了第三轮「体验与表单验证强化」，目标是让老板/产品同学可以更顺手地验收全链路。
 
 ## 技术栈
 - Vite + React
@@ -15,39 +15,55 @@ npm run dev
 npm run build
 ```
 
-## 本轮闭环能力
+## 第三轮增强内容
 
-### 1) 会员闭环
-- 可用化 Auth 页面：Login / Signup / Forgot Password。
-- 用户状态管理：`guest / member / creator / admin`。
-- Pricing 支持 `Free / Pro Monthly / Pro Yearly`，并保留 checkout-session mock 流程。
-- Watch 端权限：
-  - guest：仅可观看 trailer 与前 1 集（前 45s 试看提示）
-  - member/creator/admin：可观看完整分集
-- 导航栏实时显示账号状态和会员档位。
+### 1) 角色切换与测试体验
+- 新增 Demo Role Switcher（Header 菜单 + Profile 页面）：可在 `guest / member(free/pro) / creator / admin` 间直接切换。
+- 右上角状态文案统一为自然表达：
+  - `Status: Guest`
+  - `Status: Member / Free`
+  - `Status: Member / Pro Monthly`
+  - `Status: Creator`
+  - `Status: Admin`
+- Creator/Admin 无权限访问时，展示友好引导面板：
+  - 当前角色
+  - 无权限原因
+  - 一键切换到可测试角色 + 跳转 Profile
 
-### 2) 剧集详情 / 观看闭环
-- Series Detail：封面字段、标题、简介、标签、创作者、分集列表、trailer 入口、会员解锁提示。
-- Watch：当前分集信息、分集切换、非会员锁定提示、返回详情页入口。
-- 详情页 → 观看页 → 定价页流转可通。
+### 2) Browse / 首页卡片体验
+- 剧集卡封面新增明显的播放按钮 Overlay。
+- 点击封面可直接进入 `/watch/:seriesId/1`（播放行为更自然）。
+- 保留 `View detail` 入口。
+- 首页热门/上新与 Browse 统一增强为“可播放内容卡”。
 
-### 3) 创作者上传 / 审核闭环
-- Creator Dashboard 支持：
-  - 创建剧集（title/description/tags/cover/trailer/tiktokHook）
-  - 上传分集（标题/序号/时长/URL/试看）
-  - 提交审核后进入 `pending_review`
-- Admin Review Queue 支持 `approve / reject`，并写入 review logs。
-- 创作者端可看到剧集当前审核状态。
+### 3) 关键表单验证与反馈
+- 已为关键表单补齐前端校验与可见反馈：
+  - Login
+  - Signup
+  - Creator 创建剧集
+  - Creator 上传分集
+  - Service order 提交
+  - Admin 审核原因（reject 场景）
+- 覆盖规则：必填、邮箱格式、URL 格式、文本最小长度。
+- 覆盖状态：loading / success / error，避免“点击提交无反应”。
 
-### 4) 服务订单闭环
-- 新增 Services 页面可提交服务订单：
-  - Trailer Editing
-  - Cover Design
-  - Listing Packaging
-  - TikTok Promo Pack
-  - Subtitle / Localization
-- 表单字段：`service type / project title / request details / budget / contact / status`。
-- Admin 页面支持查看订单并更新状态。
+### 4) Service Orders 完善
+- 新增路由：`/services/:orderId`。
+- 提交成功后自动跳转订单详情页，展示：
+  - 订单编号
+  - 服务类型
+  - 项目标题
+  - 当前状态
+  - 返回服务页 / 去个人中心查看
+
+### 5) Creator / Admin 体验增强
+- Creator：保存草稿、上传分集、提交审核都有成功反馈。
+- Admin：approve/reject/订单状态更新都有明确结果反馈。
+- reject 时审核原因为空会提示错误，避免静默失败。
+
+### 6) Profile 摘要增强
+- 新增账号摘要区：状态、角色、会员档位。
+- Profile 内可直接使用 Demo Role Switcher，便于 QA 回归测试。
 
 ## 数据模型（`src/data/mockData.js`）
 - `profiles`, `memberships`, `creators`
@@ -58,7 +74,7 @@ npm run build
 
 ## 真实接入 vs Mock
 - **已真实预留结构**：Supabase client、Stripe checkout session 调用封装。
-- **当前仍为 mock**：Auth 状态、内容写入、支付确认、播放地址。
+- **当前仍为 mock**：Auth 状态、内容写入、支付确认、播放地址、订单流转。
 
 ## 本轮明确未做
 - 真实 TikTok API

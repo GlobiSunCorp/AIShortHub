@@ -4,9 +4,12 @@ import { Link, useRouter } from '../lib/router';
 export function SignupPage({ auth }) {
   const { navigate } = useRouter();
 
-  const submit = (form) => {
-    auth.signup(form);
-    navigate('/profile');
+  const submit = async (form) => {
+    const result = auth.signup(form);
+    if (result.ok) {
+      navigate('/profile');
+    }
+    return result;
   };
 
   return (

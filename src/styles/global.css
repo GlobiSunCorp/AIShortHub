@@ -381,3 +381,38 @@ td { text-align: left; padding: 10px; border-bottom: 1px solid var(--line-soft);
   .btn { width: 100%; text-align: center; }
   .row.wrap { gap: 0.55rem; }
 }
+
+.cover-link {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.cover-link:hover { transform: scale(1.01); }
+.play-overlay {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  border-radius: 999px;
+  background: rgba(6, 9, 19, 0.78);
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.form-feedback {
+  margin: 0;
+  font-size: 0.86rem;
+}
+.form-feedback.error { color: #ff9ea5; }
+.form-feedback.success { color: #8de0aa; }
+
+.role-switcher {
+  display: grid;
+  gap: 6px;
+}
+
+.btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.65;
+}

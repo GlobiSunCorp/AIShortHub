@@ -58,18 +58,22 @@ export function HomePage({ platform }) {
       <section>
         <SectionTitle title="热门剧集" desc="发布状态且可见内容" />
         <div className="grid cards-3">
-          {trending.map((item) => (
-            <SeriesCard key={item.id} series={item} episodeCount={episodeCounts[item.id]?.total} previewCount={episodeCounts[item.id]?.preview} />
-          ))}
+          {trending.length ? (
+            trending.map((item) => <SeriesCard key={item.id} series={item} episodeCount={episodeCounts[item.id]?.total} previewCount={episodeCounts[item.id]?.preview} />)
+          ) : (
+            <article className="panel"><p className="small-text">当前暂无热门剧集，稍后会自动更新。</p></article>
+          )}
         </div>
       </section>
 
       <section>
         <SectionTitle title="最新上架" desc="最近更新内容" />
         <div className="grid cards-3">
-          {latest.map((item) => (
-            <SeriesCard key={item.id} series={item} episodeCount={episodeCounts[item.id]?.total} previewCount={episodeCounts[item.id]?.preview} />
-          ))}
+          {latest.length ? (
+            latest.map((item) => <SeriesCard key={item.id} series={item} episodeCount={episodeCounts[item.id]?.total} previewCount={episodeCounts[item.id]?.preview} />)
+          ) : (
+            <article className="panel"><p className="small-text">当前暂无上新内容，欢迎稍后再来查看。</p></article>
+          )}
         </div>
       </section>
 
