@@ -33,7 +33,8 @@ export function usePlatformState() {
         synopsis: payload.synopsis,
         tags: payload.tags,
         category: payload.category,
-        trailerId: null,
+        trailerId: payload.trailerId || null,
+        coverUrl: payload.coverUrl || '',
         status: 'draft',
         visibility: 'private',
         createdAt: new Date().toISOString().slice(0, 10),
@@ -58,8 +59,28 @@ export function usePlatformState() {
     ]);
   };
 
+  const upsertTrailer = (payload) => {
+    const id = payload.id || `t_${Math.random().toString(36).slice(2, 8)}`;
+    const trailerEntry = {
+      id,
+      seriesId: payload.seriesId,
+      title: payload.title || 'Official Trailer',
+      videoUrl: payload.videoUrl,
+      durationSeconds: payload.durationSeconds || 30,
+    };
+
+    const index = trailers.findIndex((item) => item.seriesId === payload.seriesId);
+    if (index >= 0) {
+      trailers[index] = trailerEntry;
+    } else {
+      trailers.unshift(trailerEntry);
+    }
+
+    setAllSeries((prev) => prev.map((item) => (item.id === payload.seriesId ? { ...item, trailerId: id } : item)));
+  };
+
   const submitForReview = (seriesId) => {
-    setAllSeries((prev) => prev.map((item) => (item.id === seriesId ? { ...item, status: 'in_review' } : item)));
+    setAllSeries((prev) => prev.map((item) => (item.id === seriesId ? { ...item, status: 'pending_review' } : item)));
     setAllReviewLogs((prev) => [
       {
         id: `rv_${Math.random().toString(36).slice(2, 8)}`,
@@ -119,7 +140,12 @@ export function usePlatformState() {
   };
 
   const setMembershipTier = (profileId, tier) => {
-    setAllMemberships((prev) => prev.map((item) => (item.profileId === profileId ? { ...item, tier } : item)));
+    setAllMemberships((prev) => {
+      if (!prev.some((item) => item.profileId === profileId)) {
+        return [{ profileId, tier, status: 'active', renewAt: null }, ...prev];
+      }
+      return prev.map((item) => (item.profileId === profileId ? { ...item, tier } : item));
+    });
   };
 
   return {
@@ -140,6 +166,7 @@ export function usePlatformState() {
     actions: {
       createSeries,
       createEpisode,
+      upsertTrailer,
       submitForReview,
       reviewSeries,
       toggleSeriesOnline,

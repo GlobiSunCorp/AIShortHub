@@ -5,7 +5,7 @@ export function SignupPage({ auth }) {
   const { navigate } = useRouter();
 
   const submit = (form) => {
-    auth.login(form.email || 'new@aishorthub.com', form.role || 'viewer');
+    auth.signup(form);
     navigate('/profile');
   };
 

@@ -10,6 +10,7 @@ const plans = [
 export function PricingPage({ auth, platform }) {
   const [notice, setNotice] = useState('');
   const membership = platform.memberships.find((item) => item.profileId === auth.user?.id) || { tier: 'free' };
+  const accountState = auth.userState;
 
   const handleCheckout = async (plan) => {
     if (!auth.isLoggedIn) {
@@ -37,7 +38,7 @@ export function PricingPage({ auth, platform }) {
       <section className="panel">
         <h1>会员订阅</h1>
         <p className="small-text">支持 Free / Pro Monthly / Pro Yearly。Stripe 走 checkout session 结构，当前无后端时使用 mock 流程。</p>
-        <p className="small-text">当前会员：{membership.tier}</p>
+        <p className="small-text">当前身份：{accountState} · 当前会员：{membership.tier}</p>
       </section>
 
       <section className="grid cards-3">
