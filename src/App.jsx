@@ -1,12 +1,14 @@
 import { AppLayout } from './layouts/AppLayout';
 import { useAuthMock } from './hooks/useAuthMock';
 import { AdminPage } from './pages/AdminPage';
-import { AuthPage } from './pages/AuthPage';
 import { BrowsePage } from './pages/BrowsePage';
 import { CreatorDashboardPage } from './pages/CreatorDashboardPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
 import { PricingPage } from './pages/PricingPage';
 import { SeriesDetailPage } from './pages/SeriesDetailPage';
+import { SignupPage } from './pages/SignupPage';
 import { SubmitPage } from './pages/SubmitPage';
 import { WatchPage } from './pages/WatchPage';
 
@@ -44,9 +46,9 @@ export default function App() {
       {route.name === 'creator' ? <CreatorDashboardPage /> : null}
       {route.name === 'pricing' ? <PricingPage /> : null}
       {route.name === 'admin' ? <AdminPage /> : null}
-      {route.name === 'login' ? <AuthPage mode="login" auth={auth} /> : null}
-      {route.name === 'signup' ? <AuthPage mode="signup" auth={auth} /> : null}
-      {route.name === 'forgot' ? <AuthPage mode="forgot" auth={auth} /> : null}
+      {route.name === 'login' ? <LoginPage auth={auth} /> : null}
+      {route.name === 'signup' ? <SignupPage auth={auth} /> : null}
+      {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
     </AppLayout>
   );
 }

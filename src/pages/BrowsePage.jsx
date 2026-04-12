@@ -19,13 +19,15 @@ export function BrowsePage() {
 
   return (
     <div className="stack-lg">
-      <SectionTitle title="Browse Series" desc="Search by genre, mood, or campaign." />
-      <input
-        className="input"
-        placeholder="Search drama / genre / creator"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <section className="panel">
+        <SectionTitle title="Browse Library" desc="Find premium short dramas by mood, genre, or campaign keyword." />
+        <input
+          className="input"
+          placeholder="Search drama, genre, creator, or promotion"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </section>
       <div className="grid cards-3">
         {filtered.map((series) => (
           <SeriesCard key={series.id} series={series} />

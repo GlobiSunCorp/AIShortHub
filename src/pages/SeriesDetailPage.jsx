@@ -7,8 +7,10 @@ export function SeriesDetailPage({ id }) {
 
   return (
     <div className="stack-lg">
-      <section className="detail-hero">
-        <div className={`detail-cover ${series.posterTone}`} />
+      <section className="detail-hero panel">
+        <div className={`detail-cover ${series.posterTone}`}>
+          <span className="status">{series.trailerLabel}</span>
+        </div>
         <div>
           <h1>{series.title}</h1>
           <p>{series.synopsis}</p>
@@ -19,16 +21,18 @@ export function SeriesDetailPage({ id }) {
           </div>
           <div className="row wrap">
             <a className="btn btn-primary" href={`/watch/${series.id}/1`}>
-              Watch now
+              Start episode 1
             </a>
             <button className="btn btn-ghost">Add to watchlist</button>
           </div>
-          <p className="small-text">Free episodes: {series.freeEpisodes} · Locked episodes require unlock flow.</p>
+          <p className="small-text">
+            {series.episodes} episodes · {series.freeEpisodes} free to watch · locked episodes include signup/login CTAs.
+          </p>
         </div>
       </section>
 
-      <section>
-        <h2>Episode list</h2>
+      <section className="panel">
+        <h2>Episode lineup</h2>
         <EpisodeList series={series} currentEpisode={1} onSelect={() => {}} />
       </section>
     </div>

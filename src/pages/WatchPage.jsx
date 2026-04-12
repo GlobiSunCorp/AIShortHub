@@ -26,9 +26,17 @@ export function WatchPage({ auth, id, episode }) {
             Next Episode
           </button>
           {!canWatch ? (
-            <button className="btn btn-primary" onClick={() => setShowAuth(true)}>
-              Unlock with signup
-            </button>
+            <>
+              <button className="btn btn-primary" onClick={() => setShowAuth(true)}>
+                Quick unlock
+              </button>
+              <a className="btn btn-ghost" href="/signup">
+                Create account to unlock
+              </a>
+              <a className="btn btn-ghost" href="/login">
+                Already a member? Login
+              </a>
+            </>
           ) : null}
         </div>
       </div>
@@ -36,6 +44,7 @@ export function WatchPage({ auth, id, episode }) {
       <aside className="panel">
         <h3>{series.title}</h3>
         <p>{series.hook}</p>
+        {!canWatch ? <p className="small-text">Episodes after {series.freeEpisodes} require account unlock.</p> : null}
         <EpisodeList series={series} currentEpisode={currentEpisode} onSelect={jumpTo} />
       </aside>
 

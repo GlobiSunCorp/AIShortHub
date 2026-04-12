@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 const nav = [
   ['/', 'Home'],
   ['/browse', 'Browse'],
@@ -9,6 +11,7 @@ const nav = [
 
 export function Header({ auth }) {
   const current = window.location.pathname;
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="site-header">
@@ -23,21 +26,32 @@ export function Header({ auth }) {
             </a>
           ))}
         </nav>
-        <div className="row">
+        <div className="row center header-actions">
           {auth.isLoggedIn ? (
-            <>
-              <button className="avatar">{auth.user.avatar}</button>
-              <button className="btn btn-ghost" onClick={auth.logout}>
-                Logout
+            <div className="account-wrap">
+              <button className="avatar" onClick={() => setMenuOpen((open) => !open)}>
+                {auth.user.avatar}
               </button>
-            </>
+              {menuOpen ? (
+                <div className="account-menu panel">
+                  <strong>{auth.user.name}</strong>
+                  <small>{auth.user.email}</small>
+                  <a href="/creator">Creator workspace</a>
+                  <a href="/pricing">Manage plan</a>
+                  <button className="btn btn-ghost" onClick={auth.logout}>
+                    Logout
+                  </button>
+                </div>
+              ) : null}
+            </div>
           ) : (
             <>
+              <span className="status">Guest mode</span>
               <a className="btn btn-ghost" href="/login">
                 Login
               </a>
               <a className="btn btn-primary" href="/signup">
-                Sign up
+                Start free
               </a>
             </>
           )}
