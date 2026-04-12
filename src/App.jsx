@@ -13,6 +13,18 @@ import {
   CheckCircle2,
   Clock3,
   AlertCircle,
+  Megaphone,
+  TrendingUp,
+  RadioTower,
+  Music2,
+  Clapperboard,
+  FileSearch,
+  ShieldCheck,
+  ListChecks,
+  Sparkles,
+  Server,
+  BarChart3,
+  Database,
 } from "lucide-react";
 import "./index.css";
 
@@ -146,6 +158,115 @@ const adminRows = [
   { title: "Midnight Agreement", creator: "Silver Alley Lab", episodes: 12, action: "Approve" },
   { title: "Ashes of the Velvet House", creator: "North Lantern Pictures", episodes: 26, action: "Request Fix" },
   { title: "Love After the Scandal", creator: "Aurora Frame Studio", episodes: 22, action: "Publish" },
+];
+
+const creatorExpansionModules = [
+  {
+    title: "Distribution",
+    icon: RadioTower,
+    status: "Pipeline Draft",
+    detail: "Routing plan for app stores, web embeds, and partner channels.",
+    metric: "5 channels mapped",
+  },
+  {
+    title: "Promotion",
+    icon: Megaphone,
+    status: "Active",
+    detail: "Cross-platform promo package including hooks, snippets, and CTA versions.",
+    metric: "12 creatives queued",
+  },
+  {
+    title: "Traffic",
+    icon: TrendingUp,
+    status: "Monitoring",
+    detail: "Acquisition placeholders for paid tests, referral links, and retention cohorts.",
+    metric: "CTR 6.2% (mock)",
+  },
+  {
+    title: "TikTok Campaign Status",
+    icon: Music2,
+    status: "In Review",
+    detail: "Concept cards, creator whitelisting, and ad account readiness checkpoints.",
+    metric: "3 ad groups pending",
+  },
+  {
+    title: "Trailer / Teaser Assets",
+    icon: Clapperboard,
+    status: "Asset Uploading",
+    detail: "Repository for trailer cuts, teaser variants, and thumbnail packages.",
+    metric: "9 assets in library",
+  },
+  {
+    title: "Submission Review Notes",
+    icon: FileSearch,
+    status: "Updated",
+    detail: "Editorial and compliance comments attached to each submission version.",
+    metric: "2 notes unresolved",
+  },
+];
+
+const adminExpansionModules = [
+  {
+    title: "Content Moderation Status",
+    icon: ShieldCheck,
+    status: "Flag Queue Stable",
+    detail: "Mock rule engine overview for policy checks, risk scoring, and triage.",
+    metric: "14 items reviewed today",
+  },
+  {
+    title: "Publishing Queue",
+    icon: ListChecks,
+    status: "Ready to Schedule",
+    detail: "Operational queue for staging, approvals, and timed publish windows.",
+    metric: "6 titles awaiting publish",
+  },
+  {
+    title: "Featured Placement Controls",
+    icon: Sparkles,
+    status: "Rotation Set",
+    detail: "Homepage and category slot controls with priority and expiration fields.",
+    metric: "4 featured slots live",
+  },
+  {
+    title: "Promotion Status Overview",
+    icon: Megaphone,
+    status: "Campaign Mix Healthy",
+    detail: "Topline readout for active promotions and budget pacing placeholders.",
+    metric: "7 campaigns active",
+  },
+];
+
+const platformArchitecture = [
+  {
+    title: "Video Hosting Integration Layer",
+    icon: Server,
+    stage: "Placeholder API Contract",
+    points: [
+      "Mock upload jobs and transcoding states for future provider integrations.",
+      "Abstract source object (videoId, rendition profile, playback policy).",
+      "Provider adapters planned for Mux, Cloudflare Stream, and custom CDN.",
+    ],
+  },
+  {
+    title: "Content Media Store",
+    icon: Database,
+    stage: "Schema Draft",
+    points: [
+      "Front-end mock schema for trailers, teasers, subtitles, and poster variants.",
+      "Versioned asset records prepared for editorial rollback and approvals.",
+      "Storage pointers modeled as external URLs while backend is pending.",
+    ],
+  },
+  {
+    title: "Analytics & Attribution Layer",
+    icon: BarChart3,
+    stage: "Event Blueprint",
+    points: [
+      "Mock event taxonomy for play, drop-off, completion, and conversion markers.",
+      "Attribution placeholders for campaign source, creator, and distribution channel.",
+      "Dashboard contract reserved for cohort retention and monetization reporting.",
+    ],
+  },
 ];
 
 const pricing = [
@@ -680,6 +801,50 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            <div className="panel top-gap">
+              <h3>Growth Operations Modules (Placeholder)</h3>
+              <div className="card-grid three top-gap">
+                {creatorExpansionModules.map((module) => {
+                  const Icon = module.icon;
+                  return (
+                    <div key={module.title} className="mini-card module-card">
+                      <div className="module-head">
+                        <span><Icon size={16} /> {module.title}</span>
+                        <span className="badge">{module.status}</span>
+                      </div>
+                      <p>{module.detail}</p>
+                      <div className="soft-box module-metric">{module.metric}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="panel top-gap">
+              <h3>Future Platform Architecture</h3>
+              <div className="card-grid three top-gap">
+                {platformArchitecture.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.title} className="mini-card module-card">
+                      <div className="module-head">
+                        <span><Icon size={16} /> {item.title}</span>
+                        <span className="badge">{item.stage}</span>
+                      </div>
+                      <ul className="icon-list compact-list">
+                        {item.points.map((point) => (
+                          <li key={point}>
+                            <CheckCircle2 size={14} />
+                            <span>{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </section>
         )}
 
@@ -756,6 +921,50 @@ export default function App() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            <div className="panel top-gap">
+              <h3>Admin Expansion Controls (Placeholder)</h3>
+              <div className="card-grid three top-gap">
+                {adminExpansionModules.map((module) => {
+                  const Icon = module.icon;
+                  return (
+                    <div key={module.title} className="mini-card module-card">
+                      <div className="module-head">
+                        <span><Icon size={16} /> {module.title}</span>
+                        <span className="badge">{module.status}</span>
+                      </div>
+                      <p>{module.detail}</p>
+                      <div className="soft-box module-metric">{module.metric}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="panel top-gap">
+              <h3>Shared Infrastructure Roadmap</h3>
+              <div className="card-grid three top-gap">
+                {platformArchitecture.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.title} className="mini-card module-card">
+                      <div className="module-head">
+                        <span><Icon size={16} /> {item.title}</span>
+                        <span className="badge">{item.stage}</span>
+                      </div>
+                      <ul className="icon-list compact-list">
+                        {item.points.map((point) => (
+                          <li key={point}>
+                            <CheckCircle2 size={14} />
+                            <span>{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
