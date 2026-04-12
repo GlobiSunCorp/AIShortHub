@@ -1,9 +1,8 @@
 export function Footer() {
   return (
     <footer className="site-footer">
-      <div className="container row split">
-        <p>© 2026 AIShortHub · Drama platform frontend shell.</p>
-        <p>Future connectors: Auth, CDN playback, TikTok traffic, billing API.</p>
+      <div className="container">
+        AIShortHub MVP · Content funnel by TikTok · Subscription + Creator revenue share + Service orders.
       </div>
     </footer>
   );

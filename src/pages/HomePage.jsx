@@ -1,108 +1,90 @@
 import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
-import { continueWatching, homepageRows, seriesData } from '../data/series';
 
-export function HomePage({ auth }) {
-  const byId = Object.fromEntries(seriesData.map((item) => [item.id, item]));
-  const heroSeries = byId[homepageRows.trending[0]];
+export function HomePage({ platform }) {
+  const published = platform.series.filter((item) => item.status === 'published' && item.visibility === 'public');
+  const trending = published.slice(0, 3);
+  const latest = [...published].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 3);
+
+  const episodeCounts = Object.fromEntries(
+    published.map((s) => [
+      s.id,
+      {
+        total: platform.episodes.filter((ep) => ep.seriesId === s.id).length,
+        preview: platform.episodes.filter((ep) => ep.seriesId === s.id && ep.isPreview).length,
+      },
+    ])
+  );
 
   return (
     <div className="stack-lg">
       <section className="hero premium-hero">
         <div>
-          <span className="kicker">Premium Vertical Storyverse</span>
-          <h1>High-stakes short dramas built for one-more-episode nights.</h1>
-          <p>
-            AIShortHub delivers daily cinematic drops, quick episode pacing, and locked premium arcs that feel like a real modern
-            streaming product.
-          </p>
-
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <strong>4.8★</strong>
-              <span>Audience rating</span>
-            </div>
-            <div className="hero-stat">
-              <strong>120+</strong>
-              <span>Episodes this week</span>
-            </div>
-            <div className="hero-stat">
-              <strong>18m</strong>
-              <span>Avg session time</span>
-            </div>
-          </div>
-
+          <span className="kicker">TikTok 引流 + 站内订阅闭环</span>
+          <h1>AI 短剧创作与变现平台 MVP</h1>
+          <p>创作者发布剧集、用户试看转会员、平台抽成与服务订单一体化。先跑通运营闭环，再逐步接入自动化增长能力。</p>
           <div className="row wrap">
             <Link className="btn btn-primary" to="/browse">
-              Start watching
+              浏览热剧
             </Link>
-            <Link className="btn btn-ghost" to="/signup">
-              Create free account
+            <Link className="btn btn-ghost" to="/pricing">
+              开通会员
             </Link>
           </div>
         </div>
-
-        <div className={`hero-cover ${heroSeries.posterTone}`}>
-          <span className="status">Now featuring</span>
-          <h3>{heroSeries.title}</h3>
-          <p>{heroSeries.hook}</p>
-          <small>{heroSeries.trailerLabel}</small>
+        <div className="hero-cover from-fuchsia">
+          <span className="status">MVP Ready</span>
+          <h3>可运营闭环</h3>
+          <p>内容展示、试看、会员、创作者上传、审核、服务订单、管理后台</p>
         </div>
       </section>
 
-      <section className="featured-strip">
-        <article className="featured-panel">
-          <SectionTitle title="Tonight’s Cinematic Pick" desc="Editorial spotlight with strong completion and replay intent." />
-          <h3>{heroSeries.title}</h3>
-          <p className="small-text">{heroSeries.synopsis}</p>
-          <div className="row wrap">
-            <Link className="btn btn-primary" to={`/series/${heroSeries.id}`}>
-              View series
-            </Link>
-            <Link className="btn btn-ghost" to={`/watch/${heroSeries.id}/1`}>
-              Watch episode 1
-            </Link>
-          </div>
+      <section className="grid cards-3">
+        <article className="panel">
+          <h3>平台定位</h3>
+          <p className="small-text">TikTok 负责前链路曝光，AIShortHub 负责承接转化与用户付费。</p>
         </article>
-
-        <article className="insight-panel">
-          <span className="kicker">Platform Pulse</span>
-          <h3>Trending in your market</h3>
-          <p className="small-text">Romance-revenge and historical thrillers are leading retention among mobile-first viewers.</p>
-          <div className="meta-row">
-            <span className="meta-pill">Peak hour: 9:00 PM</span>
-            <span className="meta-pill">Top source: Creator referral</span>
-          </div>
+        <article className="panel">
+          <h3>创作者招募</h3>
+          <p className="small-text">支持上传封面、预告、分集内容，进入审核后上线变现。</p>
+        </article>
+        <article className="panel">
+          <h3>平台抽成</h3>
+          <p className="small-text">默认抽成 {(platform.platformConfig.platformTakeRate * 100).toFixed(0)}%，可在配置中调整。</p>
         </article>
       </section>
 
       <section>
-        <SectionTitle title="Trending Premieres" desc="High-completion short dramas with active promotion pushes." />
+        <SectionTitle title="热门剧集" desc="发布状态且可见内容" />
         <div className="grid cards-3">
-          {homepageRows.trending.map((id) => (
-            <SeriesCard key={id} series={byId[id]} />
+          {trending.map((item) => (
+            <SeriesCard key={item.id} series={item} episodeCount={episodeCounts[item.id]?.total} previewCount={episodeCounts[item.id]?.preview} />
           ))}
         </div>
       </section>
 
       <section>
-        <SectionTitle title="Continue Watching" desc="Personal timeline sync with logged-in profile state." />
-        <div className="grid cards-2">
-          {continueWatching.map((item) => (
-            <article className="watchlist-card" key={item.seriesId}>
-              <h3>{byId[item.seriesId].title}</h3>
-              <p>
-                Episode {item.episode} · Progress {item.progress}%
-              </p>
-              {auth.isLoggedIn ? (
-                <span className="status ok">Resume from saved progress</span>
-              ) : (
-                <span className="status">Sign up to sync watch progress</span>
-              )}
-            </article>
+        <SectionTitle title="最新上架" desc="最近更新内容" />
+        <div className="grid cards-3">
+          {latest.map((item) => (
+            <SeriesCard key={item.id} series={item} episodeCount={episodeCounts[item.id]?.total} previewCount={episodeCounts[item.id]?.preview} />
           ))}
         </div>
+      </section>
+
+      <section className="grid cards-2">
+        <article className="panel">
+          <h3>服务介绍区</h3>
+          <p className="small-text">Trailer Editing / Cover Design / Listing Packaging / TikTok Promo Pack / Subtitle & Localization。</p>
+          <Link className="text-link" to="/services">
+            提交服务需求 →
+          </Link>
+        </article>
+        <article className="panel">
+          <h3>TikTok 引流说明区</h3>
+          <p className="small-text">本轮仅实现引流说明与 Promo Pack 服务入口，未接 TikTok API 自动发布。</p>
+        </article>
       </section>
     </div>
   );

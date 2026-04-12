@@ -4,9 +4,9 @@ import { Link, useRouter } from '../lib/router';
 const nav = [
   ['/', 'Home'],
   ['/browse', 'Browse'],
-  ['/submit', 'Submit'],
-  ['/creator', 'Creator Dashboard'],
+  ['/creator', 'Creator'],
   ['/pricing', 'Pricing'],
+  ['/services', 'Services'],
   ['/admin', 'Admin'],
 ];
 
@@ -36,9 +36,11 @@ export function Header({ auth }) {
               {menuOpen ? (
                 <div className="account-menu panel">
                   <strong>{auth.user.name}</strong>
-                  <small>{auth.user.email}</small>
-                  <Link to="/creator">Creator workspace</Link>
-                  <Link to="/pricing">Manage plan</Link>
+                  <small>
+                    {auth.user.email} · {auth.user.role}
+                  </small>
+                  <Link to="/profile">My Profile</Link>
+                  <Link to="/creator">Creator dashboard</Link>
                   <button className="btn btn-ghost" onClick={auth.logout}>
                     Logout
                   </button>
@@ -47,7 +49,6 @@ export function Header({ auth }) {
             </div>
           ) : (
             <>
-              <span className="status">Guest mode</span>
               <Link to="/login" className="btn btn-ghost">
                 Login
               </Link>

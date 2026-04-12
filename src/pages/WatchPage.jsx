@@ -1,55 +1,50 @@
-import { useMemo, useState } from 'react';
-import { AuthModal } from '../components/AuthModal';
+import { useMemo } from 'react';
 import { EpisodeList } from '../components/EpisodeList';
-import { SeriesCard } from '../components/SeriesCard';
 import { VideoPlayerPlaceholder } from '../components/VideoPlayerPlaceholder';
-import { seriesData } from '../data/series';
 import { Link, useRouter } from '../lib/router';
 
-export function WatchPage({ auth, id, episode }) {
+export function WatchPage({ auth, id, episode, platform }) {
   const { navigate } = useRouter();
-  const series = seriesData.find((item) => item.id === id) || seriesData[0];
-  const [showAuth, setShowAuth] = useState(false);
-  const currentEpisode = Number(episode || 1);
-  const canWatch = currentEpisode <= series.freeEpisodes || auth.isLoggedIn;
+  const series = platform.series.find((item) => item.id === id) || platform.series[0];
+  const episodes = platform.episodes.filter((item) => item.seriesId === series.id).sort((a, b) => a.number - b.number);
+  const current = episodes.find((item) => item.number === Number(episode)) || episodes[0];
+  const membership = platform.memberships.find((item) => item.profileId === auth.user?.id);
+  const isPro = membership && membership.tier !== 'free';
+  const canWatch = Boolean(current?.isPreview || isPro);
 
-  const moreLikeThis = useMemo(() => seriesData.filter((item) => item.id !== series.id).slice(0, 3), [series.id]);
+  const moreLikeThis = useMemo(() => platform.series.filter((item) => item.id !== series.id && item.status === 'published').slice(0, 3), [platform.series, series.id]);
 
-  const jumpTo = (ep) => {
-    navigate(`/watch/${series.id}/${ep}`);
-  };
+  if (!current) return <section className="panel">该剧集暂无可播放分集。</section>;
 
   return (
     <div className="stack-lg">
       <section className="watch-layout">
         <div className="stack-md">
-          <VideoPlayerPlaceholder seriesTitle={series.title} episode={currentEpisode} canWatch={canWatch} />
-
-          <div className="row wrap">
-            <button className="btn btn-ghost" onClick={() => jumpTo(Math.max(1, currentEpisode - 1))}>
-              Previous
-            </button>
-            <button className="btn btn-primary" onClick={() => jumpTo(Math.min(series.episodes, currentEpisode + 1))}>
-              Next Episode
-            </button>
-          </div>
+          <VideoPlayerPlaceholder
+            title={series.title}
+            subtitle={`Episode ${current.number}: ${current.title}`}
+            canWatch={canWatch}
+            helper={canWatch ? `播放地址: ${current.videoUrl}` : `当前仅可试看前 ${platform.platformConfig.freeEpisodeCount} 集 / ${platform.platformConfig.trialSeconds}s`}
+          />
 
           {!canWatch ? (
             <article className="watch-lock">
-              <h3>Episode locked — unlock premium arc</h3>
-              <p className="small-text">
-                Episodes after {series.freeEpisodes} require account access. Sign up to continue instantly and sync progress across devices.
-              </p>
+              <h3>当前分集仅会员可观看</h3>
+              <p className="small-text">非会员用户可观看预告片和试看分集，升级后自动解锁完整内容。</p>
               <div className="row wrap">
-                <button className="btn btn-primary" onClick={() => setShowAuth(true)}>
-                  Quick unlock
-                </button>
-                <Link className="btn btn-ghost" to="/signup">
-                  Create account
+                <Link className="btn btn-primary" to="/pricing">
+                  立即开通 Pro
                 </Link>
-                <Link className="btn btn-ghost" to="/login">
-                  Log in
-                </Link>
+                {!auth.isLoggedIn ? (
+                  <>
+                    <Link className="btn btn-ghost" to="/login">
+                      登录
+                    </Link>
+                    <Link className="btn btn-ghost" to="/signup">
+                      注册
+                    </Link>
+                  </>
+                ) : null}
               </div>
             </article>
           ) : null}
@@ -57,25 +52,26 @@ export function WatchPage({ auth, id, episode }) {
 
         <aside className="panel stack-md watch-rail">
           <h3>{series.title}</h3>
-          <p>{series.hook}</p>
-          <div className="meta-row">
-            <span className="meta-pill">{series.episodes} episodes</span>
-            <span className="meta-pill">Free {series.freeEpisodes}</span>
-          </div>
-          <EpisodeList series={series} currentEpisode={currentEpisode} onSelect={jumpTo} />
+          <p>{series.synopsis}</p>
+          <EpisodeList
+            episodes={episodes}
+            currentEpisodeNumber={current.number}
+            onSelect={(ep) => navigate(`/watch/${series.id}/${ep}`)}
+            membershipLocked={(item) => !item.isPreview && !isPro}
+          />
         </aside>
       </section>
 
       <section>
-        <h2>More like this</h2>
-        <div className="grid cards-3">
+        <h2>更多推荐</h2>
+        <div className="row wrap">
           {moreLikeThis.map((item) => (
-            <SeriesCard key={item.id} series={item} />
+            <Link key={item.id} className="meta-pill" to={`/series/${item.id}`}>
+              {item.title}
+            </Link>
           ))}
         </div>
       </section>
-
-      <AuthModal open={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
 }

@@ -1,72 +1,67 @@
 import { useMemo, useState } from 'react';
 import { SeriesCard } from '../components/SeriesCard';
 import { SectionTitle } from '../components/SectionTitle';
-import { seriesData } from '../data/series';
 
-const moods = ['All Moods', 'Revenge', 'Romance', 'Mystery'];
+const statuses = ['all', 'published', 'in_review', 'draft'];
 
-export function BrowsePage() {
+export function BrowsePage({ platform }) {
   const [query, setQuery] = useState('');
-  const [mood, setMood] = useState(moods[0]);
-  const [access, setAccess] = useState('All Access');
+  const [tag, setTag] = useState('all');
+  const [status, setStatus] = useState('all');
+
+  const creatorsById = useMemo(() => Object.fromEntries(platform.creators.map((c) => [c.id, c])), [platform.creators]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return seriesData.filter((item) => {
-      const matchQuery =
-        !q ||
-        item.title.toLowerCase().includes(q) ||
-        item.genres.join(' ').toLowerCase().includes(q) ||
-        item.hook.toLowerCase().includes(q);
-      const matchMood = mood === moods[0] || item.genres.some((genre) => genre.toLowerCase().includes(mood.toLowerCase()));
-      const matchAccess = access === 'All Access' || (access === 'Mostly Free' ? item.freeEpisodes >= 3 : item.freeEpisodes < 3);
-      return matchQuery && matchMood && matchAccess;
+    return platform.series.filter((item) => {
+      const creatorName = creatorsById[item.creatorId]?.studioName || '';
+      const queryMatch = !q || item.title.toLowerCase().includes(q) || creatorName.toLowerCase().includes(q);
+      const tagMatch = tag === 'all' || item.tags.includes(tag);
+      const statusMatch = status === 'all' || item.status === status;
+      return queryMatch && tagMatch && statusMatch;
     });
-  }, [query, mood, access]);
+  }, [query, tag, status, platform.series, creatorsById]);
 
   return (
     <div className="stack-lg">
       <section className="panel">
-        <SectionTitle title="Browse Library" desc="Discover premium short dramas by genre, mood, unlock path, and release momentum." />
+        <SectionTitle title="Browse" desc="按题材、标签、状态筛选，支持搜索剧名/创作者" />
         <div className="browse-filters">
           <label>
-            Search
-            <input
-              className="input"
-              placeholder="Search drama, creator, campaign, or keyword"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+            搜索
+            <input className="input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索剧名或创作者" />
           </label>
           <label>
-            Mood
-            <select className="input" value={mood} onChange={(e) => setMood(e.target.value)}>
-              {moods.map((item) => (
+            标签
+            <select className="input" value={tag} onChange={(event) => setTag(event.target.value)}>
+              <option value="all">全部</option>
+              {platform.series
+                .flatMap((s) => s.tags)
+                .filter((value, index, list) => list.indexOf(value) === index)
+                .map((value) => (
+                  <option key={value}>{value}</option>
+                ))}
+            </select>
+          </label>
+          <label>
+            状态
+            <select className="input" value={status} onChange={(event) => setStatus(event.target.value)}>
+              {statuses.map((item) => (
                 <option key={item}>{item}</option>
               ))}
             </select>
           </label>
-          <label>
-            Access
-            <select className="input" value={access} onChange={(e) => setAccess(e.target.value)}>
-              <option>All Access</option>
-              <option>Mostly Free</option>
-              <option>Premium Heavy</option>
-            </select>
-          </label>
-        </div>
-        <div className="row wrap">
-          <span className="filter-chip">{filtered.length} series matched</span>
-          <span className="filter-chip">Optimized for vertical mobile watch</span>
-          <span className="filter-chip">Fresh campaign-ready drops</span>
         </div>
       </section>
 
       <div className="grid cards-3">
-        {filtered.map((series) => (
-          <SeriesCard key={series.id} series={series} />
-        ))}
+        {filtered.map((item) => {
+          const episodes = platform.episodes.filter((ep) => ep.seriesId === item.id);
+          return <SeriesCard key={item.id} series={item} episodeCount={episodes.length} previewCount={episodes.filter((ep) => ep.isPreview).length} />;
+        })}
       </div>
+
+      {filtered.length === 0 ? <section className="panel">暂无匹配剧集，试试更宽松的筛选条件。</section> : null}
     </div>
   );
 }

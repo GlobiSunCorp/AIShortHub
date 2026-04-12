@@ -1,26 +1,27 @@
 import { Link } from '../lib/router';
-import { GenreTag } from './GenreTag';
 
-export function SeriesCard({ series }) {
+export function SeriesCard({ series, episodeCount = 0, previewCount = 0 }) {
   return (
     <article className="series-card">
-      <div className={`cover ${series.posterTone}`}>
-        <span>{series.trailerLabel}</span>
+      <div className="cover from-purple">
+        <span>{series.status}</span>
       </div>
       <div className="series-card-body stack-md">
         <div className="row split center">
           <h3>{series.title}</h3>
-          <span className="status">Premium</span>
+          <span className="status">{series.visibility}</span>
         </div>
-        <p>{series.hook}</p>
+        <p>{series.synopsis}</p>
         <div className="row wrap">
-          {series.genres.map((g) => (
-            <GenreTag key={g} label={g} />
+          {(series.tags || []).map((tag) => (
+            <span key={tag} className="genre-tag">
+              {tag}
+            </span>
           ))}
         </div>
         <div className="row split small-text series-card-foot">
-          <span>{series.episodes} Episodes</span>
-          <span>Free {series.freeEpisodes}</span>
+          <span>{episodeCount} Episodes</span>
+          <span>{previewCount} Preview</span>
         </div>
         <Link className="text-link" to={`/series/${series.id}`}>
           View detail →

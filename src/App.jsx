@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppLayout } from './layouts/AppLayout';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { useAuthMock } from './hooks/useAuthMock';
+import { usePlatformState } from './hooks/usePlatformState';
 import { RouterContext } from './lib/router';
 import { AdminPage } from './pages/AdminPage';
 import { BrowsePage } from './pages/BrowsePage';
@@ -9,7 +11,9 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { PricingPage } from './pages/PricingPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { SeriesDetailPage } from './pages/SeriesDetailPage';
+import { ServiceOrdersPage } from './pages/ServiceOrdersPage';
 import { SignupPage } from './pages/SignupPage';
 import { SubmitPage } from './pages/SubmitPage';
 import { WatchPage } from './pages/WatchPage';
@@ -26,6 +30,8 @@ function resolveRoute(pathname) {
   if (pathname === '/creator') return { name: 'creator' };
   if (pathname === '/pricing') return { name: 'pricing' };
   if (pathname === '/admin') return { name: 'admin' };
+  if (pathname === '/services') return { name: 'services' };
+  if (pathname === '/profile') return { name: 'profile' };
   if (pathname === '/login') return { name: 'login' };
   if (pathname === '/signup') return { name: 'signup' };
   if (pathname === '/forgot-password') return { name: 'forgot' };
@@ -41,11 +47,10 @@ function resolveRoute(pathname) {
 
 export default function App() {
   const auth = useAuthMock();
+  const platform = usePlatformState();
   const [pathname, setPathname] = useState(getPathname);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
-
     const updatePath = () => setPathname(getPathname());
     window.addEventListener('popstate', updatePath);
     return () => window.removeEventListener('popstate', updatePath);
@@ -55,7 +60,6 @@ export default function App() {
     () => ({
       pathname,
       navigate: (to, options = {}) => {
-        if (typeof window === 'undefined') return;
         const method = options.replace ? 'replaceState' : 'pushState';
         window.history[method]({}, '', to);
         setPathname(to);
@@ -69,17 +73,21 @@ export default function App() {
   return (
     <RouterContext.Provider value={router}>
       <AppLayout auth={auth}>
-        {route.name === 'home' ? <HomePage auth={auth} /> : null}
-        {route.name === 'browse' ? <BrowsePage /> : null}
-        {route.name === 'series' ? <SeriesDetailPage id={route.id} /> : null}
-        {route.name === 'watch' ? <WatchPage auth={auth} id={route.id} episode={route.episode} /> : null}
-        {route.name === 'submit' ? <SubmitPage /> : null}
-        {route.name === 'creator' ? <CreatorDashboardPage /> : null}
-        {route.name === 'pricing' ? <PricingPage /> : null}
-        {route.name === 'admin' ? <AdminPage /> : null}
-        {route.name === 'login' ? <LoginPage auth={auth} /> : null}
-        {route.name === 'signup' ? <SignupPage auth={auth} /> : null}
-        {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
+        <ErrorBoundary>
+          {route.name === 'home' ? <HomePage auth={auth} platform={platform} /> : null}
+          {route.name === 'browse' ? <BrowsePage platform={platform} /> : null}
+          {route.name === 'series' ? <SeriesDetailPage id={route.id} platform={platform} auth={auth} /> : null}
+          {route.name === 'watch' ? <WatchPage auth={auth} id={route.id} episode={route.episode} platform={platform} /> : null}
+          {route.name === 'submit' ? <SubmitPage /> : null}
+          {route.name === 'creator' ? <CreatorDashboardPage auth={auth} platform={platform} /> : null}
+          {route.name === 'pricing' ? <PricingPage auth={auth} platform={platform} /> : null}
+          {route.name === 'services' ? <ServiceOrdersPage auth={auth} platform={platform} /> : null}
+          {route.name === 'profile' ? <ProfilePage auth={auth} platform={platform} /> : null}
+          {route.name === 'admin' ? <AdminPage platform={platform} auth={auth} /> : null}
+          {route.name === 'login' ? <LoginPage auth={auth} /> : null}
+          {route.name === 'signup' ? <SignupPage auth={auth} /> : null}
+          {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
+        </ErrorBoundary>
       </AppLayout>
     </RouterContext.Provider>
   );
