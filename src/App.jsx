@@ -1,5 +1,7 @@
+import { useEffect, useMemo, useState } from 'react';
 import { AppLayout } from './layouts/AppLayout';
 import { useAuthMock } from './hooks/useAuthMock';
+import { RouterContext } from './lib/router';
 import { AdminPage } from './pages/AdminPage';
 import { BrowsePage } from './pages/BrowsePage';
 import { CreatorDashboardPage } from './pages/CreatorDashboardPage';
@@ -11,6 +13,11 @@ import { SeriesDetailPage } from './pages/SeriesDetailPage';
 import { SignupPage } from './pages/SignupPage';
 import { SubmitPage } from './pages/SubmitPage';
 import { WatchPage } from './pages/WatchPage';
+
+function getPathname() {
+  if (typeof window === 'undefined') return '/';
+  return window.location.pathname || '/';
+}
 
 function resolveRoute(pathname) {
   if (pathname === '/') return { name: 'home' };
@@ -34,21 +41,46 @@ function resolveRoute(pathname) {
 
 export default function App() {
   const auth = useAuthMock();
-  const route = resolveRoute(window.location.pathname);
+  const [pathname, setPathname] = useState(getPathname);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const updatePath = () => setPathname(getPathname());
+    window.addEventListener('popstate', updatePath);
+    return () => window.removeEventListener('popstate', updatePath);
+  }, []);
+
+  const router = useMemo(
+    () => ({
+      pathname,
+      navigate: (to, options = {}) => {
+        if (typeof window === 'undefined') return;
+        const method = options.replace ? 'replaceState' : 'pushState';
+        window.history[method]({}, '', to);
+        setPathname(to);
+      },
+    }),
+    [pathname]
+  );
+
+  const route = resolveRoute(pathname);
 
   return (
-    <AppLayout auth={auth}>
-      {route.name === 'home' ? <HomePage auth={auth} /> : null}
-      {route.name === 'browse' ? <BrowsePage /> : null}
-      {route.name === 'series' ? <SeriesDetailPage id={route.id} /> : null}
-      {route.name === 'watch' ? <WatchPage auth={auth} id={route.id} episode={route.episode} /> : null}
-      {route.name === 'submit' ? <SubmitPage /> : null}
-      {route.name === 'creator' ? <CreatorDashboardPage /> : null}
-      {route.name === 'pricing' ? <PricingPage /> : null}
-      {route.name === 'admin' ? <AdminPage /> : null}
-      {route.name === 'login' ? <LoginPage auth={auth} /> : null}
-      {route.name === 'signup' ? <SignupPage auth={auth} /> : null}
-      {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
-    </AppLayout>
+    <RouterContext.Provider value={router}>
+      <AppLayout auth={auth}>
+        {route.name === 'home' ? <HomePage auth={auth} /> : null}
+        {route.name === 'browse' ? <BrowsePage /> : null}
+        {route.name === 'series' ? <SeriesDetailPage id={route.id} /> : null}
+        {route.name === 'watch' ? <WatchPage auth={auth} id={route.id} episode={route.episode} /> : null}
+        {route.name === 'submit' ? <SubmitPage /> : null}
+        {route.name === 'creator' ? <CreatorDashboardPage /> : null}
+        {route.name === 'pricing' ? <PricingPage /> : null}
+        {route.name === 'admin' ? <AdminPage /> : null}
+        {route.name === 'login' ? <LoginPage auth={auth} /> : null}
+        {route.name === 'signup' ? <SignupPage auth={auth} /> : null}
+        {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
+      </AppLayout>
+    </RouterContext.Provider>
   );
 }

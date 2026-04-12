@@ -1,9 +1,12 @@
 import { AuthFormCard } from '../components/AuthFormCard';
+import { Link, useRouter } from '../lib/router';
 
 export function ForgotPasswordPage() {
+  const { navigate } = useRouter();
+
   const submit = (event) => {
     event.preventDefault();
-    window.location.assign('/login');
+    navigate('/login');
   };
 
   return (
@@ -16,8 +19,8 @@ export function ForgotPasswordPage() {
         onSubmit={submit}
         footer={
           <>
-            <a href="/login">Back to login</a>
-            <a href="/signup">Create new account</a>
+            <Link to="/login">Back to login</Link>
+            <Link to="/signup">Create new account</Link>
           </>
         }
       />

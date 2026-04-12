@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useRouter } from '../lib/router';
 
 const nav = [
   ['/', 'Home'],
@@ -10,20 +11,20 @@ const nav = [
 ];
 
 export function Header({ auth }) {
-  const current = window.location.pathname;
+  const { pathname } = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="site-header">
       <div className="container row split center">
-        <a href="/" className="brand">
+        <Link to="/" className="brand">
           AIShortHub
-        </a>
+        </Link>
         <nav className="row nav-wrap">
           {nav.map(([to, label]) => (
-            <a key={to} href={to} className={current === to ? 'nav-link active' : 'nav-link'}>
+            <Link key={to} to={to} className={pathname === to ? 'nav-link active' : 'nav-link'}>
               {label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="row center header-actions">
@@ -36,8 +37,8 @@ export function Header({ auth }) {
                 <div className="account-menu panel">
                   <strong>{auth.user.name}</strong>
                   <small>{auth.user.email}</small>
-                  <a href="/creator">Creator workspace</a>
-                  <a href="/pricing">Manage plan</a>
+                  <Link to="/creator">Creator workspace</Link>
+                  <Link to="/pricing">Manage plan</Link>
                   <button className="btn btn-ghost" onClick={auth.logout}>
                     Logout
                   </button>
@@ -47,12 +48,12 @@ export function Header({ auth }) {
           ) : (
             <>
               <span className="status">Guest mode</span>
-              <a className="btn btn-ghost" href="/login">
+              <Link to="/login" className="btn btn-ghost">
                 Login
-              </a>
-              <a className="btn btn-primary" href="/signup">
+              </Link>
+              <Link to="/signup" className="btn btn-primary">
                 Start free
-              </a>
+              </Link>
             </>
           )}
         </div>

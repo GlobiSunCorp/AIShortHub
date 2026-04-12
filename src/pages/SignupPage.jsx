@@ -1,10 +1,13 @@
 import { AuthFormCard } from '../components/AuthFormCard';
+import { Link, useRouter } from '../lib/router';
 
 export function SignupPage({ auth }) {
+  const { navigate } = useRouter();
+
   const submit = (event) => {
     event.preventDefault();
     auth.login('newviewer@aishorthub.com');
-    window.location.assign('/browse');
+    navigate('/browse');
   };
 
   return (
@@ -17,8 +20,8 @@ export function SignupPage({ auth }) {
         onSubmit={submit}
         footer={
           <>
-            <a href="/login">Already have an account?</a>
-            <a href="/pricing">Compare plans</a>
+            <Link to="/login">Already have an account?</Link>
+            <Link to="/pricing">Compare plans</Link>
           </>
         }
       />

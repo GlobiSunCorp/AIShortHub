@@ -1,3 +1,4 @@
+import { Link } from '../lib/router';
 import { GenreTag } from './GenreTag';
 
 export function SeriesCard({ series }) {
@@ -21,9 +22,9 @@ export function SeriesCard({ series }) {
           <span>{series.episodes} Episodes</span>
           <span>Free {series.freeEpisodes}</span>
         </div>
-        <a className="text-link" href={`/series/${series.id}`}>
+        <Link className="text-link" to={`/series/${series.id}`}>
           View detail →
-        </a>
+        </Link>
       </div>
     </article>
   );

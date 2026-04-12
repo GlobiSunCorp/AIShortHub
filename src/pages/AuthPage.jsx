@@ -1,4 +1,7 @@
+import { Link, useRouter } from '../lib/router';
+
 export function AuthPage({ mode, auth }) {
+  const { navigate } = useRouter();
   const isSignup = mode === 'signup';
   const isForgot = mode === 'forgot';
 
@@ -6,7 +9,7 @@ export function AuthPage({ mode, auth }) {
     event.preventDefault();
     if (!isForgot) {
       auth.login();
-      window.location.assign('/');
+      navigate('/');
     }
   };
 
@@ -35,8 +38,8 @@ export function AuthPage({ mode, auth }) {
           {isSignup ? 'Sign up' : isForgot ? 'Send reset email' : 'Log in'}
         </button>
         <div className="row wrap small-text">
-          {!isSignup && !isForgot ? <a href="/forgot-password">Forgot password?</a> : null}
-          {!isSignup ? <a href="/signup">Need an account?</a> : <a href="/login">Already have one?</a>}
+          {!isSignup && !isForgot ? <Link to="/forgot-password">Forgot password?</Link> : null}
+          {!isSignup ? <Link to="/signup">Need an account?</Link> : <Link to="/login">Already have one?</Link>}
         </div>
       </form>
     </div>

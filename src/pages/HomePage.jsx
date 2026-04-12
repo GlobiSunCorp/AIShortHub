@@ -1,3 +1,4 @@
+import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
 import { continueWatching, homepageRows, seriesData } from '../data/series';
@@ -33,12 +34,12 @@ export function HomePage({ auth }) {
           </div>
 
           <div className="row wrap">
-            <a className="btn btn-primary" href="/browse">
+            <Link className="btn btn-primary" to="/browse">
               Start watching
-            </a>
-            <a className="btn btn-ghost" href="/signup">
+            </Link>
+            <Link className="btn btn-ghost" to="/signup">
               Create free account
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -56,12 +57,12 @@ export function HomePage({ auth }) {
           <h3>{heroSeries.title}</h3>
           <p className="small-text">{heroSeries.synopsis}</p>
           <div className="row wrap">
-            <a className="btn btn-primary" href={`/series/${heroSeries.id}`}>
+            <Link className="btn btn-primary" to={`/series/${heroSeries.id}`}>
               View series
-            </a>
-            <a className="btn btn-ghost" href={`/watch/${heroSeries.id}/1`}>
+            </Link>
+            <Link className="btn btn-ghost" to={`/watch/${heroSeries.id}/1`}>
               Watch episode 1
-            </a>
+            </Link>
           </div>
         </article>
 
