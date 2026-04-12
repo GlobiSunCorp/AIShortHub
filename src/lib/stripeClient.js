@@ -1,10 +1,10 @@
-export async function createStripeCheckoutSession({ priceId, email }) {
-  const endpoint = import.meta.env.VITE_STRIPE_CHECKOUT_ENDPOINT;
+const endpoint = import.meta.env.VITE_STRIPE_CHECKOUT_ENDPOINT;
 
+export async function createStripeCheckoutSession(payload) {
   if (!endpoint) {
     return {
       mode: 'mock',
-      url: `/pricing?mockCheckout=1&priceId=${priceId}&email=${encodeURIComponent(email || '')}`,
+      url: `/checkout/success?mock=1&type=${payload.checkoutType}`,
       message: 'Stripe endpoint is missing, using mock checkout.',
     };
   }
@@ -12,12 +12,9 @@ export async function createStripeCheckoutSession({ priceId, email }) {
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ priceId, email }),
+    body: JSON.stringify(payload),
   });
 
-  if (!response.ok) {
-    throw new Error('Failed to create Stripe checkout session');
-  }
-
+  if (!response.ok) throw new Error('Failed to create Stripe checkout session');
   return response.json();
 }

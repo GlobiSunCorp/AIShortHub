@@ -1,147 +1,72 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AccessGuidePanel } from '../components/AccessGuidePanel';
 import { minLength } from '../lib/validation';
 
 const orderStatuses = ['pending', 'in_progress', 'completed', 'cancelled'];
+const reviewStatuses = ['draft', 'pending_review', 'published', 'rejected'];
 
 export function AdminPage({ platform, auth }) {
-  const [reason, setReason] = useState('');
+  const [reviewNote, setReviewNote] = useState('');
+  const [orderNote, setOrderNote] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+
   const pending = platform.series.filter((item) => item.status === 'pending_review');
-  const published = platform.series.filter((item) => item.status === 'published');
+  const filteredSeries = useMemo(
+    () => platform.series.filter((item) => (filterStatus === 'all' ? true : item.status === filterStatus)),
+    [platform.series, filterStatus]
+  );
 
-  if (!auth.isLoggedIn) {
-    return (
-      <AccessGuidePanel
-        currentRoleLabel="Guest"
-        requiredRoleLabel="Admin"
-        reason="管理台涉及审核与订单状态变更，需要 Admin 角色进行演示。"
-        action={
-          <button type="button" className="btn btn-primary" onClick={() => auth.switchDemoRole('admin')}>
-            切换为 Admin
-          </button>
-        }
-      />
-    );
-  }
-
-  if (auth.userState !== 'admin') {
-    return (
-      <AccessGuidePanel
-        currentRoleLabel={auth.userState}
-        requiredRoleLabel="Admin"
-        reason="当前角色无权审核内容或更新服务订单状态。"
-        action={
-          <button type="button" className="btn btn-primary" onClick={() => auth.switchDemoRole('admin')}>
-            一键切换为 Admin
-          </button>
-        }
-      />
-    );
-  }
+  if (!auth.isLoggedIn) return <AccessGuidePanel currentRoleLabel="Guest" requiredRoleLabel="Admin" reason="管理台需要 Admin 角色。" action={<button type="button" className="btn btn-primary" onClick={() => auth.switchDemoRole('admin')}>切换为 Admin</button>} />;
+  if (auth.userState !== 'admin') return <AccessGuidePanel currentRoleLabel={auth.userState} requiredRoleLabel="Admin" reason="当前角色无权审核内容或更新服务订单状态。" action={<button type="button" className="btn btn-primary" onClick={() => auth.switchDemoRole('admin')}>一键切换为 Admin</button>} />;
 
   return (
     <div className="stack-lg">
       <section className="panel">
-        <h1>Admin Dashboard</h1>
-        <p className="small-text">审核队列、服务订单状态更新、用户角色与内容状态管理。</p>
+        <h1>Admin Review Workbench</h1>
+        <p className="small-text">状态流：draft → pending_review → approved/published 或 rejected。预留 report_count / flagged 字段用于下一轮举报审核。</p>
       </section>
-
       {feedback.message ? <section className="panel"><p className={`form-feedback ${feedback.type}`}>{feedback.message}</p></section> : null}
 
       <section className="grid cards-4">
-        <article className="stat-card"><p className="small-text">待审核</p><h3>{pending.length}</h3></article>
-        <article className="stat-card"><p className="small-text">已发布</p><h3>{published.length}</h3></article>
-        <article className="stat-card"><p className="small-text">用户总数</p><h3>{platform.profiles.length}</h3></article>
-        <article className="stat-card"><p className="small-text">服务订单</p><h3>{platform.serviceOrders.length}</h3></article>
+        <article className="stat-card"><p className="small-text">Draft</p><h3>{platform.series.filter((s) => s.status === 'draft').length}</h3></article>
+        <article className="stat-card"><p className="small-text">Pending</p><h3>{pending.length}</h3></article>
+        <article className="stat-card"><p className="small-text">Published</p><h3>{platform.series.filter((s) => s.status === 'published').length}</h3></article>
+        <article className="stat-card"><p className="small-text">Rejected</p><h3>{platform.series.filter((s) => s.status === 'rejected').length}</h3></article>
       </section>
 
       <section className="panel">
         <h2>Review Queue</h2>
-        <input className="input" placeholder="审核原因（reject 时必填）" value={reason} onChange={(e) => setReason(e.target.value)} />
-        <div className="table-wrap">
-          <table>
-            <thead><tr><th>Series</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>
-              {pending.length ? (
-                pending.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.title}</td>
-                    <td>{item.status}</td>
-                    <td>
-                      <div className="row wrap">
-                        <button
-                          className="btn btn-primary"
-                          type="button"
-                          onClick={() => {
-                            platform.actions.reviewSeries(item.id, 'approved', minLength(reason, 2) ? reason : 'Looks good');
-                            setFeedback({ type: 'success', message: `《${item.title}》已通过审核。` });
-                            setReason('');
-                          }}
-                        >
-                          approve
-                        </button>
-                        <button
-                          className="btn btn-ghost"
-                          type="button"
-                          onClick={() => {
-                            if (!minLength(reason, 4)) {
-                              setFeedback({ type: 'error', message: 'Reject 时请填写至少 4 个字符的审核原因。' });
-                              return;
-                            }
-                            platform.actions.reviewSeries(item.id, 'rejected', reason);
-                            setFeedback({ type: 'success', message: `《${item.title}》已驳回，原因已记录。` });
-                            setReason('');
-                          }}
-                        >
-                          reject
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="small-text">当前没有待审核内容。</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="row wrap">
+          <select className="input" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="all">All status</option>
+            {reviewStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <input className="input" placeholder="审核备注（reject 必填）" value={reviewNote} onChange={(e) => setReviewNote(e.target.value)} />
         </div>
+        <div className="table-wrap"><table><thead><tr><th>Series</th><th>Status</th><th>Report</th><th>Flagged</th><th>Action</th></tr></thead><tbody>
+          {filteredSeries.length ? filteredSeries.map((item) => (
+            <tr key={item.id}><td>{item.title}</td><td>{item.status}</td><td>{item.report_count || 0}</td><td>{item.flagged ? 'Yes' : 'No'}</td><td><div className="row wrap">
+              <button className="btn btn-primary" type="button" onClick={async () => { await platform.actions.reviewSeries(item.id, 'approved', minLength(reviewNote, 2) ? reviewNote : 'Approved by admin'); setFeedback({ type: 'success', message: `《${item.title}》已通过审核。` }); setReviewNote(''); }}>approve</button>
+              <button className="btn btn-ghost" type="button" onClick={async () => { if (!minLength(reviewNote, 4)) return setFeedback({ type: 'error', message: 'Reject 时请填写至少 4 个字符的审核备注。' }); await platform.actions.reviewSeries(item.id, 'rejected', reviewNote); setFeedback({ type: 'success', message: `《${item.title}》已驳回。` }); setReviewNote(''); }}>reject</button>
+            </div></td></tr>
+          )) : <tr><td colSpan={5} className="small-text">暂无内容，可等待 Creator 提交或调整筛选条件。</td></tr>}
+        </tbody></table></div>
       </section>
 
       <section className="panel">
         <h2>服务订单管理</h2>
-        <div className="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Type</th><th>Project</th><th>Status</th><th>Update</th></tr></thead>
-            <tbody>
-              {platform.serviceOrders.length ? (
-                platform.serviceOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td>{order.id}</td><td>{order.serviceType}</td><td>{order.projectTitle}</td><td>{order.status}</td>
-                    <td>
-                      <select
-                        className="input"
-                        value={order.status}
-                        onChange={(e) => {
-                          platform.actions.updateServiceOrderStatus(order.id, e.target.value);
-                          setFeedback({ type: 'success', message: `订单 ${order.id} 状态更新为 ${e.target.value}。` });
-                        }}
-                      >
-                        {orderStatuses.map((s) => <option key={s}>{s}</option>)}
-                      </select>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="small-text">暂无服务订单，等待用户提交。</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <p className="small-text">状态更新记录会携带更新时间与备注占位（便于后续 SLA/审计）。</p>
+        <input className="input" placeholder="订单状态备注" value={orderNote} onChange={(e) => setOrderNote(e.target.value)} />
+        <div className="table-wrap"><table><thead><tr><th>ID</th><th>Type</th><th>Project</th><th>Status</th><th>Updated</th><th>Update</th></tr></thead><tbody>
+          {platform.serviceOrders.length ? platform.serviceOrders.map((order) => (
+            <tr key={order.id}><td>{order.id}</td><td>{order.serviceType}</td><td>{order.projectTitle}</td><td>{order.status}</td><td>{order.updated_at || order.updatedAt || '-'}</td><td>
+              <select className="input" value={order.status} onChange={async (e) => { await platform.actions.updateServiceOrderStatus(order.id, e.target.value, orderNote); setFeedback({ type: 'success', message: `订单 ${order.id} 状态更新为 ${e.target.value}。` }); }}>
+                {orderStatuses.map((s) => <option key={s}>{s}</option>)}
+              </select>
+            </td></tr>
+          )) : <tr><td colSpan={6} className="small-text">暂无服务订单，等待用户提交。</td></tr>}
+        </tbody></table></div>
       </section>
     </div>
   );

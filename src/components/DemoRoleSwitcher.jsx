@@ -6,12 +6,13 @@ export function DemoRoleSwitcher({ auth, compact = false, className = '' }) {
   return (
     <div className={`role-switcher ${className}`.trim()}>
       <label className="small-text" htmlFor={compact ? 'demo-role-select-compact' : 'demo-role-select'}>
-        Demo Role Switcher
+        Demo Role Switcher {auth.mode === 'real' ? '(Demo only)' : ''}
       </label>
       <select
         id={compact ? 'demo-role-select-compact' : 'demo-role-select'}
         className="input"
         value={current}
+        disabled={auth.mode === 'real'}
         onChange={(event) => auth.switchDemoRole(event.target.value)}
       >
         {DEMO_ROLE_OPTIONS.map((item) => (

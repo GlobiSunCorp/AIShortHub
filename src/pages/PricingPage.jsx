@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createStripeCheckoutSession } from '../lib/stripeClient';
+import { startCreatorPlanCheckout, startViewerCheckout } from '../lib/services/billingService';
 import { ADD_ON_SERVICES, CREATOR_PLANS, VIEWER_SUBSCRIPTIONS, formatCommission, formatUsd, getCreatorPlan, getViewerPlan } from '../data/monetization';
 import { resolveMembership } from '../hooks/usePlanAccess';
 
@@ -18,7 +18,7 @@ export function PricingPage({ auth, platform }) {
       return setNotice('Viewer Subscription 已切换为 Free。');
     }
     try {
-      const session = await createStripeCheckoutSession({ priceId: plan.priceId, email: auth.user.email });
+      const session = await startViewerCheckout({ plan, user: auth.user });
       platform.actions.setMembershipTier(auth.user.id, plan.id);
       setNotice(session.mode === 'mock' ? `Mock checkout: ${session.message}` : 'Checkout session created.');
     } catch (error) {
@@ -26,10 +26,19 @@ export function PricingPage({ auth, platform }) {
     }
   };
 
-  const handleCreatorPlan = (plan) => {
+  const handleCreatorPlan = async (plan) => {
     if (!auth.isLoggedIn) return setNotice('请先登录后再升级 Creator Plan。');
-    platform.actions.setCreatorPlan(auth.user.id, plan.id);
-    setNotice(`Creator Plan 已更新为 ${plan.name}。`);
+    if (plan.id === 'creator_basic') {
+      platform.actions.setCreatorPlan(auth.user.id, plan.id);
+      return setNotice(`Creator Plan 已更新为 ${plan.name}。`);
+    }
+    try {
+      const session = await startCreatorPlanCheckout({ plan, user: auth.user });
+      platform.actions.setCreatorPlan(auth.user.id, plan.id);
+      setNotice(session.mode === 'mock' ? `Mock checkout: ${session.message}` : 'Creator plan checkout session created.');
+    } catch (error) {
+      setNotice(`Creator Plan 支付初始化失败：${error.message}`);
+    }
   };
 
   return (

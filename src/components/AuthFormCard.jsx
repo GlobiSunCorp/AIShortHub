@@ -57,7 +57,7 @@ export function AuthFormCard({ title, subtitle, cta, mode, onSubmit, footer }) {
       <aside className="auth-showcase auth-surface">
         <span className="kicker">Platform Access</span>
         <h2>登录后可访问 Viewer Subscription、Creator Plan 与管理流程。</h2>
-        <p>支持 Status: Guest / Member / Creator / Admin 状态切换。当前为 mock 认证流程，便于本地验证。</p>
+        <p>支持 Status: Guest / Member / Creator / Admin 状态切换。支持 Supabase Auth 真实登录；缺少环境变量时自动回退 mock。</p>
       </aside>
 
       <form className="panel auth-form" onSubmit={submit}>

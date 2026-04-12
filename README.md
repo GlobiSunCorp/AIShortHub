@@ -1,94 +1,121 @@
-# AIShortHub MVP (Phase 5)
+# AIShortHub MVP (Phase 6 · 真实接入与试运营准备)
 
-AIShortHub 在前几轮基础上完成第五轮「商业化、Creator Studio 与精细化上传」升级：从功能演示型 MVP 进一步走向商业逻辑清晰、创作者体验分层明确的平台版本。
+本轮把项目从“演示原型”推进到“可小范围试运营”的产品骨架：真实账号、真实内容写入、真实素材上传、真实支付结构、基础审核工作台与运营政策页面。
 
 ## 技术栈
 - Vite + React
-- 自定义 history router（`resolveRoute`）
-- Mock data + Supabase 兼容命名预留
-- Stripe checkout-session 结构预留 + mock fallback
+- Supabase Auth + Supabase REST + Supabase Storage（缺配置时自动 mock fallback）
+- Stripe Checkout Session（前后端结构预留 + mock fallback）
 
-## 本地启动
+## 本地运行
 ```bash
 npm install
 npm run dev
 npm run build
 ```
 
-## 第五轮增强内容
+## 环境变量（`.env.example`）
+```bash
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_STRIPE_PUBLISHABLE_KEY=
+VITE_STRIPE_SECRET_KEY=
+VITE_STRIPE_WEBHOOK_SECRET=
+VITE_STRIPE_CHECKOUT_ENDPOINT=
+VITE_PLATFORM_TAKE_RATE=0.2
+```
 
-### 1) Pricing 双体系重构
-- Pricing 页面拆分为 **For Viewers** 与 **For Creators** 两大区块。
-- Viewer Subscription：`Free / Pro Viewer / Premium Viewer`，展示月费/年费、完整剧集、画质、抢先看、专属内容、观看工具、推荐优先级。
-- Creator Plan：`Creator Basic / Creator Pro / Studio`，展示月费、Platform Commission、审核优先级、Motion Poster、TikTok Promo Pack、推荐位、数据面板、支持等级。
-- 新增“平台抽成说明”：明确订阅费、服务费、平台抽成及 Included 与 Add-on 差异。
+## 第六轮完成内容
 
-### 2) 商业化配置集中化
-- 新增 `src/data/monetization.js` 统一管理：
-  - `VIEWER_SUBSCRIPTIONS`
-  - `CREATOR_PLANS`
-  - `ADD_ON_SERVICES`
-  - `DEFAULT_PLATFORM_COMMISSION`
-  - 价格/抽成格式化与权益判定 helper
-- 避免在页面散落硬编码，后续可平滑接 Supabase/后台配置表。
+### 1) Supabase Auth 真实接入（带 mock 兜底）
+- 新增统一 auth hook：`src/hooks/useAuth.js`。
+- 支持：注册 / 登录 / 登出 / 忘记密码。
+- 登录后自动同步 `profiles`（不存在则自动创建）。
+- Demo Role Switcher 保留，但在真实模式下仅作为演示说明，不影响真实登录态。
 
-### 3) Creator Studio 导航 + 浮动工具箱
-- 顶部导航新增 **Creator Studio**（仅 creator/admin 或拥有 creator plan 的账户显示）。
-- 新增浮动 **Floating Creator Toolbox**：
-  - 桌面端右下角
-  - 默认收起/点击展开
-  - 当前页面高亮
-  - 高阶创作者显示额外入口（Motion Poster、TikTok Promo Pack、结算入口等）
+### 2) Supabase 数据接口层 + 页面层分离
+- 新增服务层：`src/lib/services/platformService.js`。
+- 新增平台状态 hook：`src/hooks/usePlatformState.js`（真实加载 + mock fallback）。
+- Creator Studio 提交剧集/分集/审核写入服务层。
+- Services 下单写入 `service_orders`。
+- Admin 读取并管理审核队列和服务订单状态。
 
-### 4) Creator 上传流程升级为多步骤
-- Creator 页面升级为 4 步工作流：
-  1. Basic Info
-  2. Assets
-  3. Episodes
-  4. Publishing & Review
-- 增加步骤校验、上一步/下一步、保存草稿、步骤完成反馈、提交审核反馈、草稿摘要。
-- 明确拆分“内容资产（Assets）”与“平台增值服务（Add-on Services）”。
+### 3) Supabase Storage 上传骨架
+- Creator Studio 支持 file picker 上传：Static Poster / Motion Poster / Thumbnail / Trailer / Video 占位。
+- 上传成功后写入 `assets` 记录。
+- 保留 URL 输入模式作为 fallback。
+- 建议 bucket：`posters`, `motion-posters`, `thumbnails`, `trailers`（`episodes` 预留）。
+- 后续可扩展 Mux：保持 `assets` 表 + `video_url` 双轨架构，逐步迁移到托管视频转码。
 
-### 5) Services 页面升级为专业下单中心
-- 服务卡片区：展示名称、说明、价格、是否 Included/Discounted。
-- 服务表单区：显示当前 Creator Plan 与权益状态，提交前校验。
-- 服务详情页增强：订单编号、服务类型、状态、方案权益、加购价格、下一步建议、按身份跳转。
+### 4) Stripe 结构接入
+- 新增 `src/lib/services/billingService.js`。
+- Checkout 类型拆分：
+  - `viewer_subscription`
+  - `creator_plan`
+  - `addon_purchase`
+- Pricing / Services 已接入购买入口。
+- 新增成功/取消回跳页：`/checkout/success`, `/checkout/cancel`。
 
-### 6) Profile 升级为账号中心
-- 展示：Status、Viewer Subscription、Creator Plan、Platform Commission、Included Benefits。
-- 展示订阅概览、Add-on Services 权益状态、最近订单与最近上传内容摘要。
-- Demo Role Switcher 保留并更自然融入账号中心。
+### 5) Admin 审核流骨架增强
+- Review Queue 支持状态筛选：`draft / pending_review / published / rejected`。
+- 审核备注输入 + reject 备注必填。
+- `review_logs` 写入结构保留。
+- 服务订单状态更新包含更新时间与备注占位。
+- 预留 `report_count` / `flagged` 字段。
 
-### 7) 术语统一
-- 统一使用以下术语：
-  - Viewer Subscription
-  - Creator Plan
-  - Platform Commission
-  - Add-on Services
-  - Included Benefits
-- 状态文案统一支持：
-  - `Status: Guest`
-  - `Status: Member / Free|Pro Viewer|Premium Viewer`
-  - `Status: Creator / Basic|Pro|Studio`
-  - `Status: Admin`
+### 6) 试运营政策与支持页面
+新增页面并加入 Footer 入口：
+- FAQ
+- Terms of Service
+- Privacy Policy
+- Refund Policy
+- Contact / Support
+- Creator Guidelines
+- Content Policy
+- Commission & Payout Policy
 
-## 数据模型（`src/data/mockData.js`）
-- `profiles` 增加 `viewerPlan / creatorPlan` mock 字段。
-- `memberships` 增加 `creatorPlan` 字段（与 Viewer Subscription 并行）。
-- `serviceOrders` 增加 `entitlement / addOnPrice / nextStep` 等订单展示字段。
-- `PLATFORM_CONFIG` 增加 `settlementCycle` mock 结算说明。
+## 集中化配置
+- 新增 `src/data/platformConfig.js`：
+  - Viewer plans
+  - Creator plans
+  - Commission rules
+  - Add-on pricing
+  - Included / Discounted / Add-on 判定
+- Pricing / Profile / Services / Creator Studio 共用配置。
 
-## 真实接入 vs Mock
-- **已真实预留结构**：Supabase 命名风格、Stripe checkout-session 调用封装、Creator/Services/Profile 数据流。
-- **当前仍为 mock**：
-  - Auth 与权限判定
-  - 支付确认与账务对账
-  - 资产文件上传存储
-  - 审核队列 SLA 与推荐位分发
-  - Creator 收益与结算自动化
+## Supabase Schema 建议
+见：`docs/supabase-schema.sql`
 
-## 本轮明确未做
-- 真实对象存储上传（S3/Supabase Storage）
-- 真正的计费与分账清结算
-- 真实推荐系统与投放回传
-- 真实客服工单系统
+包含核心表：
+- `profiles`
+- `viewer_subscriptions`
+- `creator_plans`
+- `creators`
+- `series`
+- `episodes`
+- `assets`
+- `service_orders`
+- `payments`
+- `payouts`
+- `review_logs`
+
+## 真实接入范围 vs 仍为 mock
+
+### 已接入真实结构
+- Auth 登录/注册/找回/登出流程
+- Profiles 同步
+- 基础表读写服务层
+- Storage 上传骨架
+- Stripe Checkout 调用结构和回跳页
+
+### 仍为 mock 或待下一轮
+- Stripe webhook 完整落库与幂等对账
+- 真实 RLS 策略与多租户权限细化
+- 大视频转码与 CDN 分发（Mux/Cloudflare Stream）
+- 运营工单系统与自动化风控
+
+## 下一轮建议
+1. 加 Stripe webhook consumer（写 `payments`/`viewer_subscriptions`/`creator_plans`）。
+2. 完整 RLS + policy（viewer/creator/admin）。
+3. Admin 加举报处理面板和证据链。
+4. Creator 收益看板接 `payouts` 真实流水。
