@@ -5,7 +5,7 @@ export function LoginPage({ auth }) {
   const { navigate } = useRouter();
 
   const submit = async (form) => {
-    const result = auth.login(form.email);
+    const result = await auth.login(form.email, form.password);
     if (result.ok) {
       navigate('/');
     }

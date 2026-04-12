@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppLayout } from './layouts/AppLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { useAuthMock } from './hooks/useAuthMock';
+import { useAuth } from './hooks/useAuth';
 import { usePlatformState } from './hooks/usePlatformState';
 import { RouterContext } from './lib/router';
 import { AdminPage } from './pages/AdminPage';
@@ -18,6 +18,10 @@ import { ServiceOrdersPage } from './pages/ServiceOrdersPage';
 import { SignupPage } from './pages/SignupPage';
 import { SubmitPage } from './pages/SubmitPage';
 import { WatchPage } from './pages/WatchPage';
+import { PolicyPage } from './pages/PolicyPage';
+import { FAQPage } from './pages/FAQPage';
+import { ContactSupportPage } from './pages/ContactSupportPage';
+import { CheckoutResultPage } from './pages/CheckoutResultPage';
 
 function getPathname() {
   if (typeof window === 'undefined') return '/';
@@ -36,6 +40,16 @@ function resolveRoute(pathname) {
   if (pathname === '/login') return { name: 'login' };
   if (pathname === '/signup') return { name: 'signup' };
   if (pathname === '/forgot-password') return { name: 'forgot' };
+  if (pathname === '/faq') return { name: 'faq' };
+  if (pathname === '/support') return { name: 'support' };
+  if (pathname === '/checkout/success') return { name: 'checkoutSuccess' };
+  if (pathname === '/checkout/cancel') return { name: 'checkoutCancel' };
+  if (pathname === '/terms') return { name: 'terms' };
+  if (pathname === '/privacy') return { name: 'privacy' };
+  if (pathname === '/refund') return { name: 'refund' };
+  if (pathname === '/creator-guidelines') return { name: 'creatorGuidelines' };
+  if (pathname === '/content-policy') return { name: 'contentPolicy' };
+  if (pathname === '/commission-payout') return { name: 'commissionPayout' };
 
   const serviceOrderMatch = pathname.match(/^\/services\/([^/]+)$/);
   if (serviceOrderMatch) return { name: 'serviceOrderDetail', id: serviceOrderMatch[1] };
@@ -50,8 +64,8 @@ function resolveRoute(pathname) {
 }
 
 export default function App() {
-  const auth = useAuthMock();
-  const platform = usePlatformState();
+  const auth = useAuth();
+  const platform = usePlatformState(auth);
   const [pathname, setPathname] = useState(getPathname);
 
   useEffect(() => {
@@ -92,6 +106,16 @@ export default function App() {
           {route.name === 'login' ? <LoginPage auth={auth} /> : null}
           {route.name === 'signup' ? <SignupPage auth={auth} /> : null}
           {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
+          {route.name === 'faq' ? <FAQPage /> : null}
+          {route.name === 'support' ? <ContactSupportPage /> : null}
+          {route.name === 'checkoutSuccess' ? <CheckoutResultPage type="success" /> : null}
+          {route.name === 'checkoutCancel' ? <CheckoutResultPage type="cancel" /> : null}
+          {route.name === 'terms' ? <PolicyPage type="terms" /> : null}
+          {route.name === 'privacy' ? <PolicyPage type="privacy" /> : null}
+          {route.name === 'refund' ? <PolicyPage type="refund" /> : null}
+          {route.name === 'creatorGuidelines' ? <PolicyPage type="creatorGuidelines" /> : null}
+          {route.name === 'contentPolicy' ? <PolicyPage type="contentPolicy" /> : null}
+          {route.name === 'commissionPayout' ? <PolicyPage type="commissionPayout" /> : null}
         </ErrorBoundary>
       </AppLayout>
     </RouterContext.Provider>

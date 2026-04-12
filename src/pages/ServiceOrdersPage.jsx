@@ -3,6 +3,7 @@ import { useRouter } from '../lib/router';
 import { isValidEmail, minLength } from '../lib/validation';
 import { ADD_ON_SERVICES, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
 import { resolveMembership } from '../hooks/usePlanAccess';
+import { startAddonCheckout } from '../lib/services/billingService';
 
 export function ServiceOrdersPage({ auth, platform }) {
   const { navigate } = useRouter();
@@ -69,13 +70,13 @@ export function ServiceOrdersPage({ auth, platform }) {
           type="button"
           className="btn btn-primary"
           disabled={isSubmitting}
-          onClick={() => {
+          onClick={async () => {
             if (!validate()) {
               setFeedback({ type: 'error', message: '提交失败，请修正错误后重试。' });
               return;
             }
             setIsSubmitting(true);
-            const created = platform.actions.createServiceOrder({
+            const created = await platform.actions.createServiceOrder({
               requesterId: auth.user?.id || 'guest',
               serviceType: selectedService.name,
               projectTitle: form.projectTitle,
@@ -84,8 +85,11 @@ export function ServiceOrdersPage({ auth, platform }) {
               contact: form.contact,
               entitlement,
               addOnPrice: entitlement === 'Included' ? '$0' : selectedService.price,
-              nextStep: '服务团队将在 24h 内回传项目排期（mock）。',
+              nextStep: '服务团队将在 24h 内回传项目排期。',
             });
+            if (entitlement !== 'Included' && auth.isLoggedIn) {
+              await startAddonCheckout({ service: selectedService, user: auth.user, orderId: created.id });
+            }
             setFeedback({ type: 'success', message: `服务下单成功，订单号 ${created.id}` });
             setIsSubmitting(false);
             navigate(`/services/${created.id}`);

@@ -13,8 +13,9 @@ export function ForgotPasswordPage({ auth }) {
         subtitle="按 Supabase Auth reset 密码流程预留，当前为可演示 mock 流程。"
         cta="Send reset link"
         onSubmit={(form) => {
-          auth.requestPasswordReset(form.email);
-          setMessage(`已发送重置邮件到 ${form.email}`);
+          const result = await auth.requestPasswordReset(form.email);
+          setMessage(result?.message || `已发送重置邮件到 ${form.email}`);
+          return result;
         }}
         footer={
           <>
