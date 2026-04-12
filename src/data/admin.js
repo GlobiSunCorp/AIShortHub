@@ -24,3 +24,11 @@ export const adminRows = [
     recommendation: 'Approve + Edit Asset',
   },
 ];
+
+export const adminOverviewModules = [
+  { label: 'Moderation Status', value: '29 open · 11 escalated · SLA 6h' },
+  { label: 'Publishing Queue', value: '8 ready today · 4 waiting legal review' },
+  { label: 'Featured Placement Controls', value: 'Hero slot locked through Apr 18, 2026' },
+  { label: 'Promotion Status Overview', value: '17 campaigns live · 3 blocked by asset policy' },
+  { label: 'Shared Infrastructure Roadmap', value: 'Auth SSO mock, analytics events, billing callback API' },
+];

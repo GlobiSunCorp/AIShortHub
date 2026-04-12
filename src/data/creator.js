@@ -37,3 +37,12 @@ export const creatorStats = [
   { label: 'TikTok CTR', value: '3.8%' },
   { label: 'Reg from Traffic', value: '726' },
 ];
+
+export const creatorPlatformModules = [
+  { name: 'Distribution', detail: '12 territories staged · 3 in rights clearance' },
+  { name: 'Promotion', detail: '2 paid boosts ready for launch this week' },
+  { name: 'Traffic', detail: 'Top source: TikTok Spark Ads · 44% of new viewers' },
+  { name: 'TikTok Campaign Status', detail: '3 active, 2 pending review, 1 paused for copy update' },
+  { name: 'Trailer / Teaser Assets', detail: '9 approved cuts · 2 awaiting thumbnail replacements' },
+  { name: 'Submission Review Notes', detail: 'Moderation notes synced every 4h from internal queue' },
+];
