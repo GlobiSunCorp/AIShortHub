@@ -6,16 +6,18 @@ export function AdminPage() {
     <div className="stack-lg">
       <section className="panel">
         <h1>Admin Operations</h1>
-        <p>Moderation, publishing queue, featured placement controls, promotion health, and shared infrastructure roadmap.</p>
+        <p>
+          Moderate creator submissions, manage featured placement, and keep release pipelines healthy across growth and monetization.
+        </p>
       </section>
 
       <section>
-        <SectionTitle title="Operations Overview" desc="Cross-team status modules for daily release orchestration." />
+        <SectionTitle title="Operations Overview" desc="Cross-team health modules for daily release orchestration." />
         <div className="grid cards-3">
           {adminOverviewModules.map((module) => (
-            <article key={module.label} className="mini-card">
+            <article key={module.label} className="dashboard-module">
               <h3>{module.label}</h3>
-              <p>{module.value}</p>
+              <p className="small-text">{module.value}</p>
             </article>
           ))}
         </div>
