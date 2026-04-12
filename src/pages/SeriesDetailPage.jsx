@@ -1,3 +1,4 @@
+import { Link } from '../lib/router';
 import { EpisodeList } from '../components/EpisodeList';
 import { GenreTag } from '../components/GenreTag';
 import { seriesData } from '../data/series';
@@ -33,9 +34,9 @@ export function SeriesDetailPage({ id }) {
           </div>
 
           <div className="row wrap detail-actions">
-            <a className="btn btn-primary" href={`/watch/${series.id}/1`}>
+            <Link className="btn btn-primary" to={`/watch/${series.id}/1`}>
               Start episode 1
-            </a>
+            </Link>
             <button className="btn btn-ghost">Add to watchlist</button>
           </div>
         </div>

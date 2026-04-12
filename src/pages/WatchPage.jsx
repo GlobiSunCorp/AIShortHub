@@ -4,8 +4,10 @@ import { EpisodeList } from '../components/EpisodeList';
 import { SeriesCard } from '../components/SeriesCard';
 import { VideoPlayerPlaceholder } from '../components/VideoPlayerPlaceholder';
 import { seriesData } from '../data/series';
+import { Link, useRouter } from '../lib/router';
 
 export function WatchPage({ auth, id, episode }) {
+  const { navigate } = useRouter();
   const series = seriesData.find((item) => item.id === id) || seriesData[0];
   const [showAuth, setShowAuth] = useState(false);
   const currentEpisode = Number(episode || 1);
@@ -14,7 +16,7 @@ export function WatchPage({ auth, id, episode }) {
   const moreLikeThis = useMemo(() => seriesData.filter((item) => item.id !== series.id).slice(0, 3), [series.id]);
 
   const jumpTo = (ep) => {
-    window.location.assign(`/watch/${series.id}/${ep}`);
+    navigate(`/watch/${series.id}/${ep}`);
   };
 
   return (
@@ -42,12 +44,12 @@ export function WatchPage({ auth, id, episode }) {
                 <button className="btn btn-primary" onClick={() => setShowAuth(true)}>
                   Quick unlock
                 </button>
-                <a className="btn btn-ghost" href="/signup">
+                <Link className="btn btn-ghost" to="/signup">
                   Create account
-                </a>
-                <a className="btn btn-ghost" href="/login">
+                </Link>
+                <Link className="btn btn-ghost" to="/login">
                   Log in
-                </a>
+                </Link>
               </div>
             </article>
           ) : null}

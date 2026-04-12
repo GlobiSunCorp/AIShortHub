@@ -1,3 +1,5 @@
+import { Link } from '../lib/router';
+
 export function AuthModal({ open, onClose }) {
   if (!open) return null;
 
@@ -7,12 +9,12 @@ export function AuthModal({ open, onClose }) {
         <h3>Register to continue watching</h3>
         <p>Unlock watchlist, continue watching, and premium episodes after quick signup.</p>
         <div className="row">
-          <a className="btn btn-primary" href="/signup" onClick={onClose}>
+          <Link className="btn btn-primary" to="/signup" onClick={onClose}>
             Create account
-          </a>
-          <a className="btn btn-ghost" href="/login" onClick={onClose}>
+          </Link>
+          <Link className="btn btn-ghost" to="/login" onClick={onClose}>
             Log in
-          </a>
+          </Link>
         </div>
         <button className="text-link" onClick={onClose}>
           Maybe later
