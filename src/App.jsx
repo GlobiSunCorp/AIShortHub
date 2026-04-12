@@ -1,5 +1,20 @@
 import React, { useMemo, useState } from "react";
-import { Play, Upload, Search, Star, ChevronRight, User, LayoutDashboard, Film, Settings, ArrowLeft, ArrowRight, CheckCircle2, Clock3, AlertCircle } from "lucide-react";
+import {
+  Play,
+  Upload,
+  Search,
+  Star,
+  ChevronRight,
+  User,
+  LayoutDashboard,
+  Film,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
+  AlertCircle,
+} from "lucide-react";
+import "./index.css";
 
 const seriesData = [
   {
@@ -12,7 +27,6 @@ const seriesData = [
     synopsis:
       "After years of silence, Elena returns under a new identity to confront the family that destroyed her life. But revenge becomes dangerous when love, secrets, and ambition collide in the heart of the city.",
     creator: "Aurora Frame Studio",
-    color: "from-fuchsia-700/40 to-rose-900/30",
     freeEpisodes: 3,
     whyWatch: [
       "A fierce revenge story with high emotional tension",
@@ -43,7 +57,6 @@ const seriesData = [
     synopsis:
       "A nobleman bound by duty finds his fate entangled with a woman whose silence hides a political secret. In a house where every smile is calculated, one promise changes everything.",
     creator: "North Lantern Pictures",
-    color: "from-amber-700/30 to-neutral-900/40",
     freeEpisodes: 2,
     whyWatch: [
       "Elegant period styling with sharp emotional stakes",
@@ -67,7 +80,6 @@ const seriesData = [
     synopsis:
       "When a desperate deal forces two enemies into a public marriage, hidden agendas begin to crack. What starts as strategy becomes a dangerous test of loyalty and pride.",
     creator: "Glass City Motion",
-    color: "from-cyan-700/20 to-neutral-900/40",
     freeEpisodes: 3,
     whyWatch: [
       "Sharp chemistry and constant power reversals",
@@ -91,7 +103,6 @@ const seriesData = [
     synopsis:
       "A masked court, a vanished bloodline, and a forbidden relic pull a reluctant heroine into a kingdom built on illusion and fear.",
     creator: "Velvet Myth Studio",
-    color: "from-red-700/30 to-neutral-900/40",
     freeEpisodes: 2,
     whyWatch: [
       "Fantasy intrigue with a premium mood",
@@ -155,26 +166,26 @@ const pricing = [
   },
 ];
 
-function Poster({ title, meta, className = "", compact = false }) {
+function Poster({ title, meta, compact = false }) {
   return (
-    <div className={`rounded-3xl border border-white/10 bg-gradient-to-b ${className} p-4 shadow-lg`}>
-      <div className={`rounded-2xl border border-white/10 bg-black/25 ${compact ? "h-40" : "h-72"}`} />
-      <div className="mt-4 text-lg font-semibold">{title}</div>
-      <div className="mt-1 text-xs text-white/55">{meta}</div>
+    <div className="poster-card">
+      <div className={`poster-media ${compact ? "compact" : ""}`} />
+      <div className="poster-title">{title}</div>
+      <div className="poster-meta">{meta}</div>
     </div>
   );
 }
 
 function SectionTitle({ title, desc }) {
   return (
-    <div className="mb-6">
-      <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
-      {desc ? <p className="mt-2 text-sm text-white/60">{desc}</p> : null}
+    <div className="section-title-wrap">
+      <h2>{title}</h2>
+      {desc ? <p>{desc}</p> : null}
     </div>
   );
 }
 
-export default function AIShortHubPrototype() {
+export default function App() {
   const [page, setPage] = useState("home");
   const [selectedSeriesId, setSelectedSeriesId] = useState(seriesData[0].id);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
@@ -208,14 +219,11 @@ export default function AIShortHubPrototype() {
     setPage("watch");
   };
 
-  const statusBadge = (status) => {
-    const map = {
-      Published: "bg-emerald-500/15 text-emerald-300",
-      "Under Review": "bg-amber-500/15 text-amber-300",
-      "Needs Revision": "bg-red-500/15 text-red-300",
-      Approved: "bg-sky-500/15 text-sky-300",
-    };
-    return map[status] || "bg-white/10 text-white/70";
+  const statusClass = (status) => {
+    if (status === "Published") return "badge green";
+    if (status === "Under Review") return "badge yellow";
+    if (status === "Needs Revision") return "badge red";
+    return "badge";
   };
 
   const navItems = [
@@ -227,152 +235,153 @@ export default function AIShortHubPrototype() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-neutral-950/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <button onClick={() => setPage("home")} className="text-xl font-semibold tracking-wide">
+    <div className="app-shell">
+      <header className="site-header">
+        <div className="container header-inner">
+          <button onClick={() => setPage("home")} className="brand-btn">
             AIShortHub
           </button>
-          <nav className="hidden items-center gap-6 text-sm text-white/75 lg:flex">
+
+          <nav className="top-nav">
             {navItems.map(([label, key]) => (
               <button
                 key={key}
                 onClick={() => setPage(key)}
-                className={`transition hover:text-white ${page === key ? "text-white" : ""}`}
+                className={page === key ? "nav-btn active" : "nav-btn"}
               >
                 {label}
               </button>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
-            <button className="hidden rounded-2xl border border-white/15 px-4 py-2 text-sm md:block">Login</button>
-            <button
-              onClick={() => setPage("submit")}
-              className="rounded-2xl bg-white px-4 py-2 text-sm font-medium text-black shadow"
-            >
+
+          <div className="header-actions">
+            <button className="btn btn-outline">Login</button>
+            <button onClick={() => setPage("submit")} className="btn btn-light">
               Upload Your Series
             </button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-10">
+      <main className="container page-content">
         {page === "home" && (
-          <div>
-            <section className="grid gap-8 rounded-3xl border border-white/10 bg-white/5 p-8 md:grid-cols-2">
-              <div className="flex flex-col justify-center">
-                <div className="mb-3 inline-block rounded-full border border-white/15 px-3 py-1 text-xs text-white/70">
-                  Curated AI short dramas
-                </div>
-                <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
-                  Watch and Publish the Next Wave of AI Short Dramas
-                </h1>
-                <p className="mt-4 max-w-xl text-base text-white/70">
-                  AIShortHub is a curated platform for AI short dramas — built for viewers to discover compelling short-form stories and for creators to publish, package, and grow their series.
+          <>
+            <section className="hero">
+              <div className="hero-copy">
+                <div className="pill">Curated AI short dramas</div>
+                <h1>Watch and Publish the Next Wave of AI Short Dramas</h1>
+                <p>
+                  AIShortHub is a curated platform for AI short dramas — built for viewers to
+                  discover compelling short-form stories and for creators to publish, package,
+                  and grow their series.
                 </p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <button onClick={() => setPage("browse")} className="rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black">
+
+                <div className="button-row">
+                  <button onClick={() => setPage("browse")} className="btn btn-light">
                     Start Watching
                   </button>
-                  <button onClick={() => setPage("submit")} className="rounded-2xl border border-white/20 px-5 py-3 text-sm font-medium text-white">
+                  <button onClick={() => setPage("submit")} className="btn btn-outline">
                     Submit Your Series
                   </button>
                 </div>
-                <div className="mt-5 flex flex-wrap gap-2 text-xs text-white/50">
-                  <span className="rounded-full border border-white/10 px-3 py-1">Curated series</span>
-                  <span className="rounded-full border border-white/10 px-3 py-1">Short-form storytelling</span>
-                  <span className="rounded-full border border-white/10 px-3 py-1">Creator-friendly publishing</span>
+
+                <div className="tag-row">
+                  <span>Curated series</span>
+                  <span>Short-form storytelling</span>
+                  <span>Creator-friendly publishing</span>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2 rounded-3xl bg-gradient-to-b from-fuchsia-700/40 to-neutral-900 p-5 shadow-2xl">
-                  <div className="flex h-72 items-center justify-center rounded-2xl border border-white/10 bg-black/30">
-                    <Play className="h-12 w-12 text-white/80" />
+
+              <div className="hero-grid">
+                <div className="hero-feature">
+                  <div className="hero-poster">
+                    <Play size={42} />
                   </div>
-                  <div className="mt-4 text-xs text-white/60">Romance • Revenge • 24 Episodes</div>
-                  <div className="mt-2 text-2xl font-semibold">Her Hidden Return</div>
-                  <div className="mt-2 text-sm text-white/70">She came back with a new name — and a dangerous plan.</div>
+                  <div className="mini-meta">Romance • Revenge • 24 Episodes</div>
+                  <div className="hero-title">Her Hidden Return</div>
+                  <div className="hero-text">She came back with a new name — and a dangerous plan.</div>
                 </div>
-                <div className="space-y-4">
-                  <Poster title="The Duke’s Last Promise" meta="Historical • Drama" className="from-amber-700/20 to-neutral-900/10" compact />
-                  <Poster title="Beneath the Crimson Veil" meta="Fantasy • Mystery" className="from-red-700/20 to-neutral-900/10" compact />
+
+                <div className="hero-side">
+                  <Poster title="The Duke’s Last Promise" meta="Historical • Drama" compact />
+                  <Poster title="Beneath the Crimson Veil" meta="Fantasy • Mystery" compact />
                 </div>
               </div>
             </section>
 
-            <section className="mt-12">
+            <section className="section-block">
               <SectionTitle title="Trending Now" desc="Curated AI short dramas gaining attention this week." />
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+              <div className="card-grid four">
                 {seriesData.map((item) => (
-                  <div key={item.id} className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-lg transition hover:-translate-y-1 hover:bg-white/10">
-                    <div className={`mb-4 h-72 rounded-2xl border border-white/10 bg-gradient-to-b ${item.color}`} />
-                    <div className="text-lg font-semibold">{item.title}</div>
-                    <div className="mt-1 text-xs text-white/50">
+                  <div key={item.id} className="content-card">
+                    <div className="content-cover" />
+                    <div className="card-title">{item.title}</div>
+                    <div className="card-meta">
                       {item.genres.join(" • ")} • {item.episodes} Episodes
                     </div>
-                    <div className="mt-3 text-sm text-white/70">{item.hook}</div>
-                    <div className="mt-4 flex gap-2">
-                      <button onClick={() => goWatch(item.id, 1)} className="rounded-2xl border border-white/15 px-4 py-2 text-sm">Watch Now</button>
-                      <button onClick={() => openSeries(item.id)} className="rounded-2xl border border-white/15 px-4 py-2 text-sm">View Details</button>
+                    <div className="card-text">{item.hook}</div>
+                    <div className="button-row">
+                      <button onClick={() => goWatch(item.id, 1)} className="btn btn-outline small">
+                        Watch Now
+                      </button>
+                      <button onClick={() => openSeries(item.id)} className="btn btn-outline small">
+                        View Details
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="mt-16 grid gap-6 rounded-3xl border border-white/10 bg-white/5 p-8 md:grid-cols-3">
-              <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                <Upload className="h-6 w-6 text-white/80" />
-                <div className="mt-4 text-lg font-semibold">Curated Publishing</div>
-                <p className="mt-2 text-sm text-white/65">
-                  We review and present selected AI short dramas in a clean, premium short-drama format.
-                </p>
+            <section className="feature-strip">
+              <div className="info-card">
+                <Upload size={22} />
+                <h3>Curated Publishing</h3>
+                <p>We review and present selected AI short dramas in a clean, premium short-drama format.</p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                <Star className="h-6 w-6 text-white/80" />
-                <div className="mt-4 text-lg font-semibold">Better Positioning</div>
-                <p className="mt-2 text-sm text-white/65">
-                  We help improve titles, summaries, covers, and detail pages to make your series more clickable and platform-ready.
-                </p>
+              <div className="info-card">
+                <Star size={22} />
+                <h3>Better Positioning</h3>
+                <p>We help improve titles, summaries, covers, and detail pages to make your series more clickable and platform-ready.</p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                <LayoutDashboard className="h-6 w-6 text-white/80" />
-                <div className="mt-4 text-lg font-semibold">Promotion Support</div>
-                <p className="mt-2 text-sm text-white/65">
-                  Selected creators can access optional support for promo packaging, traffic testing, and growth-focused distribution.
-                </p>
+              <div className="info-card">
+                <LayoutDashboard size={22} />
+                <h3>Promotion Support</h3>
+                <p>Selected creators can access optional support for promo packaging, traffic testing, and growth-focused distribution.</p>
               </div>
             </section>
-          </div>
+          </>
         )}
 
         {page === "browse" && (
-          <section>
+          <section className="section-block">
             <SectionTitle title="Browse Series" desc="Discover curated AI short dramas by genre, mood, and popularity." />
-            <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 md:flex-row md:items-center md:justify-between">
-              <div className="flex flex-wrap gap-2 text-sm">
+
+            <div className="toolbar">
+              <div className="genre-tags">
                 {["All", "Romance", "Revenge", "Fantasy", "Thriller", "Historical", "Urban Drama", "Mystery"].map((g) => (
-                  <span key={g} className="rounded-full border border-white/10 px-3 py-1 text-white/75">{g}</span>
+                  <span key={g}>{g}</span>
                 ))}
               </div>
-              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 md:w-80">
-                <Search className="h-4 w-4 text-white/45" />
+
+              <div className="search-box">
+                <Search size={16} />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search series, genre, or hook"
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-white/35"
                 />
               </div>
             </div>
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+            <div className="card-grid four">
               {filteredSeries.map((item) => (
-                <div key={item.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <div className={`mb-4 h-72 rounded-2xl border border-white/10 bg-gradient-to-b ${item.color}`} />
-                  <div className="text-lg font-semibold">{item.title}</div>
-                  <div className="mt-1 text-xs text-white/50">{item.genres.join(" • ")} • {item.episodes} Episodes</div>
-                  <div className="mt-3 text-sm text-white/70">{item.hook}</div>
-                  <button onClick={() => openSeries(item.id)} className="mt-4 rounded-2xl bg-white px-4 py-2 text-sm font-medium text-black">
+                <div key={item.id} className="content-card">
+                  <div className="content-cover" />
+                  <div className="card-title">{item.title}</div>
+                  <div className="card-meta">{item.genres.join(" • ")} • {item.episodes} Episodes</div>
+                  <div className="card-text">{item.hook}</div>
+                  <button onClick={() => openSeries(item.id)} className="btn btn-light small">
                     View Details
                   </button>
                 </div>
@@ -382,70 +391,70 @@ export default function AIShortHubPrototype() {
         )}
 
         {page === "detail" && (
-          <section className="grid gap-8 rounded-3xl border border-white/10 bg-white/5 p-8 md:grid-cols-[320px,1fr]">
-            <div>
-              <div className={`h-[460px] rounded-3xl border border-white/10 bg-gradient-to-b ${selectedSeries.color}`} />
-            </div>
-            <div>
-              <div className="text-sm text-white/50">
+          <section className="detail-layout">
+            <div className="detail-poster" />
+            <div className="detail-main">
+              <div className="detail-meta">
                 {selectedSeries.genres.join(" • ")} • {selectedSeries.episodes} Episodes • {selectedSeries.subtitle}
               </div>
-              <h2 className="mt-3 text-4xl font-semibold">{selectedSeries.title}</h2>
-              <p className="mt-4 max-w-3xl text-base text-white/75">{selectedSeries.hook}</p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button onClick={() => goWatch(selectedSeries.id, 1)} className="rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black">
+              <h2>{selectedSeries.title}</h2>
+              <p className="lead-text">{selectedSeries.hook}</p>
+
+              <div className="button-row">
+                <button onClick={() => goWatch(selectedSeries.id, 1)} className="btn btn-light">
                   Watch Episode 1
                 </button>
-                <button className="rounded-2xl border border-white/20 px-5 py-3 text-sm font-medium">Add to Watchlist</button>
-              </div>
-              <div className="mt-3 text-sm text-white/45">First {selectedSeries.freeEpisodes} episodes free</div>
-
-              <div className="mt-8 rounded-3xl border border-white/10 bg-black/20 p-5">
-                <div className="text-sm font-medium text-white/90">Synopsis</div>
-                <p className="mt-3 text-sm leading-7 text-white/70">{selectedSeries.synopsis}</p>
+                <button className="btn btn-outline">Add to Watchlist</button>
               </div>
 
-              <div className="mt-8 grid gap-5 lg:grid-cols-2">
-                <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                  <div className="text-sm font-medium text-white/90">Why Watch</div>
-                  <ul className="mt-3 space-y-3 text-sm text-white/70">
+              <div className="subtle-text">First {selectedSeries.freeEpisodes} episodes free</div>
+
+              <div className="panel">
+                <h3>Synopsis</h3>
+                <p>{selectedSeries.synopsis}</p>
+              </div>
+
+              <div className="two-col">
+                <div className="panel">
+                  <h3>Why Watch</h3>
+                  <ul className="icon-list">
                     {selectedSeries.whyWatch.map((item) => (
-                      <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-white/60" />{item}</li>
+                      <li key={item}>
+                        <CheckCircle2 size={16} />
+                        <span>{item}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
-                <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                  <div className="text-sm font-medium text-white/90">Creator / Studio</div>
-                  <p className="mt-3 text-sm text-white/70">Submitted by {selectedSeries.creator}</p>
-                  <button onClick={() => setPage("submit")} className="mt-4 rounded-2xl border border-white/15 px-4 py-2 text-sm">
+
+                <div className="panel">
+                  <h3>Creator / Studio</h3>
+                  <p>Submitted by {selectedSeries.creator}</p>
+                  <button onClick={() => setPage("submit")} className="btn btn-outline small top-gap">
                     Submit Your Series
                   </button>
                 </div>
               </div>
 
-              <div className="mt-8">
-                <div className="text-sm font-medium text-white/90">Episodes</div>
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <div className="panel">
+                <h3>Episodes</h3>
+                <div className="episode-grid">
                   {selectedSeries.episodeNames.map((ep, i) => (
-                    <button
-                      key={ep}
-                      onClick={() => goWatch(selectedSeries.id, i + 1)}
-                      className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm"
-                    >
+                    <button key={ep} onClick={() => goWatch(selectedSeries.id, i + 1)} className="episode-btn">
                       <span>Episode {i + 1} — {ep}</span>
-                      <span className="text-white/50">Watch</span>
+                      <span>Watch</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-8 rounded-3xl border border-white/10 bg-black/20 p-5">
-                <div className="text-sm font-medium text-white/90">Main Characters</div>
-                <div className="mt-3 grid gap-4 md:grid-cols-3">
+              <div className="panel">
+                <h3>Main Characters</h3>
+                <div className="card-grid three">
                   {selectedSeries.characters.map(([name, desc]) => (
-                    <div key={name} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                      <div className="font-medium">{name}</div>
-                      <div className="mt-2 text-sm text-white/65">{desc}</div>
+                    <div key={name} className="mini-card">
+                      <div className="mini-card-title">{name}</div>
+                      <div className="mini-card-text">{desc}</div>
                     </div>
                   ))}
                 </div>
@@ -455,116 +464,107 @@ export default function AIShortHubPrototype() {
         )}
 
         {page === "watch" && (
-          <section>
-            <button onClick={() => setPage("detail")} className="mb-5 inline-flex items-center gap-2 text-sm text-white/70 hover:text-white">
-              <ArrowLeft className="h-4 w-4" /> Back to Series
-            </button>
-            <div className="grid gap-8 lg:grid-cols-[1fr,360px]">
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                <div className="aspect-[9/16] max-h-[760px] w-full rounded-3xl border border-white/10 bg-gradient-to-b from-black to-neutral-900 flex items-center justify-center">
-                  <div className="text-center">
-                    <Play className="mx-auto h-16 w-16 text-white/80" />
-                    <div className="mt-4 text-lg font-medium">Episode {selectedEpisode}</div>
-                    <div className="mt-1 text-sm text-white/55">{selectedSeries.title}</div>
-                  </div>
+          <section className="watch-layout">
+            <div className="watch-main">
+              <button onClick={() => setPage("detail")} className="back-link">
+                <ArrowLeft size={16} /> Back to Series
+              </button>
+
+              <div className="player-shell">
+                <div className="fake-player">
+                  <Play size={54} />
+                  <div className="player-title">Episode {selectedEpisode}</div>
+                  <div className="player-subtitle">{selectedSeries.title}</div>
                 </div>
-                <div className="mt-5 flex items-center justify-between">
+
+                <div className="watch-head">
                   <div>
-                    <div className="text-xl font-semibold">Episode {selectedEpisode} — {selectedSeries.episodeNames[(selectedEpisode - 1) % selectedSeries.episodeNames.length]}</div>
-                    <div className="mt-1 text-sm text-white/55">Series: {selectedSeries.title}</div>
+                    <h3>Episode {selectedEpisode} — {selectedSeries.episodeNames[(selectedEpisode - 1) % selectedSeries.episodeNames.length]}</h3>
+                    <div className="subtle-text">Series: {selectedSeries.title}</div>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedEpisode(Math.max(1, selectedEpisode - 1))}
-                      className="rounded-2xl border border-white/15 px-4 py-2 text-sm"
-                    >
-                      <ArrowLeft className="h-4 w-4" />
+
+                  <div className="button-row">
+                    <button onClick={() => setSelectedEpisode(Math.max(1, selectedEpisode - 1))} className="btn btn-outline icon-btn">
+                      <ArrowLeft size={16} />
                     </button>
-                    <button
-                      onClick={() => setSelectedEpisode(Math.min(selectedSeries.episodes, selectedEpisode + 1))}
-                      className="rounded-2xl border border-white/15 px-4 py-2 text-sm"
-                    >
-                      <ArrowRight className="h-4 w-4" />
+                    <button onClick={() => setSelectedEpisode(Math.min(selectedSeries.episodes, selectedEpisode + 1))} className="btn btn-outline icon-btn">
+                      <ArrowRight size={16} />
                     </button>
                   </div>
                 </div>
 
                 {selectedEpisode > selectedSeries.freeEpisodes && (
-                  <div className="mt-6 rounded-3xl border border-amber-400/20 bg-amber-500/10 p-5">
-                    <div className="text-lg font-semibold">Continue Watching</div>
-                    <p className="mt-2 text-sm text-white/70">
-                      Create an account to continue this series and unlock more curated AI dramas.
-                    </p>
-                    <div className="mt-4 flex gap-3">
-                      <button className="rounded-2xl bg-white px-4 py-2 text-sm font-medium text-black">Sign Up</button>
-                      <button className="rounded-2xl border border-white/15 px-4 py-2 text-sm">Log In</button>
+                  <div className="gate-box">
+                    <h3>Continue Watching</h3>
+                    <p>Create an account to continue this series and unlock more curated AI dramas.</p>
+                    <div className="button-row">
+                      <button className="btn btn-light">Sign Up</button>
+                      <button className="btn btn-outline">Log In</button>
                     </div>
                   </div>
                 )}
               </div>
+            </div>
 
-              <div className="space-y-5">
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <div className="text-sm font-medium text-white/90">Episode List</div>
-                  <div className="mt-4 space-y-2">
-                    {Array.from({ length: Math.min(selectedSeries.episodes, 10) }).map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setSelectedEpisode(i + 1)}
-                        className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm ${selectedEpisode === i + 1 ? "border-white/30 bg-white/10" : "border-white/10 bg-black/20"}`}
-                      >
-                        <span>Episode {i + 1}</span>
-                        {i + 1 <= selectedSeries.freeEpisodes ? <span className="text-emerald-300">Free</span> : <span className="text-white/45">Locked</span>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <div className="text-sm font-medium text-white/90">More Like This</div>
-                  <div className="mt-4 space-y-3">
-                    {seriesData.filter((s) => s.id !== selectedSeries.id).slice(0, 3).map((item) => (
-                      <button key={item.id} onClick={() => openSeries(item.id)} className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-3 text-left">
-                        <div className={`h-20 w-14 rounded-xl bg-gradient-to-b ${item.color}`} />
-                        <div>
-                          <div className="font-medium">{item.title}</div>
-                          <div className="mt-1 text-xs text-white/50">{item.genres.join(" • ")}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+            <aside className="watch-side">
+              <div className="panel">
+                <h3>Episode List</h3>
+                <div className="episode-list">
+                  {Array.from({ length: Math.min(selectedSeries.episodes, 10) }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedEpisode(i + 1)}
+                      className={selectedEpisode === i + 1 ? "episode-list-btn active" : "episode-list-btn"}
+                    >
+                      <span>Episode {i + 1}</span>
+                      <span>{i + 1 <= selectedSeries.freeEpisodes ? "Free" : "Locked"}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
+
+              <div className="panel">
+                <h3>More Like This</h3>
+                <div className="side-list">
+                  {seriesData.filter((s) => s.id !== selectedSeries.id).slice(0, 3).map((item) => (
+                    <button key={item.id} onClick={() => openSeries(item.id)} className="side-item">
+                      <div className="side-thumb" />
+                      <div>
+                        <div className="side-title">{item.title}</div>
+                        <div className="side-meta">{item.genres.join(" • ")}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </aside>
           </section>
         )}
 
         {page === "submit" && (
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-8">
-            <div className="max-w-3xl">
-              <div className="inline-block rounded-full border border-white/15 px-3 py-1 text-xs text-white/70">Creator Submission</div>
-              <h2 className="mt-4 text-3xl font-semibold">Submit Your AI Short Drama</h2>
-              <p className="mt-3 text-white/70">
-                Send us your finished series for review, publishing, and optional promotion support on AIShortHub.
-              </p>
+          <section className="submit-layout">
+            <div className="submit-head">
+              <div className="pill">Creator Submission</div>
+              <h2>Submit Your AI Short Drama</h2>
+              <p>Send us your finished series for review, publishing, and optional promotion support on AIShortHub.</p>
             </div>
 
-            <div className="mt-8 grid gap-8 md:grid-cols-2">
-              <div className="space-y-4">
+            <div className="two-col submit-grid">
+              <div className="stack-col">
                 {[
                   ["What you can submit", "We accept completed AI short dramas, serialized story content, trailers, and teaser materials intended for short-form video audiences."],
                   ["What we review", "Our team reviews each submission for story clarity, visual consistency, technical format, and overall fit for the AIShortHub platform."],
                   ["Optional support", "Selected creators may request help with listing setup, title refinement, cover positioning, and promotional distribution support."],
                 ].map(([title, desc]) => (
-                  <div key={title} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <div className="font-medium">{title}</div>
-                    <div className="mt-2 text-sm text-white/65">{desc}</div>
+                  <div key={title} className="panel">
+                    <h3>{title}</h3>
+                    <p>{desc}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                <div className="grid gap-3">
+              <div className="panel form-panel">
+                <div className="form-grid">
                   {[
                     "Series Title",
                     "Genre",
@@ -580,76 +580,73 @@ export default function AIShortHubPrototype() {
                     "Video Upload or Drive Link",
                     "Cover Upload",
                   ].map((field) => (
-                    <div key={field}>
-                      <label className="mb-2 block text-sm text-white/80">{field}</label>
-                      <div className="h-11 rounded-2xl border border-white/10 bg-white/5" />
+                    <div key={field} className="form-field">
+                      <label>{field}</label>
+                      <div className="fake-input" />
                     </div>
                   ))}
                 </div>
-                <div className="mt-5 space-y-3 text-sm text-white/70">
-                  <label className="flex items-start gap-2">
-                    <input type="checkbox" className="mt-1" />
-                    <span>I confirm that I own or control the rights necessary to submit this content.</span>
-                  </label>
-                  <label className="flex items-start gap-2">
-                    <input type="checkbox" className="mt-1" />
-                    <span>I confirm that the submitted materials do not knowingly infringe third-party rights.</span>
-                  </label>
-                  <label className="flex items-start gap-2">
-                    <input type="checkbox" className="mt-1" />
-                    <span>I agree to the AIShortHub review and publishing policy.</span>
-                  </label>
+
+                <div className="check-group">
+                  <label><input type="checkbox" /> I confirm that I own or control the rights necessary to submit this content.</label>
+                  <label><input type="checkbox" /> I confirm that the submitted materials do not knowingly infringe third-party rights.</label>
+                  <label><input type="checkbox" /> I agree to the AIShortHub review and publishing policy.</label>
                 </div>
-                <button className="mt-6 rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black">Submit for Review</button>
+
+                <button className="btn btn-light">Submit for Review</button>
               </div>
             </div>
           </section>
         )}
 
         {page === "creator" && (
-          <section>
+          <section className="section-block">
             <SectionTitle title="Creator Dashboard" desc="Manage your submitted series and track review and publishing progress." />
-            <div className="grid gap-4 md:grid-cols-4">
+
+            <div className="card-grid four stats-grid">
               {[
                 ["Total Views", "18.4K", Film],
                 ["Series Published", "1", CheckCircle2],
                 ["Review Pending", "1", Clock3],
                 ["Promotion Active", "1", Star],
               ].map(([label, value, Icon]) => (
-                <div key={label} className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <Icon className="h-5 w-5 text-white/70" />
-                  <div className="mt-4 text-2xl font-semibold">{value}</div>
-                  <div className="mt-1 text-sm text-white/55">{label}</div>
+                <div key={label} className="stat-card">
+                  <Icon size={20} />
+                  <div className="stat-value">{value}</div>
+                  <div className="stat-label">{label}</div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="text-lg font-semibold">Your Series</div>
-                <button onClick={() => setPage("submit")} className="rounded-2xl bg-white px-4 py-2 text-sm font-medium text-black">Submit New Series</button>
+            <div className="panel top-gap">
+              <div className="panel-head">
+                <h3>Your Series</h3>
+                <button onClick={() => setPage("submit")} className="btn btn-light small">
+                  Submit New Series
+                </button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] text-left text-sm">
-                  <thead className="text-white/45">
-                    <tr className="border-b border-white/10">
-                      <th className="pb-3 font-medium">Series Title</th>
-                      <th className="pb-3 font-medium">Status</th>
-                      <th className="pb-3 font-medium">Episodes</th>
-                      <th className="pb-3 font-medium">Submitted Date</th>
-                      <th className="pb-3 font-medium">Promotion Status</th>
-                      <th className="pb-3 font-medium">Action</th>
+
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Series Title</th>
+                      <th>Status</th>
+                      <th>Episodes</th>
+                      <th>Submitted Date</th>
+                      <th>Promotion Status</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {creatorRows.map((row) => (
-                      <tr key={row.title} className="border-b border-white/5">
-                        <td className="py-4 font-medium">{row.title}</td>
-                        <td className="py-4"><span className={`rounded-full px-3 py-1 text-xs ${statusBadge(row.status)}`}>{row.status}</span></td>
-                        <td className="py-4 text-white/70">{row.episodes}</td>
-                        <td className="py-4 text-white/70">{row.date}</td>
-                        <td className="py-4 text-white/70">{row.promo}</td>
-                        <td className="py-4"><button className="rounded-2xl border border-white/15 px-3 py-2 text-xs">View</button></td>
+                      <tr key={row.title}>
+                        <td>{row.title}</td>
+                        <td><span className={statusClass(row.status)}>{row.status}</span></td>
+                        <td>{row.episodes}</td>
+                        <td>{row.date}</td>
+                        <td>{row.promo}</td>
+                        <td><button className="btn btn-outline small">View</button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -657,26 +654,27 @@ export default function AIShortHubPrototype() {
               </div>
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2">
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                <div className="text-lg font-semibold">Service History</div>
-                <div className="mt-4 space-y-3 text-sm text-white/70">
-                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Listing Setup — Completed</div>
-                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Cover Optimization — In Progress</div>
-                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Promotion Support — Active</div>
+            <div className="two-col top-gap">
+              <div className="panel">
+                <h3>Service History</h3>
+                <div className="stack-col">
+                  <div className="soft-box">Listing Setup — Completed</div>
+                  <div className="soft-box">Cover Optimization — In Progress</div>
+                  <div className="soft-box">Promotion Support — Active</div>
                 </div>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                <div className="text-lg font-semibold">Quick Actions</div>
-                <div className="mt-4 space-y-3">
+
+              <div className="panel">
+                <h3>Quick Actions</h3>
+                <div className="stack-col">
                   {[
                     ["Submit New Series", Upload],
                     ["Request Promotion", Star],
                     ["Contact Support", User],
                   ].map(([label, Icon]) => (
-                    <button key={label} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-left text-sm">
-                      <span className="flex items-center gap-3"><Icon className="h-4 w-4" />{label}</span>
-                      <ChevronRight className="h-4 w-4 text-white/45" />
+                    <button key={label} className="quick-action">
+                      <span><Icon size={16} /> {label}</span>
+                      <ChevronRight size={16} />
                     </button>
                   ))}
                 </div>
@@ -686,19 +684,22 @@ export default function AIShortHubPrototype() {
         )}
 
         {page === "pricing" && (
-          <section>
+          <section className="section-block">
             <SectionTitle title="Creator Services" desc="Choose the level of publishing and promotion support that fits your series." />
-            <div className="grid gap-5 md:grid-cols-3">
+            <div className="card-grid three">
               {pricing.map((plan, idx) => (
-                <div key={plan.name} className={`rounded-3xl border p-6 ${idx === 1 ? "border-white/25 bg-white/10" : "border-white/10 bg-white/5"}`}>
-                  <div className="text-lg font-semibold">{plan.name}</div>
-                  <div className="mt-3 text-3xl font-semibold">{plan.price}</div>
-                  <div className="mt-5 space-y-3 text-sm text-white/70">
+                <div key={plan.name} className={idx === 1 ? "price-card featured" : "price-card"}>
+                  <h3>{plan.name}</h3>
+                  <div className="price-value">{plan.price}</div>
+                  <div className="stack-col">
                     {plan.items.map((item) => (
-                      <div key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-white/60" />{item}</div>
+                      <div key={item} className="price-item">
+                        <CheckCircle2 size={16} />
+                        <span>{item}</span>
+                      </div>
                     ))}
                   </div>
-                  <button className={`mt-6 rounded-2xl px-4 py-3 text-sm font-medium ${idx === 1 ? "bg-white text-black" : "border border-white/15"}`}>
+                  <button className={idx === 1 ? "btn btn-light top-gap" : "btn btn-outline top-gap"}>
                     Get Started
                   </button>
                 </div>
@@ -708,46 +709,49 @@ export default function AIShortHubPrototype() {
         )}
 
         {page === "admin" && (
-          <section>
+          <section className="section-block">
             <SectionTitle title="Admin" desc="Internal moderation and content operations panel." />
-            <div className="grid gap-4 md:grid-cols-4">
+
+            <div className="card-grid four stats-grid">
               {[
                 ["Total Series", "12", Film],
                 ["Pending Review", "3", Clock3],
                 ["Published", "7", CheckCircle2],
                 ["Needs Attention", "2", AlertCircle],
               ].map(([label, value, Icon]) => (
-                <div key={label} className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <Icon className="h-5 w-5 text-white/70" />
-                  <div className="mt-4 text-2xl font-semibold">{value}</div>
-                  <div className="mt-1 text-sm text-white/55">{label}</div>
+                <div key={label} className="stat-card">
+                  <Icon size={20} />
+                  <div className="stat-value">{value}</div>
+                  <div className="stat-label">{label}</div>
                 </div>
               ))}
             </div>
-            <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="text-lg font-semibold">Review Queue</div>
-                <button className="rounded-2xl border border-white/15 px-4 py-2 text-sm">Homepage Picks</button>
+
+            <div className="panel top-gap">
+              <div className="panel-head">
+                <h3>Review Queue</h3>
+                <button className="btn btn-outline small">Homepage Picks</button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px] text-left text-sm">
-                  <thead className="text-white/45">
-                    <tr className="border-b border-white/10">
-                      <th className="pb-3 font-medium">Title</th>
-                      <th className="pb-3 font-medium">Creator</th>
-                      <th className="pb-3 font-medium">Episodes</th>
-                      <th className="pb-3 font-medium">Suggested Action</th>
-                      <th className="pb-3 font-medium">Action</th>
+
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Creator</th>
+                      <th>Episodes</th>
+                      <th>Suggested Action</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {adminRows.map((row) => (
-                      <tr key={row.title} className="border-b border-white/5">
-                        <td className="py-4 font-medium">{row.title}</td>
-                        <td className="py-4 text-white/70">{row.creator}</td>
-                        <td className="py-4 text-white/70">{row.episodes}</td>
-                        <td className="py-4 text-white/70">{row.action}</td>
-                        <td className="py-4"><button className="rounded-2xl bg-white px-3 py-2 text-xs font-medium text-black">Open</button></td>
+                      <tr key={row.title}>
+                        <td>{row.title}</td>
+                        <td>{row.creator}</td>
+                        <td>{row.episodes}</td>
+                        <td>{row.action}</td>
+                        <td><button className="btn btn-light small">Open</button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -758,34 +762,34 @@ export default function AIShortHubPrototype() {
         )}
       </main>
 
-      <footer className="border-t border-white/10 bg-neutral-950">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 md:grid-cols-4">
+      <footer className="site-footer">
+        <div className="container footer-grid">
           <div>
-            <div className="text-lg font-semibold">AIShortHub</div>
-            <p className="mt-3 text-sm text-white/55">Curated AI short dramas for viewers and creators.</p>
+            <div className="footer-brand">AIShortHub</div>
+            <p>Curated AI short dramas for viewers and creators.</p>
           </div>
           <div>
-            <div className="text-sm font-medium text-white/90">Platform</div>
-            <div className="mt-3 space-y-2 text-sm text-white/55">
+            <h4>Platform</h4>
+            <div className="footer-list">
               <div>Browse</div>
               <div>Submit</div>
               <div>Creator Services</div>
             </div>
           </div>
           <div>
-            <div className="text-sm font-medium text-white/90">Legal</div>
-            <div className="mt-3 space-y-2 text-sm text-white/55">
+            <h4>Legal</h4>
+            <div className="footer-list">
               <div>Terms of Use</div>
               <div>Privacy Policy</div>
               <div>Copyright Policy</div>
             </div>
           </div>
           <div>
-            <div className="text-sm font-medium text-white/90">Internal Demo</div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => setPage("creator")} className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70">Creator</button>
-              <button onClick={() => setPage("admin")} className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70">Admin</button>
-              <button onClick={() => setPage("pricing")} className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70">Pricing</button>
+            <h4>Internal Demo</h4>
+            <div className="button-row wrap">
+              <button onClick={() => setPage("creator")} className="btn btn-outline small">Creator</button>
+              <button onClick={() => setPage("admin")} className="btn btn-outline small">Admin</button>
+              <button onClick={() => setPage("pricing")} className="btn btn-outline small">Pricing</button>
             </div>
           </div>
         </div>
