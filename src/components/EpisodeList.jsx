@@ -1,20 +1,25 @@
-export function EpisodeList({ series, currentEpisode, onSelect }) {
+export function EpisodeList({ episodes, currentEpisodeNumber, onSelect, membershipLocked = () => false }) {
+  if (!episodes.length) {
+    return <p className="small-text">No episodes yet. Upload the first episode to start distribution.</p>;
+  }
+
   return (
     <div className="episode-list">
-      {Array.from({ length: series.episodes })
-        .slice(0, 12)
-        .map((_, index) => {
-          const ep = index + 1;
-          const locked = ep > series.freeEpisodes;
-          const label = series.episodeNames[index] || `Episode ${ep}`;
-          return (
-            <button key={ep} className={ep === currentEpisode ? 'ep-btn active' : 'ep-btn'} onClick={() => onSelect(ep)}>
-              <span>E{ep}</span>
-              <small>{label}</small>
-              {locked ? <i>Premium lock</i> : <i>Free episode</i>}
-            </button>
-          );
-        })}
+      {episodes.map((episode) => {
+        const locked = membershipLocked(episode);
+        return (
+          <button
+            key={episode.id}
+            type="button"
+            className={episode.number === currentEpisodeNumber ? 'ep-btn active' : 'ep-btn'}
+            onClick={() => onSelect(episode.number)}
+          >
+            <span>E{episode.number}</span>
+            <small>{episode.title}</small>
+            {episode.isPreview ? <i>Preview</i> : <i>{locked ? 'Member only' : 'Unlocked'}</i>}
+          </button>
+        );
+      })}
     </div>
   );
 }

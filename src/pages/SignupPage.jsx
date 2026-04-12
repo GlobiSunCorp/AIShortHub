@@ -4,23 +4,22 @@ import { Link, useRouter } from '../lib/router';
 export function SignupPage({ auth }) {
   const { navigate } = useRouter();
 
-  const submit = (event) => {
-    event.preventDefault();
-    auth.login('newviewer@aishorthub.com');
-    navigate('/browse');
+  const submit = (form) => {
+    auth.login(form.email || 'new@aishorthub.com', form.role || 'viewer');
+    navigate('/profile');
   };
 
   return (
     <div className="auth-page">
       <AuthFormCard
         mode="signup"
-        title="Create your account"
-        subtitle="Start free and unlock premium short-drama drops with one profile."
+        title="注册"
+        subtitle="创建账户后可体验试看、会员、创作者上传与服务订单。"
         cta="Create account"
         onSubmit={submit}
         footer={
           <>
-            <Link to="/login">Already have an account?</Link>
+            <Link to="/login">Already have account?</Link>
             <Link to="/pricing">Compare plans</Link>
           </>
         }

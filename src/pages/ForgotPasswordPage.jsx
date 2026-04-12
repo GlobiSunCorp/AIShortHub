@@ -4,23 +4,17 @@ import { Link, useRouter } from '../lib/router';
 export function ForgotPasswordPage() {
   const { navigate } = useRouter();
 
-  const submit = (event) => {
-    event.preventDefault();
-    navigate('/login');
-  };
-
   return (
     <div className="auth-page">
       <AuthFormCard
         mode="forgot"
-        title="Reset password"
-        subtitle="We'll send you a secure reset link so you can continue watching instantly."
+        title="忘记密码"
+        subtitle="Supabase Auth 可直接接入 reset email，这里保留流程占位。"
         cta="Send reset link"
-        onSubmit={submit}
+        onSubmit={() => navigate('/login')}
         footer={
           <>
             <Link to="/login">Back to login</Link>
-            <Link to="/signup">Create new account</Link>
           </>
         }
       />

@@ -4,9 +4,9 @@ import { Link, useRouter } from '../lib/router';
 export function LoginPage({ auth }) {
   const { navigate } = useRouter();
 
-  const submit = (event) => {
-    event.preventDefault();
-    auth.login();
+  const submit = (form) => {
+    const role = form.email.includes('admin') ? 'admin' : form.email.includes('creator') ? 'creator' : 'viewer';
+    auth.login(form.email || 'mia@example.com', role);
     navigate('/');
   };
 
@@ -14,14 +14,14 @@ export function LoginPage({ auth }) {
     <div className="auth-page">
       <AuthFormCard
         mode="login"
-        title="Welcome back"
-        subtitle="Log in to resume locked episodes and keep your watch history synced."
+        title="登录"
+        subtitle="登录后继续观看、提交作品或进入管理后台。"
         cta="Log in"
         onSubmit={submit}
         footer={
           <>
             <Link to="/forgot-password">Forgot password?</Link>
-            <Link to="/signup">Need an account?</Link>
+            <Link to="/signup">Create account</Link>
           </>
         }
       />

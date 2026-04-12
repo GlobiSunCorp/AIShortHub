@@ -1,14 +1,14 @@
-export function VideoPlayerPlaceholder({ seriesTitle, episode, canWatch }) {
+export function VideoPlayerPlaceholder({ title, subtitle, canWatch, helper }) {
   return (
     <div className="player-shell">
       <div className="player-screen">
-        <p>{seriesTitle}</p>
-        <h2>Episode {episode}</h2>
-        <small>{canWatch ? 'Playback source: pending API integration' : 'Premium lock active • Unlock to continue'}</small>
+        <p>{title}</p>
+        <h2>{subtitle}</h2>
+        <small>{canWatch ? 'Playable (MVP placeholder)' : 'Locked: upgrade to Pro to watch full episode'}</small>
       </div>
       <div className="player-meta row split small-text">
-        <span>Adaptive quality + playback analytics (planned)</span>
-        <span>CDN source provider (future)</span>
+        <span>{helper}</span>
+        <span>Supabase Storage / Mux ready</span>
       </div>
     </div>
   );

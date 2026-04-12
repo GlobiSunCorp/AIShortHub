@@ -1,65 +1,59 @@
 import { Link } from '../lib/router';
 import { EpisodeList } from '../components/EpisodeList';
-import { GenreTag } from '../components/GenreTag';
-import { seriesData } from '../data/series';
 
-export function SeriesDetailPage({ id }) {
-  const series = seriesData.find((item) => item.id === id) || seriesData[0];
+export function SeriesDetailPage({ id, platform, auth }) {
+  const series = platform.series.find((item) => item.id === id) || platform.series[0];
+  const creator = platform.creators.find((item) => item.id === series.creatorId);
+  const trailer = platform.trailers.find((item) => item.id === series.trailerId);
+  const episodes = platform.episodes.filter((item) => item.seriesId === series.id).sort((a, b) => a.number - b.number);
+  const membership = platform.memberships.find((item) => item.profileId === auth.user?.id);
+  const isPro = membership && membership.tier !== 'free';
 
   return (
     <div className="stack-lg">
       <section className="detail-hero panel">
-        <div className={`detail-cover ${series.posterTone}`}>
-          <span className="status">{series.trailerLabel}</span>
+        <div className="detail-cover from-blue">
+          <span className="status">{series.status}</span>
           <h2>{series.title}</h2>
-          <small>{series.subtitle}</small>
+          <small>{series.category}</small>
         </div>
 
         <div>
-          <span className="kicker">Series Detail</span>
           <h1>{series.title}</h1>
           <p>{series.synopsis}</p>
-
           <div className="meta-row">
-            <span className="meta-pill">{series.episodes} episodes</span>
-            <span className="meta-pill">Free {series.freeEpisodes}</span>
-            <span className="meta-pill">Creator: {series.creator}</span>
-            <span className="meta-pill">Campaign: {series.campaignStatus}</span>
-          </div>
-
-          <div className="row wrap">
-            {series.genres.map((genre) => (
-              <GenreTag key={genre} label={genre} />
+            {series.tags.map((tag) => (
+              <span className="meta-pill" key={tag}>
+                {tag}
+              </span>
             ))}
+            <span className="meta-pill">Creator: {creator?.studioName || 'Unknown'}</span>
           </div>
 
           <div className="row wrap detail-actions">
             <Link className="btn btn-primary" to={`/watch/${series.id}/1`}>
-              Start episode 1
+              开始观看
             </Link>
-            <button className="btn btn-ghost">Add to watchlist</button>
+            <button className="btn btn-ghost" type="button">
+              预告片：{trailer?.title || '未上传'}
+            </button>
           </div>
+
+          {!isPro ? (
+            <article className="watch-lock" style={{ marginTop: '1rem' }}>
+              <h3>会员解锁提示</h3>
+              <p className="small-text">非会员可看预告和首集试看。开通 Pro 后可观看全集并解锁更多剧集。</p>
+              <Link className="text-link" to="/pricing">
+                查看会员方案 →
+              </Link>
+            </article>
+          ) : null}
         </div>
       </section>
 
-      <section className="grid cards-2">
-        <article className="detail-callout">
-          <h3>Why watch</h3>
-          <p className="small-text">
-            Fast-paced cliffhangers, high replay hooks, and social-ready moments designed for short-form binge viewing.
-          </p>
-        </article>
-        <article className="detail-callout">
-          <h3>Creator spotlight</h3>
-          <p className="small-text">
-            {series.creator} specializes in emotionally intense vertical stories optimized for audience retention and campaign growth.
-          </p>
-        </article>
-      </section>
-
       <section className="panel">
-        <h2>Episode lineup</h2>
-        <EpisodeList series={series} currentEpisode={1} onSelect={() => {}} />
+        <h2>分集列表</h2>
+        <EpisodeList episodes={episodes} currentEpisodeNumber={1} onSelect={() => {}} membershipLocked={(episode) => !episode.isPreview && !isPro} />
       </section>
     </div>
   );
