@@ -1,27 +1,30 @@
-export function AuthFormCard({
-  title,
-  subtitle,
-  cta,
-  mode,
-  onSubmit,
-  footer,
-}) {
+export function AuthFormCard({ title, subtitle, cta, mode, onSubmit, footer }) {
   const isForgot = mode === 'forgot';
   const isSignup = mode === 'signup';
 
   return (
     <section className="auth-layout">
-      <aside className="auth-showcase panel">
+      <aside className="auth-showcase auth-surface">
         <span className="kicker">Premium Access</span>
         <h2>Unlock cinematic short dramas on every device.</h2>
         <p>
-          Keep your progress synced, unlock VIP episodes, and get personalized launch alerts for new short-drama releases.
+          Keep your progress synced, unlock VIP episodes, and receive personalized launch alerts for each new short-drama release.
         </p>
-        <ul className="stack-md small-text">
-          <li>• Early access to trailer drops and behind-the-scenes notes</li>
-          <li>• Personalized continue-watching timeline</li>
-          <li>• Campaign perks tied to creator promotions</li>
-        </ul>
+
+        <div className="auth-benefits">
+          <article className="auth-benefit">
+            <h4>Member timeline sync</h4>
+            <p className="small-text">Continue exactly where you left off on mobile and desktop.</p>
+          </article>
+          <article className="auth-benefit">
+            <h4>Premium unlock path</h4>
+            <p className="small-text">Open locked episodes and join creator-exclusive campaign events.</p>
+          </article>
+          <article className="auth-benefit">
+            <h4>Early drop alerts</h4>
+            <p className="small-text">Get first notice when high-retention series release new arcs.</p>
+          </article>
+        </div>
       </aside>
 
       <form className="panel auth-form" onSubmit={onSubmit}>

@@ -6,7 +6,10 @@ import { creatorPlatformModules, creatorRows, creatorStats } from '../data/creat
 export function CreatorDashboardPage() {
   return (
     <div className="stack-lg">
-      <SectionTitle title="Creator Dashboard" desc="Submission pipeline, distribution modules, and promotion health." />
+      <section className="panel">
+        <SectionTitle title="Creator Command Center" desc="Track submissions, release readiness, and monetization health in one premium workspace." />
+      </section>
+
       <div className="grid cards-4">
         {creatorStats.map((stat) => (
           <DashboardStatCard key={stat.label} label={stat.label} value={stat.value} />
@@ -20,12 +23,12 @@ export function CreatorDashboardPage() {
       </section>
 
       <section>
-        <SectionTitle title="Platform Modules" desc="Placeholder modules wired for future APIs and automation." />
+        <SectionTitle title="Platform Modules" desc="Roadmap modules wired for data integrations and campaign automation." />
         <div className="grid cards-3">
           {creatorPlatformModules.map((module) => (
-            <article key={module.name} className="mini-card">
+            <article key={module.name} className="dashboard-module">
               <h3>{module.name}</h3>
-              <p>{module.detail}</p>
+              <p className="small-text">{module.detail}</p>
             </article>
           ))}
         </div>

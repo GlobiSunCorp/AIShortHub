@@ -17,7 +17,7 @@ export function SeriesCard({ series }) {
             <GenreTag key={g} label={g} />
           ))}
         </div>
-        <div className="row split small-text">
+        <div className="row split small-text series-card-foot">
           <span>{series.episodes} Episodes</span>
           <span>Free {series.freeEpisodes}</span>
         </div>
