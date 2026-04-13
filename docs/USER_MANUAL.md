@@ -50,3 +50,8 @@
 - Creator Studio 顶部会显示 Quota Alert Bar，提示额度风险和下一步动作。
 - Profile 展示轻量提醒条与 Plan Health Card，可查看续费日与配额重置日。
 - 全站下拉已统一为深色主题组件，移动端点击、键盘操作更稳定。
+
+## Iteration 11: Viewer Membership Experience
+- Top-right plan badge now opens a detailed status card (plan identity + entitlement details + upgrade path).
+- Viewer accounts now only receive Viewer upgrade prompts (Pro Viewer / Premium Viewer).
+- New Sticky Upgrade Rail provides persistent upgrade context: current plan, quality, full access, early access, exclusive content.

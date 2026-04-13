@@ -4,7 +4,7 @@ import { isValidEmail, minLength } from '../lib/validation';
 import { ADD_ON_SERVICES, REFUND_POLICY_CONFIG, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
 import { resolveMembership } from '../hooks/usePlanAccess';
 import { startAddonCheckout } from '../lib/services/billingService';
-import { MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
+import { MembershipBadge, PlanIdentityBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 import { DarkSelect } from '../components/DarkSelect';
 
 export function ServiceOrdersPage({ auth, platform }) {
@@ -38,6 +38,7 @@ export function ServiceOrdersPage({ auth, platform }) {
         <div className="row wrap">
           <MembershipBadge auth={auth} membership={membership} />
           <UsageQuotaBadge label="Plan" value={getCreatorPlan(creatorPlanId).name} details={[["Current Creator Plan", getCreatorPlan(creatorPlanId).name], ["Service entitlement", 'Included / Discounted / Add-on is applied per card']]} />
+          <PlanIdentityBadge badgeKey={creatorPlanId} subtle />
         </div>
         <p className="small-text">选择 Add-on Services，查看当前 Creator Plan 的 Included / Discounted / Add-on 权益、可用次数和下周期重置信息，然后提交服务订单。</p>
         <p className="small-text">退款策略：{REFUND_POLICY_CONFIG.addon.short} <Link className="text-link" to="/refund">查看规则 →</Link></p>

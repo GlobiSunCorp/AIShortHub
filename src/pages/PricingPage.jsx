@@ -3,7 +3,7 @@ import { Link } from '../lib/router';
 import { startCreatorPlanCheckout, startViewerCheckout } from '../lib/services/billingService';
 import { ADD_ON_SERVICES, CREATOR_PLANS, REFUND_POLICY_CONFIG, VIEWER_SUBSCRIPTIONS, formatCommission, formatStorageGb, formatUsd, getCreatorPlan, getViewerPlan } from '../data/monetization';
 import { resolveMembership } from '../hooks/usePlanAccess';
-import { MembershipBadge } from '../components/EntitlementBadges';
+import { MembershipBadge, PlanIdentityBadge } from '../components/EntitlementBadges';
 
 function FeatureCell({ value }) {
   return <span>{value === true ? '✅' : value === false ? '—' : value}</span>;
@@ -13,6 +13,7 @@ export function PricingPage({ auth, platform }) {
   const [notice, setNotice] = useState({ type: '', text: '' });
   const [loadingKey, setLoadingKey] = useState('');
   const membership = auth.user ? resolveMembership(auth, platform) : { tier: 'free', creatorPlan: null };
+  const activeCreator = getCreatorPlan(membership.creatorPlan || 'creator_basic');
 
   const handleViewerCheckout = async (plan) => {
     if (!auth.isLoggedIn) return setNotice({ type: 'error', text: '请先登录后再升级 Viewer Subscription。' });
@@ -73,9 +74,10 @@ export function PricingPage({ auth, platform }) {
         <h2>For Viewers</h2>
         <div className="grid cards-3">
           {VIEWER_SUBSCRIPTIONS.map((plan) => (
-            <article className="pricing-card" key={plan.id}>
+            <article className={`pricing-card ${membership.tier === plan.id ? 'active-card' : ''}`} key={plan.id}>
               <p className="kicker">{plan.badge}</p>
-              <h3>{plan.name}</h3>
+              {membership.tier === plan.id ? <span className="status ok">Current Plan</span> : null}
+              <h3><PlanIdentityBadge badgeKey={plan.id === 'free' ? 'free_viewer' : plan.id} subtle /> </h3>
               <p className="price">{formatUsd(plan.monthlyPrice)}<small className="small-text"> /month</small></p>
               <p className="small-text">{formatUsd(plan.yearlyPrice)} /year</p>
               <ul>
@@ -85,8 +87,9 @@ export function PricingPage({ auth, platform }) {
                 <li>会员专属内容：<FeatureCell value={plan.exclusiveContent} /></li>
                 <li>继续观看/收藏/历史：<FeatureCell value={plan.watchTools} /></li>
               </ul>
+              {plan.id !== membership.tier ? <p className="small-text">Upgrade gains: better quality, exclusive drops, full access.</p> : null}
               <button type="button" className="btn btn-primary" disabled={loadingKey === `viewer-${plan.id}`} onClick={() => handleViewerCheckout(plan)}>
-                {loadingKey === `viewer-${plan.id}` ? '跳转支付中...' : `选择 ${plan.name}`}
+                {loadingKey === `viewer-${plan.id}` ? '跳转支付中...' : membership.tier === plan.id ? 'Current Plan' : `升级到 ${plan.name}`}
               </button>
             </article>
           ))}
@@ -97,8 +100,9 @@ export function PricingPage({ auth, platform }) {
         <h2>For Creators</h2>
         <div className="grid cards-3">
           {CREATOR_PLANS.map((plan) => (
-            <article className="pricing-card" key={plan.id}>
-              <h3>{plan.name}</h3>
+            <article className={`pricing-card ${membership.creatorPlan === plan.id ? 'active-card' : ''}`} key={plan.id}>
+              {membership.creatorPlan === plan.id ? <span className="status ok">Current Plan</span> : null}
+              <h3><PlanIdentityBadge badgeKey={plan.id} subtle /></h3>
               <p className="price">{formatUsd(plan.monthlyPrice)}<small className="small-text"> /month</small></p>
               <p className="small-text">Platform Commission: {formatCommission(plan.commissionRate)}</p>
               <ul>
@@ -110,12 +114,10 @@ export function PricingPage({ auth, platform }) {
                 <li>月上传次数：{plan.monthlyUploadLimit}</li>
                 <li>Motion Poster：<FeatureCell value={plan.motionPoster} /></li>
                 <li>推荐位资格：<FeatureCell value={plan.featuredPlacementEligibility} /></li>
-                <li>Included Motion Poster 次数：{plan.includedMotionPosterCount}</li>
-                <li>配额重置：每个 billing cycle 自动刷新</li>
               </ul>
-              <p className="small-text">Upgrade benefit: lower commission · more storage · priority review · more featured slots.</p>
+              {plan.id !== activeCreator.id ? <p className="small-text">增量收益：+{plan.maxActiveSeries - activeCreator.maxActiveSeries} active series · +{plan.monthlyAssetStorageLimitGb - activeCreator.monthlyAssetStorageLimitGb}GB storage · {Math.round((activeCreator.commissionRate - plan.commissionRate) * 100)}% commission change · Motion Poster {plan.includedMotionPosterCount ? 'included' : 'optional'}.</p> : null}
               <button type="button" className="btn btn-ghost" disabled={loadingKey === `creator-${plan.id}`} onClick={() => handleCreatorPlan(plan)}>
-                {loadingKey === `creator-${plan.id}` ? '跳转支付中...' : `选择 ${plan.name}`}
+                {loadingKey === `creator-${plan.id}` ? '跳转支付中...' : membership.creatorPlan === plan.id ? 'Current Plan' : `升级到 ${plan.name}`}
               </button>
             </article>
           ))}

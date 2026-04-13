@@ -1,6 +1,7 @@
 import { FloatingCreatorToolbox } from '../components/FloatingCreatorToolbox';
 import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
+import { StickyUpgradeRail } from '../components/StickyUpgradeRail';
 
 export function AppLayout({ auth, platform, children }) {
   return (
@@ -8,6 +9,7 @@ export function AppLayout({ auth, platform, children }) {
       <Header auth={auth} platform={platform} />
       <main className="container page-shell">{children}</main>
       <FloatingCreatorToolbox auth={auth} platform={platform} />
+      <StickyUpgradeRail auth={auth} platform={platform} />
       <Footer />
     </div>
   );

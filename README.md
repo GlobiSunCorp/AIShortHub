@@ -122,3 +122,10 @@ VITE_SUPPORT_FORM_URL=/support
 - 新增 Creator Action Center：按 urgent / recommended / informational 分类行动项。
 - 新增 Submission Readiness Checklist：提交前显式校验缺项与状态（ready to submit / needs revision / upgrade recommended）。
 - Pricing / Services / Profile 补充 Included / Discounted / Add-on / quota / renewal 说明文案。
+
+## Iteration 11 UI Upgrade (Membership Identity System)
+- Added a unified Plan Identity System with reusable badge icons for Free Viewer / Pro Viewer / Premium Viewer / Creator Basic / Creator Pro / Studio / Admin.
+- Upgraded header membership badge into a status entry popover with entitlement detail cards and audience-specific CTAs.
+- Introduced Sticky Upgrade Rail (desktop floating rail + mobile compact drawer style) with separate Viewer / Creator / Admin guidance.
+- Refined dark-mode contrast for badge, tooltip, popover, select, info cards, and quota surfaces.
+- Viewer and Creator upgrade messaging is now separated across profile/pricing/header/sticky rail to avoid cross-role confusion.
