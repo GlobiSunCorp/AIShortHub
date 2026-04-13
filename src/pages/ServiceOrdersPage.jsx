@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { useRouter } from '../lib/router';
+import { Link, useRouter } from '../lib/router';
 import { isValidEmail, minLength } from '../lib/validation';
-import { ADD_ON_SERVICES, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
+import { ADD_ON_SERVICES, REFUND_POLICY_CONFIG, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
 import { resolveMembership } from '../hooks/usePlanAccess';
 import { startAddonCheckout } from '../lib/services/billingService';
 
@@ -33,6 +33,7 @@ export function ServiceOrdersPage({ auth, platform }) {
       <section className="panel">
         <h1>Creator Services Center</h1>
         <p className="small-text">选择 Add-on Services，查看当前 Creator Plan 的 Included / Discounted 权益，然后提交服务订单。</p>
+        <p className="small-text">退款策略：{REFUND_POLICY_CONFIG.addon.short} <Link className="text-link" to="/refund">查看规则 →</Link></p>
       </section>
 
       <section className="grid cards-3">
@@ -76,23 +77,34 @@ export function ServiceOrdersPage({ auth, platform }) {
               return;
             }
             setIsSubmitting(true);
-            const created = await platform.actions.createServiceOrder({
-              requesterId: auth.user?.id || 'guest',
-              serviceType: selectedService.name,
-              projectTitle: form.projectTitle,
-              requestDetails: form.requestDetails,
-              budget: form.budget,
-              contact: form.contact,
-              entitlement,
-              addOnPrice: entitlement === 'Included' ? '$0' : selectedService.price,
-              nextStep: '服务团队将在 24h 内回传项目排期。',
-            });
-            if (entitlement !== 'Included' && auth.isLoggedIn) {
-              await startAddonCheckout({ service: selectedService, user: auth.user, orderId: created.id });
+            setFeedback({ type: '', message: '' });
+            try {
+              const created = await platform.actions.createServiceOrder({
+                requesterId: auth.user?.id || 'guest',
+                serviceType: selectedService.name,
+                projectTitle: form.projectTitle,
+                requestDetails: form.requestDetails,
+                budget: form.budget,
+                contact: form.contact,
+                entitlement,
+                addOnPrice: entitlement === 'Included' ? '$0' : selectedService.price,
+                nextStep: entitlement === 'Included' ? '服务团队将在 24h 内回传项目排期。' : '请完成支付后进入服务排期。',
+                status: entitlement === 'Included' ? 'pending' : 'pending_payment',
+              });
+              if (entitlement !== 'Included' && auth.isLoggedIn) {
+                const session = await startAddonCheckout({ service: selectedService, user: auth.user, orderId: created.id });
+                if (session.url) {
+                  window.location.href = session.url;
+                  return;
+                }
+              }
+              setFeedback({ type: 'success', message: `服务下单成功，订单号 ${created.id}` });
+              navigate(`/services/${created.id}`);
+            } catch (error) {
+              setFeedback({ type: 'error', message: `下单失败：${error.message}` });
+            } finally {
+              setIsSubmitting(false);
             }
-            setFeedback({ type: 'success', message: `服务下单成功，订单号 ${created.id}` });
-            setIsSubmitting(false);
-            navigate(`/services/${created.id}`);
           }}
         >
           {isSubmitting ? '提交中...' : '提交服务订单'}

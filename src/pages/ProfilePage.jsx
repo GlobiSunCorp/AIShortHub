@@ -1,8 +1,9 @@
 import { DemoRoleSwitcher } from '../components/DemoRoleSwitcher';
 import { Link } from '../lib/router';
-import { ADD_ON_SERVICES, formatCommission, getCreatorPlan, getServiceEntitlement, getViewerPlan } from '../data/monetization';
+import { ADD_ON_SERVICES, REFUND_POLICY_CONFIG, formatCommission, formatStorageGb, getCreatorPlan, getServiceEntitlement, getViewerPlan } from '../data/monetization';
 import { getCommissionForUser, resolveMembership } from '../hooks/usePlanAccess';
 import { getStatusLabel } from '../lib/roleDisplay';
+import { getCreatorQuotaSnapshot } from '../lib/services/quotaService';
 
 export function ProfilePage({ auth, platform }) {
   if (!auth.isLoggedIn) {
@@ -23,6 +24,7 @@ export function ProfilePage({ auth, platform }) {
   const orders = platform.serviceOrders.filter((item) => item.requesterId === auth.user.id).slice(0, 3);
   const creator = platform.creators.find((item) => item.profileId === auth.user.id);
   const uploads = creator ? platform.series.filter((item) => item.creatorId === creator.id).slice(0, 3) : [];
+  const quota = creatorPlan && creator ? getCreatorQuotaSnapshot({ creatorPlanId: creatorPlan.id, creatorId: creator.id, platform }) : null;
 
   return (
     <div className="stack-lg">
@@ -35,11 +37,22 @@ export function ProfilePage({ auth, platform }) {
           <article className="mini-card"><h3>Creator Plan</h3><p className="small-text">{creatorPlan?.name || 'None'}</p></article>
           <article className="mini-card"><h3>Platform Commission</h3><p className="small-text">{commission}</p></article>
           <article className="mini-card"><h3>Included Benefits</h3><p className="small-text">{creatorPlan ? creatorPlan.reviewPriority : 'Viewer-only account'}</p></article>
-          <article className="mini-card"><h3>审核速度</h3><p className="small-text">{creatorPlan?.reviewPriority || 'Standard member support'}</p></article>
+          <article className="mini-card"><h3>退款规则摘要</h3><p className="small-text">{creatorPlan ? REFUND_POLICY_CONFIG.creator.short : REFUND_POLICY_CONFIG.viewer.short}</p></article>
         </div>
         <p className="small-text">Auth mode: {auth.mode === 'real' ? 'Supabase Auth' : 'Mock fallback'} · Demo Role Switcher only affects demo mode.</p>
         <DemoRoleSwitcher auth={auth} />
       </section>
+
+      {quota ? (
+        <section className="panel stack-md">
+          <h3>Creator 上传配额</h3>
+          <div className="grid cards-3">
+            <article className="mini-card"><h4>Active Series</h4><p className="small-text">{quota.usage.activeSeries} / {quota.limits.maxActiveSeries}</p></article>
+            <article className="mini-card"><h4>Total Episodes</h4><p className="small-text">{quota.usage.totalEpisodes} / {quota.limits.maxTotalEpisodes}</p></article>
+            <article className="mini-card"><h4>Storage</h4><p className="small-text">{quota.usage.usedStorageGb.toFixed(2)}GB / {formatStorageGb(quota.limits.monthlyAssetStorageLimitGb)}</p></article>
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid cards-2">
         <article className="panel stack-md">
@@ -47,6 +60,7 @@ export function ProfilePage({ auth, platform }) {
           <p className="small-text">Viewer Subscription: {viewerPlan.name}</p>
           <p className="small-text">Creator Plan: {creatorPlan?.name || 'Not activated'}</p>
           <p className="small-text">推荐位申请：{creatorPlan?.featuredPlacementRequest ? 'Supported' : 'Not available'}</p>
+          <Link className="text-link" to="/refund">查看退款矩阵 →</Link>
         </article>
         <article className="panel stack-md">
           <h3>Add-on Services</h3>
@@ -65,7 +79,7 @@ export function ProfilePage({ auth, platform }) {
           <h3>最近上传内容</h3>
           {uploads.length ? uploads.map((item) => <p className="small-text" key={item.id}>{item.title} · {item.status}</p>) : <p className="small-text">暂无上传内容。</p>}
           <p className="small-text">服务订单摘要：{orders.length} 条 · 最近状态 {orders[0]?.status || 'N/A'}</p>
-          <p className="small-text">最近计划变更：2026-04-12（mock）</p>
+          <p className="small-text">最近计划变更：2026-04-13（mock）</p>
         </article>
       </section>
     </div>

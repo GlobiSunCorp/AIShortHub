@@ -1,3 +1,4 @@
+import { SUPPORT_CONTACT_CONFIG } from '../data/monetization';
 import { Link } from '../lib/router';
 
 export function Footer() {
@@ -5,6 +6,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="container stack-sm">
         <p>AIShortHub pilot · Real auth/data/storage/payment structure with mock fallback.</p>
+        <p>Support: {SUPPORT_CONTACT_CONFIG.supportEmail} · Creator Ops: {SUPPORT_CONTACT_CONFIG.creatorOpsEmail} · Policy: {SUPPORT_CONTACT_CONFIG.policyEmail}</p>
         <div className="row wrap small-text">
           <Link to="/faq">FAQ</Link>
           <Link to="/terms">Terms</Link>
