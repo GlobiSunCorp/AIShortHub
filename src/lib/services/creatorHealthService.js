@@ -58,9 +58,9 @@ export function buildQuotaAlerts({ snapshot, renewAt, unpaidOrders = [] }) {
     },
     {
       key: 'featured',
-      message: `Featured placement requests: ${snapshot.remaining.featuredRequestsLeft} left this cycle`,
+      message: `Featured placement requests: ${snapshot.remaining.featuredRequestsLeft} Remaining · Resets on ${renewAt || '2026-05-01'}`,
       state: snapshot.remaining.featuredRequestsLeft <= 0 ? 'exhausted' : snapshot.remaining.featuredRequestsLeft <= 1 ? 'near_limit' : 'normal',
-      cta: 'Contact support',
+      cta: snapshot.remaining.featuredRequestsLeft <= 0 ? 'Upgrade to Studio' : 'Request featured placement',
     },
     {
       key: 'renew',

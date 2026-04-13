@@ -48,3 +48,9 @@
 - 提交前检查清单会明确标红缺项，不再静默失败。
 - 若当前计划额度不足，会在检查清单中直接给出升级建议。
 - 配额提醒条可提示 Series/Storage/Motion Poster/Featured/Renewal 风险。
+
+## Iteration 11: Creator Plan Visibility and Upgrade Guidance
+- Creator Studio and Profile now show stronger plan identity badges (Creator Basic / Creator Pro / Studio).
+- Quota alert bar wording now follows Included / Optional / Add-on / Remaining / Resets-on style.
+- Sticky Upgrade Rail includes commission, active series remaining, storage remaining, motion poster status, featured request status.
+- Creator-only upgrade prompts are now isolated to Creator Pro / Studio / Add-on services.

@@ -16,3 +16,11 @@
 - 新增 `CreatorActionCenter`，按优先级输出运营动作与 CTA。
 - 新增 `SubmissionReadinessChecklist`，在提审前显示完成态/缺失态和计划兼容性。
 - 增强 Pricing/Services/Profile 的 Included / Discounted / Add-on / Quota / Renewal 文案和升级收益提示。
+
+## 2026-04-13 · Iteration 11
+- Added unified Plan Identity System component (`PlanIdentityBadge`) and centralized identity metadata in `src/lib/planIdentity.js`.
+- Upgraded membership badge popovers to status-entry cards with role-separated upgrade CTA logic.
+- Added `StickyUpgradeRail` with Viewer / Creator / Admin variants and responsive behavior.
+- Improved dark theme contrast for badges, popovers, selects, cards, and quota UI.
+- Enhanced quota alert wording for “Remaining / Resets on …” semantics.
+- Pricing and Profile now display clearer current-plan markers and role-specific upgrade messaging.

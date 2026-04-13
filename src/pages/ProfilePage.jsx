@@ -1,9 +1,10 @@
 import { DemoRoleSwitcher } from '../components/DemoRoleSwitcher';
-import { CreatorPlanCard, MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
+import { CreatorPlanCard, MembershipBadge, PlanIdentityBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 import { PlanHealthCard, QuotaAlertBar } from '../components/CreatorOpsPanels';
 import { Link } from '../lib/router';
-import { ADD_ON_SERVICES, REFUND_POLICY_CONFIG, formatCommission, getCreatorPlan, getServiceEntitlement, getViewerPlan } from '../data/monetization';
+import { REFUND_POLICY_CONFIG, formatCommission, getCreatorPlan, getViewerPlan } from '../data/monetization';
 import { getCommissionForUser, resolveMembership } from '../hooks/usePlanAccess';
+import { getAudienceGroup } from '../lib/planIdentity';
 import { getStatusLabel } from '../lib/roleDisplay';
 import { getCreatorQuotaSnapshot } from '../lib/services/quotaService';
 import { buildQuotaAlerts, getCycleDates, getHealthStatus } from '../lib/services/creatorHealthService';
@@ -29,6 +30,7 @@ export function ProfilePage({ auth, platform }) {
   const uploads = creator ? platform.series.filter((item) => item.creatorId === creator.id).slice(0, 3) : [];
   const quota = creatorPlan && creator ? getCreatorQuotaSnapshot({ creatorPlanId: creatorPlan.id, creatorId: creator.id, profileId: auth.user.id, platform }) : null;
   const cycle = getCycleDates(platform.memberships.find((m) => m.profileId === auth.user.id)?.renewAt);
+  const audienceGroup = getAudienceGroup({ auth, membership });
 
   return (
     <div className="stack-lg">
@@ -44,8 +46,8 @@ export function ProfilePage({ auth, platform }) {
         </div>
         <div className="grid cards-3">
           <article className="mini-card"><h3>Status</h3><p className="small-text">{statusLabel}</p></article>
-          <article className="mini-card"><h3>Viewer Subscription</h3><p className="small-text">{viewerPlan.name}</p></article>
-          <article className="mini-card"><h3>Creator Plan</h3><p className="small-text">{creatorPlan?.name || 'None'}</p></article>
+          <article className="mini-card"><h3>Viewer Subscription</h3><PlanIdentityBadge badgeKey={membership.tier === 'free' ? 'free_viewer' : membership.tier} subtle /></article>
+          <article className="mini-card"><h3>Creator Plan</h3>{creatorPlan ? <PlanIdentityBadge badgeKey={creatorPlan.id} subtle /> : <p className="small-text">Viewer-only account · Creator plan optional</p>}</article>
           <article className="mini-card"><h3>Platform Commission</h3><p className="small-text">{commission}</p></article>
           <article className="mini-card"><h3>Quota reset date</h3><p className="small-text">{cycle.quotaResetDate}</p></article>
           <article className="mini-card"><h3>Billing renewal date</h3><p className="small-text">{cycle.renewalDate}</p></article>
@@ -88,17 +90,28 @@ export function ProfilePage({ auth, platform }) {
 
       <section className="grid cards-2">
         <article className="panel stack-md">
-          <h3>订阅与方案概览</h3>
-          <p className="small-text">Viewer Subscription: {viewerPlan.name}</p>
-          <p className="small-text">Creator Plan: {creatorPlan?.name || 'Not activated'}</p>
-          <p className="small-text">推荐位申请：{creatorPlan?.featuredPlacementRequest ? 'Supported' : 'Not available'}</p>
-          <Link className="text-link" to="/refund">查看退款矩阵 →</Link>
+          <h3>Plan Upgrade Guide</h3>
+          {audienceGroup === 'viewer' ? (
+            <>
+              <p className="small-text">Current Viewer Plan: {viewerPlan.name}</p>
+              <p className="small-text">Upgrade options: Pro Viewer / Premium Viewer</p>
+              <p className="small-text">Benefits: full access · better quality · continue watching history.</p>
+            </>
+          ) : (
+            <>
+              <p className="small-text">Current Creator Plan: {creatorPlan?.name || 'Creator Basic'}</p>
+              <p className="small-text">Upgrade options: Creator Pro / Studio</p>
+              <p className="small-text">Benefits: lower commission · more slots · included motion poster.</p>
+            </>
+          )}
+          <Link className="text-link" to="/pricing">查看升级方案 →</Link>
         </article>
         <article className="panel stack-md">
-          <h3>Add-on Services</h3>
-          {ADD_ON_SERVICES.slice(0, 4).map((item) => (
-            <p key={item.id} className="small-text">{item.name}: {getServiceEntitlement(item, membership.creatorPlan || 'creator_basic')}</p>
-          ))}
+          <h3>Refund Rules by Category</h3>
+          <p className="small-text">Viewer: {REFUND_POLICY_CONFIG.viewer.short}</p>
+          <p className="small-text">Creator: {REFUND_POLICY_CONFIG.creator.short}</p>
+          <p className="small-text">Add-on: {REFUND_POLICY_CONFIG.addon.short}</p>
+          <Link className="text-link" to="/refund">查看退款矩阵 →</Link>
         </article>
       </section>
 
