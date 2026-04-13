@@ -1,26 +1,19 @@
 import { DEMO_ROLE_OPTIONS } from '../lib/roleDisplay';
+import { DarkSelect } from './DarkSelect';
 
 export function DemoRoleSwitcher({ auth, compact = false, className = '' }) {
   const current = auth.demoRole;
 
   return (
     <div className={`role-switcher ${className}`.trim()}>
-      <label className="small-text" htmlFor={compact ? 'demo-role-select-compact' : 'demo-role-select'}>
-        Demo Role Switcher {auth.mode === 'real' ? '(Demo only)' : ''}
-      </label>
-      <select
+      <DarkSelect
         id={compact ? 'demo-role-select-compact' : 'demo-role-select'}
-        className="input"
+        label={`Demo Role Switcher ${auth.mode === 'real' ? '(Demo only)' : ''}`}
         value={current}
         disabled={auth.mode === 'real'}
-        onChange={(event) => auth.switchDemoRole(event.target.value)}
-      >
-        {DEMO_ROLE_OPTIONS.map((item) => (
-          <option key={item.value} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
+        options={DEMO_ROLE_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+        onChange={(next) => auth.switchDemoRole(next)}
+      />
     </div>
   );
 }

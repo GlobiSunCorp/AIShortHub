@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { isValidEmail, minLength } from '../lib/validation';
+import { DarkSelect } from './DarkSelect';
 
 export function AuthFormCard({ title, subtitle, cta, mode, onSubmit, footer }) {
   const isForgot = mode === 'forgot';
@@ -79,13 +80,13 @@ export function AuthFormCard({ title, subtitle, cta, mode, onSubmit, footer }) {
         ) : null}
 
         {isSignup ? (
-          <label>
-            Account Type
-            <select className="input" value={form.role} onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}>
-              <option value="member">Member</option>
-              <option value="creator">Creator</option>
-            </select>
-          </label>
+          <DarkSelect
+            id="signup-account-type"
+            label="Account Type"
+            value={form.role}
+            options={[{ value: 'member', label: 'Member' }, { value: 'creator', label: 'Creator' }]}
+            onChange={(next) => setForm((prev) => ({ ...prev, role: next }))}
+          />
         ) : null}
 
         <button className="btn btn-primary" type="submit" disabled={isSubmitting}>

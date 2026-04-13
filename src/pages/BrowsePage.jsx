@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { SeriesCard } from '../components/SeriesCard';
 import { SectionTitle } from '../components/SectionTitle';
+import { DarkSelect } from '../components/DarkSelect';
 
 const statuses = ['all', 'published', 'pending_review', 'draft', 'rejected'];
 
@@ -31,26 +32,23 @@ export function BrowsePage({ platform }) {
             搜索
             <input className="input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索剧名或创作者" />
           </label>
-          <label>
-            标签
-            <select className="input" value={tag} onChange={(event) => setTag(event.target.value)}>
-              <option value="all">全部</option>
-              {platform.series
-                .flatMap((s) => s.tags)
-                .filter((value, index, list) => list.indexOf(value) === index)
-                .map((value) => (
-                  <option key={value}>{value}</option>
-                ))}
-            </select>
-          </label>
-          <label>
-            状态
-            <select className="input" value={status} onChange={(event) => setStatus(event.target.value)}>
-              {statuses.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </label>
+          <DarkSelect
+            id="browse-tag"
+            label="标签"
+            value={tag}
+            onChange={setTag}
+            options={[{ value: 'all', label: '全部' }, ...platform.series
+              .flatMap((s) => s.tags)
+              .filter((value, index, list) => list.indexOf(value) === index)
+              .map((value) => ({ value, label: value }))]}
+          />
+          <DarkSelect
+            id="browse-status"
+            label="状态"
+            value={status}
+            onChange={setStatus}
+            options={statuses.map((item) => ({ value: item, label: item }))}
+          />
         </div>
       </section>
 
