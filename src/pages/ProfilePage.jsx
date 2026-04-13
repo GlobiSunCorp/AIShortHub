@@ -1,6 +1,7 @@
 import { DemoRoleSwitcher } from '../components/DemoRoleSwitcher';
+import { CreatorPlanCard, MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 import { Link } from '../lib/router';
-import { ADD_ON_SERVICES, REFUND_POLICY_CONFIG, formatCommission, formatStorageGb, getCreatorPlan, getServiceEntitlement, getViewerPlan } from '../data/monetization';
+import { ADD_ON_SERVICES, REFUND_POLICY_CONFIG, formatCommission, getCreatorPlan, getServiceEntitlement, getViewerPlan } from '../data/monetization';
 import { getCommissionForUser, resolveMembership } from '../hooks/usePlanAccess';
 import { getStatusLabel } from '../lib/roleDisplay';
 import { getCreatorQuotaSnapshot } from '../lib/services/quotaService';
@@ -24,13 +25,18 @@ export function ProfilePage({ auth, platform }) {
   const orders = platform.serviceOrders.filter((item) => item.requesterId === auth.user.id).slice(0, 3);
   const creator = platform.creators.find((item) => item.profileId === auth.user.id);
   const uploads = creator ? platform.series.filter((item) => item.creatorId === creator.id).slice(0, 3) : [];
-  const quota = creatorPlan && creator ? getCreatorQuotaSnapshot({ creatorPlanId: creatorPlan.id, creatorId: creator.id, platform }) : null;
+  const quota = creatorPlan && creator ? getCreatorQuotaSnapshot({ creatorPlanId: creatorPlan.id, creatorId: creator.id, profileId: auth.user.id, platform }) : null;
 
   return (
     <div className="stack-lg">
       <section className="panel stack-md">
         <h1>{auth.user.name}</h1>
         <p className="small-text">{auth.user.email}</p>
+        <div className="row wrap">
+          <MembershipBadge auth={auth} membership={membership} />
+          {quota ? <UsageQuotaBadge label="Series" value={`${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`} tone={quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok'} details={[["Active Series used", quota.usage.activeSeries], ["Series slots left", quota.remaining.seriesLeft]]} /> : null}
+          {quota ? <UsageQuotaBadge label="Episodes" value={`${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes}`} details={[["Episodes used", quota.usage.totalEpisodes], ["Episode slots left", quota.remaining.episodesLeft]]} /> : null}
+        </div>
         <div className="grid cards-3">
           <article className="mini-card"><h3>Status</h3><p className="small-text">{statusLabel}</p></article>
           <article className="mini-card"><h3>Viewer Subscription</h3><p className="small-text">{viewerPlan.name}</p></article>
@@ -46,11 +52,14 @@ export function ProfilePage({ auth, platform }) {
       {quota ? (
         <section className="panel stack-md">
           <h3>Creator 上传配额</h3>
-          <div className="grid cards-3">
-            <article className="mini-card"><h4>Active Series</h4><p className="small-text">{quota.usage.activeSeries} / {quota.limits.maxActiveSeries}</p></article>
-            <article className="mini-card"><h4>Total Episodes</h4><p className="small-text">{quota.usage.totalEpisodes} / {quota.limits.maxTotalEpisodes}</p></article>
-            <article className="mini-card"><h4>Storage</h4><p className="small-text">{quota.usage.usedStorageGb.toFixed(2)}GB / {formatStorageGb(quota.limits.monthlyAssetStorageLimitGb)}</p></article>
+          <div className="row wrap">
+            <UsageQuotaBadge label="Series" value={`${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`} tone={quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok'} details={[["Used", quota.usage.activeSeries], ["Remaining", quota.remaining.seriesLeft]]} cta={quota.upgradeHint} />
+            <UsageQuotaBadge label="Episodes" value={`${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes}`} details={[["Used", quota.usage.totalEpisodes], ["Remaining", quota.remaining.episodesLeft]]} />
+            <UsageQuotaBadge label="Storage" value={`${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`} tone={quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok'} details={[["Used", `${quota.usage.usedStorageGb.toFixed(1)}GB`], ["Remaining", `${quota.remaining.storageGbLeft.toFixed(1)}GB`]]} />
+            <UsageQuotaBadge label="Motion Poster" value={`${quota.remaining.motionPosterLeft} left`} details={[["Included", quota.limits.includedMotionPosterCount], ["Used", quota.usage.usedMotionPosterCount], ["Remaining", quota.remaining.motionPosterLeft]]} />
+            <UsageQuotaBadge label="Featured" value={`${quota.remaining.featuredRequestsLeft} left`} details={[["Per cycle", quota.limits.maxFeaturedRequestsPerCycle], ["Used", quota.usage.featuredRequestsUsed], ["Remaining", quota.remaining.featuredRequestsLeft], ["Platform commission", `${Math.round(quota.plan.commissionRate * 100)}%`]]} />
           </div>
+          <CreatorPlanCard snapshot={quota} />
         </section>
       ) : null}
 

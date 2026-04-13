@@ -35,3 +35,13 @@
 - Profile：查看近期服务订单与上传记录。
 - Services 详情页：查看单个订单状态。
 - Admin：查看审核队列和服务订单处理。
+
+
+## 7. 会员徽章与权益卡
+- 顶部头像附近会显示当前身份徽章（Viewer / Creator / Studio / Admin）。
+- 鼠标悬停（桌面）或点击（移动）可查看当前计划权益摘要。
+- 在 Profile 页面可查看配额徽章与详细额度卡。
+
+## 8. 配额提醒
+- Creator 账号会显示 Series / Episodes / Storage / Motion Poster / Featured 请求额度。
+- 当接近限制时，系统会给出轻提醒与升级建议。

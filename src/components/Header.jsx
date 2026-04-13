@@ -3,6 +3,7 @@ import { DemoRoleSwitcher } from './DemoRoleSwitcher';
 import { Link, useRouter } from '../lib/router';
 import { getStatusLabel } from '../lib/roleDisplay';
 import { canAccessCreatorStudio, resolveMembership } from '../hooks/usePlanAccess';
+import { MembershipBadge } from './EntitlementBadges';
 
 export function Header({ auth, platform }) {
   const { pathname } = useRouter();
@@ -39,6 +40,7 @@ export function Header({ auth, platform }) {
         </nav>
         <div className="row center header-actions">
           <span className="meta-pill">{statusLabel}</span>
+          {auth.isLoggedIn && membership ? <MembershipBadge auth={auth} membership={membership} /> : null}
           {auth.isLoggedIn ? (
             <div className="account-wrap">
               <button className="avatar" onClick={() => setMenuOpen((open) => !open)}>

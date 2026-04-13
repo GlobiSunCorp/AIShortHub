@@ -3,6 +3,7 @@ import { Link } from '../lib/router';
 import { startCreatorPlanCheckout, startViewerCheckout } from '../lib/services/billingService';
 import { ADD_ON_SERVICES, CREATOR_PLANS, REFUND_POLICY_CONFIG, VIEWER_SUBSCRIPTIONS, formatCommission, formatStorageGb, formatUsd, getCreatorPlan, getViewerPlan } from '../data/monetization';
 import { resolveMembership } from '../hooks/usePlanAccess';
+import { MembershipBadge } from '../components/EntitlementBadges';
 
 function FeatureCell({ value }) {
   return <span>{value === true ? '✅' : value === false ? '—' : value}</span>;
@@ -65,6 +66,7 @@ export function PricingPage({ auth, platform }) {
         <h1>Pricing & Monetization</h1>
         <p className="small-text">Viewer Subscription 与 Creator Plan 分层管理。Platform Commission、Add-on Services 与 Included Benefits 均已拆分展示。</p>
         <p className="small-text">当前 Viewer Subscription: {getViewerPlan(membership.tier).name} · 当前 Creator Plan: {membership.creatorPlan ? getCreatorPlan(membership.creatorPlan).name : 'None'}</p>
+        {auth.isLoggedIn ? <MembershipBadge auth={auth} membership={membership} /> : null}
       </section>
 
       <section className="panel stack-md">
@@ -104,6 +106,7 @@ export function PricingPage({ auth, platform }) {
                 <li>上传剧集上限：{plan.maxActiveSeries}</li>
                 <li>分集总上限：{plan.maxTotalEpisodes}</li>
                 <li>月素材存储：{formatStorageGb(plan.monthlyAssetStorageLimitGb)}</li>
+                <li>Featured requests / cycle：{plan.maxFeaturedRequestsPerCycle}</li>
                 <li>月上传次数：{plan.monthlyUploadLimit}</li>
                 <li>Motion Poster：<FeatureCell value={plan.motionPoster} /></li>
                 <li>推荐位资格：<FeatureCell value={plan.featuredPlacementEligibility} /></li>

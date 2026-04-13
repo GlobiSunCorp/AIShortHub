@@ -4,11 +4,13 @@ import { isValidEmail, minLength } from '../lib/validation';
 import { ADD_ON_SERVICES, REFUND_POLICY_CONFIG, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
 import { resolveMembership } from '../hooks/usePlanAccess';
 import { startAddonCheckout } from '../lib/services/billingService';
+import { MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 
 export function ServiceOrdersPage({ auth, platform }) {
   const { navigate } = useRouter();
   const membership = resolveMembership(auth, platform);
   const creatorPlanId = membership.creatorPlan || 'creator_basic';
+  const servicePerkCopy = (value) => value === 'Included' ? 'Included in Studio' : value === 'Discounted' ? 'Discounted for Creator Pro' : 'Add-on for Basic';
   const [selectedServiceId, setSelectedServiceId] = useState(ADD_ON_SERVICES[0].id);
   const [form, setForm] = useState({ projectTitle: '', requestDetails: '', budget: '$200-$500', contact: auth.user?.email || '' });
   const [errors, setErrors] = useState({});
@@ -32,6 +34,10 @@ export function ServiceOrdersPage({ auth, platform }) {
     <div className="stack-lg">
       <section className="panel">
         <h1>Creator Services Center</h1>
+        <div className="row wrap">
+          <MembershipBadge auth={auth} membership={membership} />
+          <UsageQuotaBadge label="Plan" value={getCreatorPlan(creatorPlanId).name} details={[["Current Creator Plan", getCreatorPlan(creatorPlanId).name], ["Service entitlement", 'Included / Discounted / Add-on is applied per card']]} />
+        </div>
         <p className="small-text">选择 Add-on Services，查看当前 Creator Plan 的 Included / Discounted 权益，然后提交服务订单。</p>
         <p className="small-text">退款策略：{REFUND_POLICY_CONFIG.addon.short} <Link className="text-link" to="/refund">查看规则 →</Link></p>
       </section>
@@ -42,7 +48,7 @@ export function ServiceOrdersPage({ auth, platform }) {
             <h3>{item.name}</h3>
             <p className="small-text">{item.description}</p>
             <p className="price">{item.price}</p>
-            <p className="small-text">{getServiceEntitlement(item, creatorPlanId)} · {item.includedIn.length ? `Included in ${item.includedIn.join(', ')}` : 'Not included in base plans'}</p>
+            <p className="small-text">{getServiceEntitlement(item, creatorPlanId)} · {servicePerkCopy(getServiceEntitlement(item, creatorPlanId))}</p>
             <button className="btn btn-ghost" type="button" onClick={() => setSelectedServiceId(item.id)}>选择此服务</button>
           </article>
         ))}
