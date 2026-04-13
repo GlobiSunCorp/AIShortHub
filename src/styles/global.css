@@ -459,3 +459,65 @@ td { text-align: left; padding: 10px; border-bottom: 1px solid var(--line-soft);
   .creator-toolbox { right: 0.5rem; bottom: 0.5rem; }
   .toolbox-menu { max-height: 48vh; }
 }
+
+.badge-wrap { position: relative; }
+.membership-badge,
+.quota-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  padding: 0.38rem 0.78rem;
+  font-size: 0.77rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+.membership-badge .info-dot,
+.quota-badge .info-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.35);
+  display: grid;
+  place-content: center;
+  font-size: 10px;
+  color: #d2d9ff;
+}
+.membership-badge.viewer-free { border-color: rgba(157, 176, 255, 0.34); }
+.membership-badge.viewer-pro { border-color: rgba(98, 170, 255, 0.55); background: rgba(83, 131, 255, 0.14); }
+.membership-badge.viewer-premium { border-color: rgba(189, 136, 255, 0.56); background: rgba(159, 95, 255, 0.18); }
+.membership-badge.creator-basic { border-color: rgba(255, 179, 102, 0.48); background: rgba(255, 156, 71, 0.16); }
+.membership-badge.creator-pro { border-color: rgba(88, 226, 255, 0.5); background: rgba(57, 171, 230, 0.2); }
+.membership-badge.studio { border-color: rgba(255, 212, 95, 0.62); background: rgba(255, 186, 57, 0.2); }
+.membership-badge.admin { border-color: rgba(255, 105, 136, 0.65); background: rgba(214, 63, 110, 0.24); }
+
+.quota-badge.ok { border-color: rgba(140, 232, 188, 0.54); }
+.quota-badge.warn { border-color: rgba(255, 182, 109, 0.62); background: rgba(255, 175, 92, 0.16); }
+
+.entitlement-popover {
+  border-radius: 16px;
+  background: rgba(12, 16, 30, 0.98);
+}
+.entitlement-popover.floating {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: min(360px, 92vw);
+  z-index: 40;
+}
+.entitlement-popover.inline {
+  position: static;
+  width: 100%;
+}
+.entitlement-popover h4 { margin: 0 0 0.65rem; }
+.entitlement-grid { display: grid; gap: 0.5rem; }
+.entitlement-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: 0.35rem;
+  font-size: 0.82rem;
+}
+.entitlement-item span { color: var(--muted); }
+.entitlement-item strong { text-align: right; }

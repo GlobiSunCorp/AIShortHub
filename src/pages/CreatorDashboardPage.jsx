@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { AccessGuidePanel } from '../components/AccessGuidePanel';
+import { CreatorPlanCard, MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 import { Link } from '../lib/router';
-import { ADD_ON_SERVICES, CREATOR_ASSETS, REFUND_POLICY_CONFIG, formatStorageGb, getServiceEntitlement } from '../data/monetization';
+import { ADD_ON_SERVICES, CREATOR_ASSETS, REFUND_POLICY_CONFIG, getServiceEntitlement } from '../data/monetization';
 import { canAccessCreatorStudio, isHighTierCreator, resolveMembership } from '../hooks/usePlanAccess';
 import { isValidUrl, minLength } from '../lib/validation';
 import { evaluateQuotaLimits, getCreatorQuotaSnapshot } from '../lib/services/quotaService';
@@ -10,6 +11,13 @@ const STEPS = ['Basic Info', 'Assets', 'Episodes', 'Publishing & Review'];
 const bucketByAssetType = { static_poster: 'posters', motion_poster: 'motion-posters', thumbnail: 'thumbnails', trailer: 'trailers', video: 'episodes' };
 
 const initialDraft = { title: '', synopsis: '', tags: '', category: 'Romance', audience: '', staticPoster: '', motionPoster: '', thumbnail: '', trailer: '', episodeTitle: '', episodeNumber: 1, episodeUrl: '', episodeDuration: 60, episodePreview: true, checklistReady: false };
+
+const assetEntitlementText = {
+  static_poster: ['Included', 'Included in all creator plans.'],
+  motion_poster: ['Plan based', 'Included in Studio · Discounted for Creator Pro · Add-on for Basic.'],
+  thumbnail: ['Included', 'Included in all creator plans.'],
+  trailer: ['Discounted', 'Discounted for Creator Pro and Studio.'],
+};
 
 export function CreatorDashboardPage({ auth, platform }) {
   const membership = resolveMembership(auth, platform);
@@ -23,7 +31,7 @@ export function CreatorDashboardPage({ auth, platform }) {
 
   const myCreator = platform.creators.find((item) => item.profileId === auth.user?.id) || platform.creators[0];
   const mySeries = platform.series.filter((item) => item.creatorId === myCreator?.id);
-  const quota = getCreatorQuotaSnapshot({ creatorPlanId: membership.creatorPlan || 'creator_basic', creatorId: myCreator?.id, platform });
+  const quota = getCreatorQuotaSnapshot({ creatorPlanId: membership.creatorPlan || 'creator_basic', creatorId: myCreator?.id, profileId: auth.user?.id, platform });
   const metrics = useMemo(() => [['我的剧集', mySeries.length], ['待审核', mySeries.filter((item) => item.status === 'pending_review').length], ['已发布', mySeries.filter((item) => item.status === 'published').length]], [mySeries]);
 
   const uploadAsset = async (assetType, draftField) => {
@@ -46,17 +54,22 @@ export function CreatorDashboardPage({ auth, platform }) {
 
   return (
     <div className="stack-lg">
-      <section className="panel"><h1>Creator Studio</h1><p className="small-text">{STEPS[step]}（{platform.mode === 'real' ? 'Real Data Mode' : 'Mock Fallback Mode'}）</p></section>
+      <section className="panel stack-md">
+        <h1>Creator Studio</h1>
+        <p className="small-text">{STEPS[step]}（{platform.mode === 'real' ? 'Real Data Mode' : 'Mock Fallback Mode'}）</p>
+        <div className="row wrap">
+          <MembershipBadge auth={auth} membership={membership} />
+          <UsageQuotaBadge label="Series" value={`${quota.usage.activeSeries}/${quota.limits.maxActiveSeries} Series`} tone={quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok'} details={[["Used", quota.usage.activeSeries], ["Remaining", quota.remaining.seriesLeft]]} cta={quota.upgradeHint} />
+          <UsageQuotaBadge label="Episodes" value={`${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes} Episodes`} details={[["Used", quota.usage.totalEpisodes], ["Remaining", quota.remaining.episodesLeft]]} />
+          <UsageQuotaBadge label="Storage" value={`${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`} tone={quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok'} details={[["Used", `${quota.usage.usedStorageGb.toFixed(1)}GB`], ["Remaining", `${quota.remaining.storageGbLeft.toFixed(1)}GB`]]} />
+          <UsageQuotaBadge label="Motion Poster" value={`${quota.remaining.motionPosterLeft} left`} details={[["Included", quota.limits.includedMotionPosterCount], ["Used", quota.usage.usedMotionPosterCount], ["Remaining", quota.remaining.motionPosterLeft]]} />
+          <UsageQuotaBadge label="Featured" value={`${quota.remaining.featuredRequestsLeft} left`} details={[["Per cycle", quota.limits.maxFeaturedRequestsPerCycle], ["Used", quota.usage.featuredRequestsUsed], ["Remaining", quota.remaining.featuredRequestsLeft]]} />
+        </div>
+        {quota.warning.length ? <p className="form-feedback error">{quota.warning.join(' · ')} · Upgrade recommended for uninterrupted uploads.</p> : null}
+      </section>
       {feedback.message ? <section className="panel"><p className={`form-feedback ${feedback.type}`}>{feedback.message}</p></section> : null}
 
-      <section className="panel grid cards-3">
-        <article className="mini-card"><h4>Active Series</h4><p className="small-text">{quota.usage.activeSeries} / {quota.limits.maxActiveSeries}</p></article>
-        <article className="mini-card"><h4>Total Episodes</h4><p className="small-text">{quota.usage.totalEpisodes} / {quota.limits.maxTotalEpisodes}</p></article>
-        <article className="mini-card"><h4>Monthly Storage</h4><p className="small-text">{quota.usage.usedStorageGb.toFixed(2)}GB / {formatStorageGb(quota.limits.monthlyAssetStorageLimitGb)}</p></article>
-        <article className="mini-card"><h4>Monthly Uploads</h4><p className="small-text">{quota.usage.monthlyUploads} / {quota.limits.monthlyUploadLimit}</p></article>
-        <article className="mini-card"><h4>Review Priority</h4><p className="small-text">{quota.plan.reviewPriority}</p></article>
-        <article className="mini-card"><h4>Featured Placement</h4><p className="small-text">{quota.plan.featuredPlacementEligibility ? 'Eligible' : 'Not eligible'}</p></article>
-      </section>
+      <CreatorPlanCard snapshot={quota} />
 
       <section className="grid cards-3">{metrics.map(([label, value]) => <article className="stat-card" key={label}><p className="small-text">{label}</p><h3>{value}</h3></article>)}</section>
 
@@ -71,6 +84,15 @@ export function CreatorDashboardPage({ auth, platform }) {
         {step === 1 ? <>
           <h2>Step 2: Assets</h2>
           <p className="small-text">支持 URL fallback + Supabase Storage 上传。Assets: {CREATOR_ASSETS.join(' · ')}</p>
+          <div className="grid cards-2">
+            {Object.entries(assetEntitlementText).map(([key, [label, desc]]) => (
+              <article key={key} className="mini-card">
+                <h4>{key.replace('_', ' ')}</h4>
+                <p className="small-text">{label}</p>
+                <p className="small-text">{desc}</p>
+              </article>
+            ))}
+          </div>
           <input className="input" placeholder="Static Poster URL" value={draft.staticPoster} onChange={(e) => setDraft((p) => ({ ...p, staticPoster: e.target.value }))} />
           <label className="small-text">Static Poster file<input type="file" onChange={(e) => setFiles((p) => ({ ...p, static_poster: e.target.files?.[0] }))} /></label><button className="btn btn-ghost" type="button" disabled={uploading.static_poster} onClick={() => uploadAsset('static_poster', 'staticPoster')}>上传 Static Poster</button>
           <input className="input" placeholder="Motion Poster URL" value={draft.motionPoster} onChange={(e) => setDraft((p) => ({ ...p, motionPoster: e.target.value }))} />

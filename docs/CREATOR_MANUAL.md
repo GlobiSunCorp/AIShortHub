@@ -33,3 +33,12 @@
 - Creator Plan 与 Viewer Subscription 独立退款。
 - 首次购买审核窗口可申请（mock 默认 7 天）。
 - 一旦上传内容/提交审核/使用权益，默认不可退款。
+
+
+## 8. 徽章与额度看板
+- Creator Studio 顶部提供方案徽章与核心额度徽章。
+- Hover/Tap 可展开权益卡，查看审核优先级、平台抽成、额度已用/剩余、续费占位。
+
+## 9. 资产与服务权益文案
+- 上传资产模块会提示当前计划状态：Included / Discounted / Add-on。
+- Services 页面会根据 Creator Plan 自动显示待遇（Included in Studio / Discounted for Creator Pro / Add-on for Basic）。

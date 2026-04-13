@@ -1,4 +1,4 @@
-# AIShortHub MVP (Phase 8 · 上传限制、退款矩阵、支付联动与运营文档体系)
+# AIShortHub MVP (Phase 9 · 会员徽章系统 + 配额提示系统 + 权益卡交互)
 
 本轮重点打磨试运营闭环：Creator 上传配额、退款策略拆分、支付按钮真实跳转、Support 可信化、文档体系补齐。
 
@@ -30,13 +30,43 @@ VITE_POLICY_EMAIL=policy@aishorthub.com
 VITE_SUPPORT_FORM_URL=/support
 ```
 
-## Phase 8 完成内容
+## Phase 9 完成内容
 
 ### 1) Creator 上传限制与配额
 - Creator Plan 新增：`maxActiveSeries`、`maxTotalEpisodes`、`monthlyAssetStorageLimitGb`、`monthlyUploadLimit`、`includedMotionPosterCount`、`reviewPriority`、`featuredPlacementEligibility`。
 - Pricing 展示计划对比。
 - Creator Studio 展示已用/可用配额，并在超限时给出明确提示。
 - Profile 增加 Creator 配额摘要。
+
+### 1) Membership Badge System
+- 新增统一会员徽章组件，覆盖 Free/Pro/Premium Viewer、Creator Basic/Pro、Studio、Admin。
+- Header、Profile、Creator Studio、Services、Pricing 统一展示身份徽章。
+- 徽章支持 hover/tap 弹出权益卡，移动端可点按查看。
+
+### 2) Usage Quota Badge System
+- Creator 配额统一通过 `quotaService` 聚合输出：
+  - `maxActiveSeries`
+  - `maxTotalEpisodes`
+  - `monthlyAssetStorageLimit` / `monthlyAssetStorageLimitGb`
+  - `includedMotionPosterCount`
+  - `maxFeaturedRequestsPerCycle`
+  - `reviewPriority`
+  - `commissionRate`
+- 在 Profile 与 Creator Studio 展示简洁配额徽章（如 `2/5 Series`、`12GB/20GB`、`Motion Poster 0 left`）。
+
+### 3) Entitlement Hover / Tap Card
+- 徽章弹层改为迷你方案状态卡，支持：
+  - 当前方案
+  - 审核优先级
+  - 平台抽成
+  - 系列/分集/存储已用与剩余
+  - Motion Poster / Featured request 剩余额度
+  - 计费周期占位与升级 CTA
+- Creator Studio 增加接近上限提醒（如 `Only 1 series slot left`、`2GB storage remaining`）。
+
+### 4) Upload/Services 权益呈现
+- Creator 上传资产模块增加 Included / Discounted / Add-on 说明。
+- Services 卡片显示当前计划待遇，并给出专业化文案（Included in Studio / Discounted for Creator Pro / Add-on for Basic）。
 
 ### 2) 退款策略矩阵
 - Refund Policy 拆分为：
