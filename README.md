@@ -1,6 +1,6 @@
-# AIShortHub MVP (Phase 6 · 真实接入与试运营准备)
+# AIShortHub MVP (Phase 8 · 上传限制、退款矩阵、支付联动与运营文档体系)
 
-本轮把项目从“演示原型”推进到“可小范围试运营”的产品骨架：真实账号、真实内容写入、真实素材上传、真实支付结构、基础审核工作台与运营政策页面。
+本轮重点打磨试运营闭环：Creator 上传配额、退款策略拆分、支付按钮真实跳转、Support 可信化、文档体系补齐。
 
 ## 技术栈
 - Vite + React
@@ -23,81 +23,51 @@ VITE_STRIPE_SECRET_KEY=
 VITE_STRIPE_WEBHOOK_SECRET=
 VITE_STRIPE_CHECKOUT_ENDPOINT=
 VITE_PLATFORM_TAKE_RATE=0.2
+VITE_SUPPORT_PILOT_MODE=1
+VITE_SUPPORT_EMAIL=support@aishorthub.com
+VITE_CREATOR_OPS_EMAIL=creatorops@aishorthub.com
+VITE_POLICY_EMAIL=policy@aishorthub.com
+VITE_SUPPORT_FORM_URL=/support
 ```
 
-## 第六轮完成内容
+## Phase 8 完成内容
 
-### 1) Supabase Auth 真实接入（带 mock 兜底）
-- 新增统一 auth hook：`src/hooks/useAuth.js`。
-- 支持：注册 / 登录 / 登出 / 忘记密码。
-- 登录后自动同步 `profiles`（不存在则自动创建）。
-- Demo Role Switcher 保留，但在真实模式下仅作为演示说明，不影响真实登录态。
+### 1) Creator 上传限制与配额
+- Creator Plan 新增：`maxActiveSeries`、`maxTotalEpisodes`、`monthlyAssetStorageLimitGb`、`monthlyUploadLimit`、`includedMotionPosterCount`、`reviewPriority`、`featuredPlacementEligibility`。
+- Pricing 展示计划对比。
+- Creator Studio 展示已用/可用配额，并在超限时给出明确提示。
+- Profile 增加 Creator 配额摘要。
 
-### 2) Supabase 数据接口层 + 页面层分离
-- 新增服务层：`src/lib/services/platformService.js`。
-- 新增平台状态 hook：`src/hooks/usePlatformState.js`（真实加载 + mock fallback）。
-- Creator Studio 提交剧集/分集/审核写入服务层。
-- Services 下单写入 `service_orders`。
-- Admin 读取并管理审核队列和服务订单状态。
+### 2) 退款策略矩阵
+- Refund Policy 拆分为：
+  - Viewer Subscription Refund Policy
+  - Creator Plan Refund Policy
+  - Add-on Services Refund Policy
+- Pricing / Services / Creator Studio / Profile 均提供退款入口。
 
-### 3) Supabase Storage 上传骨架
-- Creator Studio 支持 file picker 上传：Static Poster / Motion Poster / Thumbnail / Trailer / Video 占位。
-- 上传成功后写入 `assets` 记录。
-- 保留 URL 输入模式作为 fallback。
-- 建议 bucket：`posters`, `motion-posters`, `thumbnails`, `trailers`（`episodes` 预留）。
-- 后续可扩展 Mux：保持 `assets` 表 + `video_url` 双轨架构，逐步迁移到托管视频转码。
+### 3) 支付联动修复
+- Pricing 的 Viewer / Creator 购买按钮：返回 `session.url` 时立即跳转。
+- Services 下单：
+  - Included 服务直接下单进入详情。
+  - 需支付服务优先跳转 checkout。
+- 所有支付动作提供 loading 与错误提示。
+- Checkout success/cancel 展示支付类型与下一步建议。
 
-### 4) Stripe 结构接入
-- 新增 `src/lib/services/billingService.js`。
-- Checkout 类型拆分：
-  - `viewer_subscription`
-  - `creator_plan`
-  - `addon_purchase`
-- Pricing / Services 已接入购买入口。
-- 新增成功/取消回跳页：`/checkout/success`, `/checkout/cancel`。
+### 4) 播放按钮统一化
+- Browse / Home 卡片封面保留统一播放按钮。
+- Home Hero 与 Series Detail 主视觉新增可见 Play 标识。
 
-### 5) Admin 审核流骨架增强
-- Review Queue 支持状态筛选：`draft / pending_review / published / rejected`。
-- 审核备注输入 + reject 备注必填。
-- `review_logs` 写入结构保留。
-- 服务订单状态更新包含更新时间与备注占位。
-- 预留 `report_count` / `flagged` 字段。
+### 5) Contact / Support 真实化
+- 支持 custom domain 模式与 pilot fallback 模式。
+- 区分 Support / Creator Ops / Policy&Abuse 联系用途。
+- Footer / FAQ / Support 文案一致。
 
-### 6) 试运营政策与支持页面
-新增页面并加入 Footer 入口：
-- FAQ
-- Terms of Service
-- Privacy Policy
-- Refund Policy
-- Contact / Support
-- Creator Guidelines
-- Content Policy
-- Commission & Payout Policy
-
-## 集中化配置
-- 新增 `src/data/platformConfig.js`：
-  - Viewer plans
-  - Creator plans
-  - Commission rules
-  - Add-on pricing
-  - Included / Discounted / Add-on 判定
-- Pricing / Profile / Services / Creator Studio 共用配置。
-
-## Supabase Schema 建议
-见：`docs/supabase-schema.sql`
-
-包含核心表：
-- `profiles`
-- `viewer_subscriptions`
-- `creator_plans`
-- `creators`
-- `series`
-- `episodes`
-- `assets`
-- `service_orders`
-- `payments`
-- `payouts`
-- `review_logs`
+## 文档入口
+- 用户说明书：`docs/USER_MANUAL.md`
+- 创作者说明书：`docs/CREATOR_MANUAL.md`
+- 管理后台操作手册：`docs/ADMIN_PLAYBOOK.md`
+- 更新日志：`docs/CHANGELOG.md`
+- Supabase Schema：`docs/supabase-schema.sql`
 
 ## 真实接入范围 vs 仍为 mock
 
@@ -113,9 +83,3 @@ VITE_PLATFORM_TAKE_RATE=0.2
 - 真实 RLS 策略与多租户权限细化
 - 大视频转码与 CDN 分发（Mux/Cloudflare Stream）
 - 运营工单系统与自动化风控
-
-## 下一轮建议
-1. 加 Stripe webhook consumer（写 `payments`/`viewer_subscriptions`/`creator_plans`）。
-2. 完整 RLS + policy（viewer/creator/admin）。
-3. Admin 加举报处理面板和证据链。
-4. Creator 收益看板接 `payouts` 真实流水。

@@ -12,11 +12,12 @@ export function SeriesDetailPage({ id, platform, auth }) {
   return (
     <div className="stack-lg">
       <section className="detail-hero panel">
-        <div className="detail-cover from-blue">
+        <Link className="detail-cover from-blue cover-link" to={`/watch/${series.id}/1`}>
           <span className="status">{series.status}</span>
           <h2>{series.title}</h2>
           <small>{series.coverUrl || 'Cover placeholder'}</small>
-        </div>
+          <div className="play-overlay">▶ Play</div>
+        </Link>
 
         <div>
           <h1>{series.title}</h1>

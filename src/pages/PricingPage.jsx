@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from '../lib/router';
 import { startCreatorPlanCheckout, startViewerCheckout } from '../lib/services/billingService';
-import { ADD_ON_SERVICES, CREATOR_PLANS, VIEWER_SUBSCRIPTIONS, formatCommission, formatUsd, getCreatorPlan, getViewerPlan } from '../data/monetization';
+import { ADD_ON_SERVICES, CREATOR_PLANS, REFUND_POLICY_CONFIG, VIEWER_SUBSCRIPTIONS, formatCommission, formatStorageGb, formatUsd, getCreatorPlan, getViewerPlan } from '../data/monetization';
 import { resolveMembership } from '../hooks/usePlanAccess';
 
 function FeatureCell({ value }) {
@@ -8,36 +9,53 @@ function FeatureCell({ value }) {
 }
 
 export function PricingPage({ auth, platform }) {
-  const [notice, setNotice] = useState('');
+  const [notice, setNotice] = useState({ type: '', text: '' });
+  const [loadingKey, setLoadingKey] = useState('');
   const membership = auth.user ? resolveMembership(auth, platform) : { tier: 'free', creatorPlan: null };
 
   const handleViewerCheckout = async (plan) => {
-    if (!auth.isLoggedIn) return setNotice('请先登录后再升级 Viewer Subscription。');
+    if (!auth.isLoggedIn) return setNotice({ type: 'error', text: '请先登录后再升级 Viewer Subscription。' });
     if (plan.id === 'free') {
       platform.actions.setMembershipTier(auth.user.id, 'free');
-      return setNotice('Viewer Subscription 已切换为 Free。');
+      return setNotice({ type: 'success', text: 'Viewer Subscription 已切换为 Free。' });
     }
+    setLoadingKey(`viewer-${plan.id}`);
+    setNotice({ type: '', text: '' });
     try {
       const session = await startViewerCheckout({ plan, user: auth.user });
+      if (session.url) {
+        window.location.href = session.url;
+        return;
+      }
       platform.actions.setMembershipTier(auth.user.id, plan.id);
-      setNotice(session.mode === 'mock' ? `Mock checkout: ${session.message}` : 'Checkout session created.');
+      setNotice({ type: 'success', text: 'Checkout session created，正在同步状态。' });
     } catch (error) {
-      setNotice(`支付初始化失败：${error.message}`);
+      setNotice({ type: 'error', text: `支付初始化失败：${error.message}` });
+    } finally {
+      setLoadingKey('');
     }
   };
 
   const handleCreatorPlan = async (plan) => {
-    if (!auth.isLoggedIn) return setNotice('请先登录后再升级 Creator Plan。');
+    if (!auth.isLoggedIn) return setNotice({ type: 'error', text: '请先登录后再升级 Creator Plan。' });
     if (plan.id === 'creator_basic') {
       platform.actions.setCreatorPlan(auth.user.id, plan.id);
-      return setNotice(`Creator Plan 已更新为 ${plan.name}。`);
+      return setNotice({ type: 'success', text: `Creator Plan 已更新为 ${plan.name}。` });
     }
+    setLoadingKey(`creator-${plan.id}`);
+    setNotice({ type: '', text: '' });
     try {
       const session = await startCreatorPlanCheckout({ plan, user: auth.user });
+      if (session.url) {
+        window.location.href = session.url;
+        return;
+      }
       platform.actions.setCreatorPlan(auth.user.id, plan.id);
-      setNotice(session.mode === 'mock' ? `Mock checkout: ${session.message}` : 'Creator plan checkout session created.');
+      setNotice({ type: 'success', text: 'Creator plan checkout session created，正在同步状态。' });
     } catch (error) {
-      setNotice(`Creator Plan 支付初始化失败：${error.message}`);
+      setNotice({ type: 'error', text: `Creator Plan 支付初始化失败：${error.message}` });
+    } finally {
+      setLoadingKey('');
     }
   };
 
@@ -64,10 +82,9 @@ export function PricingPage({ auth, platform }) {
                 <li>抢先看：<FeatureCell value={plan.earlyAccess} /></li>
                 <li>会员专属内容：<FeatureCell value={plan.exclusiveContent} /></li>
                 <li>继续观看/收藏/历史：<FeatureCell value={plan.watchTools} /></li>
-                <li>推荐优先级：<FeatureCell value={plan.recommendationPriority} /></li>
               </ul>
-              <button type="button" className="btn btn-primary" onClick={() => handleViewerCheckout(plan)}>
-                选择 {plan.name}
+              <button type="button" className="btn btn-primary" disabled={loadingKey === `viewer-${plan.id}`} onClick={() => handleViewerCheckout(plan)}>
+                {loadingKey === `viewer-${plan.id}` ? '跳转支付中...' : `选择 ${plan.name}`}
               </button>
             </article>
           ))}
@@ -84,18 +101,27 @@ export function PricingPage({ auth, platform }) {
               <p className="small-text">Platform Commission: {formatCommission(plan.commissionRate)}</p>
               <ul>
                 <li>审核优先级：{plan.reviewPriority}</li>
-                <li>Static Poster：<FeatureCell value={plan.staticPoster} /></li>
+                <li>上传剧集上限：{plan.maxActiveSeries}</li>
+                <li>分集总上限：{plan.maxTotalEpisodes}</li>
+                <li>月素材存储：{formatStorageGb(plan.monthlyAssetStorageLimitGb)}</li>
+                <li>月上传次数：{plan.monthlyUploadLimit}</li>
                 <li>Motion Poster：<FeatureCell value={plan.motionPoster} /></li>
-                <li>TikTok Promo Pack：<FeatureCell value={plan.tiktokPromoPack} /></li>
-                <li>推荐位申请：<FeatureCell value={plan.featuredPlacementRequest} /></li>
-                <li>完整数据面板：<FeatureCell value={plan.advancedAnalytics} /></li>
-                <li>优先支持：<FeatureCell value={plan.prioritySupport} /></li>
+                <li>推荐位资格：<FeatureCell value={plan.featuredPlacementEligibility} /></li>
               </ul>
-              <button type="button" className="btn btn-ghost" onClick={() => handleCreatorPlan(plan)}>
-                选择 {plan.name}
+              <button type="button" className="btn btn-ghost" disabled={loadingKey === `creator-${plan.id}`} onClick={() => handleCreatorPlan(plan)}>
+                {loadingKey === `creator-${plan.id}` ? '跳转支付中...' : `选择 ${plan.name}`}
               </button>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="panel stack-md">
+        <h3>退款策略矩阵入口</h3>
+        <div className="grid cards-3">
+          <article className="mini-card"><h4>{REFUND_POLICY_CONFIG.viewer.title}</h4><p className="small-text">{REFUND_POLICY_CONFIG.viewer.short}</p><Link className="text-link" to="/refund">查看完整规则 →</Link></article>
+          <article className="mini-card"><h4>{REFUND_POLICY_CONFIG.creator.title}</h4><p className="small-text">{REFUND_POLICY_CONFIG.creator.short}</p><Link className="text-link" to="/refund">查看完整规则 →</Link></article>
+          <article className="mini-card"><h4>{REFUND_POLICY_CONFIG.addon.title}</h4><p className="small-text">{REFUND_POLICY_CONFIG.addon.short}</p><Link className="text-link" to="/refund">查看完整规则 →</Link></article>
         </div>
       </section>
 
@@ -105,8 +131,7 @@ export function PricingPage({ auth, platform }) {
           <li>平台按每笔创作者收入抽取 Platform Commission，默认基准为 20%。</li>
           <li>Creator Plan 越高，平台抽成越低，因为高阶方案承担更高固定订阅费用。</li>
           <li>结算周期：{platform.platformConfig.settlementCycle}。</li>
-          <li>Viewer Subscription 是观众端观看订阅费；Service Fee 是创作者购买的 Add-on Services；Platform Commission 是内容收入分成抽取。</li>
-          <li>Included Benefits 属于方案内权益，Add-on Services 属于额外购买，Discounted 表示当前方案可享优惠价。</li>
+          <li>Viewer Subscription、Creator Plan、Add-on Services 各自独立计费与退款路径。</li>
         </ul>
         <div className="grid cards-3">
           {ADD_ON_SERVICES.slice(0, 3).map((service) => (
@@ -117,7 +142,7 @@ export function PricingPage({ auth, platform }) {
             </article>
           ))}
         </div>
-        {notice ? <p className="form-feedback success">{notice}</p> : null}
+        {notice.text ? <p className={`form-feedback ${notice.type || 'success'}`}>{notice.text}</p> : null}
       </section>
     </div>
   );

@@ -58,6 +58,7 @@ export function usePlatformState(auth) {
         url: uploaded.data.publicUrl,
         storage_bucket: bucket,
         storage_path: path,
+        size_bytes: Number(file?.size || 0),
       });
       return uploaded;
     },
@@ -80,7 +81,7 @@ export function usePlatformState(auth) {
       setState((prev) => ({ ...prev, series: prev.series.map((s) => (s.id === seriesId ? { ...s, visibility: s.visibility === 'public' ? 'private' : 'public' } : s)) }));
     },
     async createServiceOrder(payload) {
-      const createdOrder = { id: `so_${Math.random().toString(36).slice(2, 8)}`, created_at: new Date().toISOString(), status: 'pending', ...payload };
+      const createdOrder = { id: `so_${Math.random().toString(36).slice(2, 8)}`, created_at: new Date().toISOString(), status: payload.status || 'pending', ...payload };
       await createServiceOrderData(createdOrder, auth?.session?.access_token);
       setState((prev) => ({ ...prev, serviceOrders: [createdOrder, ...prev.serviceOrders] }));
       return createdOrder;

@@ -1,3 +1,5 @@
+import { REFUND_POLICY_CONFIG } from '../data/monetization';
+
 const policies = {
   terms: {
     title: 'Terms of Service',
@@ -8,8 +10,8 @@ const policies = {
     points: ['We store account/profile/order/payment metadata for operations.', 'We minimize sensitive data and use third-party processors like Supabase/Stripe.', 'Users may request data export/deletion subject to legal obligations.'],
   },
   refund: {
-    title: 'Refund Policy',
-    points: ['Viewer subscriptions are generally non-refundable after billing cycle start.', 'Duplicate charges/technical failures can be reviewed within 7 days.', 'Service add-ons are refundable only before production starts.'],
+    title: 'Refund Matrix',
+    modules: [REFUND_POLICY_CONFIG.viewer, REFUND_POLICY_CONFIG.creator, REFUND_POLICY_CONFIG.addon],
   },
   creatorGuidelines: {
     title: 'Creator Guidelines',
@@ -30,11 +32,27 @@ export function PolicyPage({ type = 'terms' }) {
   return (
     <section className="panel stack-md">
       <h1>{policy.title}</h1>
-      <ul>
-        {policy.points.map((point) => (
-          <li key={point}>{point}</li>
-        ))}
-      </ul>
+      {policy.modules ? (
+        <div className="grid cards-3">
+          {policy.modules.map((item) => (
+            <article key={item.title} className="mini-card stack-sm">
+              <h3>{item.title}</h3>
+              <p className="small-text">{item.short}</p>
+              <ul>
+                {item.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <ul>
+          {policy.points.map((point) => (
+            <li key={point}>{point}</li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
