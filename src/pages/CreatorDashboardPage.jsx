@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { AccessGuidePanel } from '../components/AccessGuidePanel';
 import { CreatorPlanCard, MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
+import { CreatorActionCenter, PlanHealthCard, QuotaAlertBar, SubmissionReadinessChecklist } from '../components/CreatorOpsPanels';
 import { Link } from '../lib/router';
-import { ADD_ON_SERVICES, CREATOR_ASSETS, REFUND_POLICY_CONFIG, getServiceEntitlement } from '../data/monetization';
+import { ADD_ON_SERVICES, CREATOR_ASSETS, REFUND_POLICY_CONFIG, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
 import { canAccessCreatorStudio, isHighTierCreator, resolveMembership } from '../hooks/usePlanAccess';
 import { isValidUrl, minLength } from '../lib/validation';
 import { evaluateQuotaLimits, getCreatorQuotaSnapshot } from '../lib/services/quotaService';
+import { buildCreatorActions, buildQuotaAlerts, getCycleDates, getHealthStatus, getSubmissionChecklist } from '../lib/services/creatorHealthService';
 
 const STEPS = ['Basic Info', 'Assets', 'Episodes', 'Publishing & Review'];
 const bucketByAssetType = { static_poster: 'posters', motion_poster: 'motion-posters', thumbnail: 'thumbnails', trailer: 'trailers', video: 'episodes' };
@@ -33,6 +35,11 @@ export function CreatorDashboardPage({ auth, platform }) {
   const mySeries = platform.series.filter((item) => item.creatorId === myCreator?.id);
   const quota = getCreatorQuotaSnapshot({ creatorPlanId: membership.creatorPlan || 'creator_basic', creatorId: myCreator?.id, profileId: auth.user?.id, platform });
   const metrics = useMemo(() => [['我的剧集', mySeries.length], ['待审核', mySeries.filter((item) => item.status === 'pending_review').length], ['已发布', mySeries.filter((item) => item.status === 'published').length]], [mySeries]);
+  const cycle = getCycleDates(platform.memberships.find((m) => m.profileId === auth.user?.id)?.renewAt);
+  const healthStatus = getHealthStatus(quota);
+  const alerts = buildQuotaAlerts({ snapshot: quota, renewAt: cycle.renewalDate, unpaidOrders: platform.serviceOrders.filter((o) => o.requesterId === auth.user?.id && o.status === 'pending_payment') });
+  const actions = buildCreatorActions({ snapshot: quota, pendingSeriesCount: mySeries.filter((item) => item.status === 'pending_review').length, unpaidOrdersCount: platform.serviceOrders.filter((o) => o.requesterId === auth.user?.id && o.status === 'pending_payment').length, draft });
+  const checklist = getSubmissionChecklist({ draft, snapshot: quota, creatorPlanName: getCreatorPlan(membership.creatorPlan || 'creator_basic').name });
 
   const uploadAsset = async (assetType, draftField) => {
     const file = files[assetType];
@@ -54,6 +61,30 @@ export function CreatorDashboardPage({ auth, platform }) {
 
   return (
     <div className="stack-lg">
+      <QuotaAlertBar alerts={alerts.slice(0, 4)} />
+      <PlanHealthCard
+        hoverHint="Hover to review entitlement details and renewal dates."
+        data={{
+          healthStatus,
+          cycleLabel: cycle.cycleLabel,
+          metrics: [
+            { label: 'Series', value: `${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`, tone: quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok', details: [['Used', quota.usage.activeSeries], ['Left', quota.remaining.seriesLeft]] },
+            { label: 'Episodes', value: `${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes}`, details: [['Used', quota.usage.totalEpisodes], ['Left', quota.remaining.episodesLeft]] },
+            { label: 'Storage', value: `${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`, tone: quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok', details: [['Used', `${quota.usage.usedStorageGb.toFixed(1)}GB`], ['Left', `${quota.remaining.storageGbLeft.toFixed(1)}GB`]] },
+          ],
+          summary: [
+            ['Viewer Plan', membership.tier],
+            ['Creator Plan', quota.plan.name],
+            ['Platform Commission', `${Math.round(quota.plan.commissionRate * 100)}%`],
+            ['Review Priority', quota.plan.reviewPriority],
+            ['Motion Poster', `${quota.usage.usedMotionPosterCount} used / ${quota.remaining.motionPosterLeft} left`],
+            ['Featured Request', `${quota.usage.featuredRequestsUsed} used / ${quota.remaining.featuredRequestsLeft} left`],
+            ['Billing Renewal', cycle.renewalDate],
+            ['Quota Reset Date', cycle.quotaResetDate],
+          ],
+        }}
+      />
+
       <section className="panel stack-md">
         <h1>Creator Studio</h1>
         <p className="small-text">{STEPS[step]}（{platform.mode === 'real' ? 'Real Data Mode' : 'Mock Fallback Mode'}）</p>
@@ -69,6 +100,7 @@ export function CreatorDashboardPage({ auth, platform }) {
       </section>
       {feedback.message ? <section className="panel"><p className={`form-feedback ${feedback.type}`}>{feedback.message}</p></section> : null}
 
+      <CreatorActionCenter actions={actions} />
       <CreatorPlanCard snapshot={quota} />
 
       <section className="grid cards-3">{metrics.map(([label, value]) => <article className="stat-card" key={label}><p className="small-text">{label}</p><h3>{value}</h3></article>)}</section>
@@ -79,6 +111,7 @@ export function CreatorDashboardPage({ auth, platform }) {
           <input className="input" placeholder="剧名" value={draft.title} onChange={(e) => setDraft((p) => ({ ...p, title: e.target.value }))} />
           <textarea className="input" placeholder="简介" value={draft.synopsis} onChange={(e) => setDraft((p) => ({ ...p, synopsis: e.target.value }))} />
           <input className="input" placeholder="标签(逗号分隔)" value={draft.tags} onChange={(e) => setDraft((p) => ({ ...p, tags: e.target.value }))} />
+          <input className="input" placeholder="Audience（required）" value={draft.audience} onChange={(e) => setDraft((p) => ({ ...p, audience: e.target.value }))} />
         </> : null}
 
         {step === 1 ? <>
@@ -93,6 +126,7 @@ export function CreatorDashboardPage({ auth, platform }) {
               </article>
             ))}
           </div>
+          <p className="small-text">Asset quality hints: Poster 推荐 1080x1920；Trailer 建议 20-60s；建议增加 vertical cover 用于 TikTok 流量转化。</p>
           <input className="input" placeholder="Static Poster URL" value={draft.staticPoster} onChange={(e) => setDraft((p) => ({ ...p, staticPoster: e.target.value }))} />
           <label className="small-text">Static Poster file<input type="file" onChange={(e) => setFiles((p) => ({ ...p, static_poster: e.target.files?.[0] }))} /></label><button className="btn btn-ghost" type="button" disabled={uploading.static_poster} onClick={() => uploadAsset('static_poster', 'staticPoster')}>上传 Static Poster</button>
           <input className="input" placeholder="Motion Poster URL" value={draft.motionPoster} onChange={(e) => setDraft((p) => ({ ...p, motionPoster: e.target.value }))} />
@@ -114,12 +148,13 @@ export function CreatorDashboardPage({ auth, platform }) {
 
         {step === 3 ? <>
           <h2>Step 4: Publishing & Review</h2>
+          <SubmissionReadinessChecklist checklist={checklist} />
           <label className="small-text"><input type="checkbox" checked={draft.checklistReady} onChange={(e) => setDraft((p) => ({ ...p, checklistReady: e.target.checked }))} /> 提交审核前检查清单已完成</label>
           <button className="btn btn-primary" type="button" onClick={async () => {
             const quotaFailures = evaluateQuotaLimits(quota);
             if (quotaFailures.length) return setFeedback({ type: 'error', message: `提交失败：${quotaFailures.join('；')}。` });
             if (!minLength(draft.title, 2) || !minLength(draft.synopsis, 12)) return setFeedback({ type: 'error', message: '请至少完成标题和简介。' });
-            if (!draft.checklistReady) return setFeedback({ type: 'error', message: '请勾选检查清单。' });
+            if (!draft.checklistReady || checklist.missing) return setFeedback({ type: 'error', message: '请先完成提交前检查清单。' });
             if (draft.staticPoster && !isValidUrl(draft.staticPoster)) return setFeedback({ type: 'error', message: '海报 URL 格式错误。' });
             const id = `${draft.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${Date.now().toString().slice(-4)}`;
             await platform.actions.createSeries({ id, creatorId: myCreator?.id, creator_id: myCreator?.id, title: draft.title, synopsis: draft.synopsis, tags: draft.tags.split(',').map((t) => t.trim()).filter(Boolean), category: draft.category, coverUrl: draft.staticPoster, cover_url: draft.staticPoster, trailer_url: draft.trailer, status: 'draft' });

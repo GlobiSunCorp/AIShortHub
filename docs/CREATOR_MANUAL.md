@@ -42,3 +42,9 @@
 ## 9. 资产与服务权益文案
 - 上传资产模块会提示当前计划状态：Included / Discounted / Add-on。
 - Services 页面会根据 Creator Plan 自动显示待遇（Included in Studio / Discounted for Creator Pro / Add-on for Basic）。
+
+## 10. 本轮新增：动作中心与提审清单
+- Creator Action Center 会按 urgent / recommended / informational 给出下一步操作建议。
+- 提交前检查清单会明确标红缺项，不再静默失败。
+- 若当前计划额度不足，会在检查清单中直接给出升级建议。
+- 配额提醒条可提示 Series/Storage/Motion Poster/Featured/Renewal 风险。

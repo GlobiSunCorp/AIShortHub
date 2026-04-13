@@ -45,3 +45,8 @@
 ## 8. 配额提醒
 - Creator 账号会显示 Series / Episodes / Storage / Motion Poster / Featured 请求额度。
 - 当接近限制时，系统会给出轻提醒与升级建议。
+
+## 9. 新版运营提醒与健康卡
+- Creator Studio 顶部会显示 Quota Alert Bar，提示额度风险和下一步动作。
+- Profile 展示轻量提醒条与 Plan Health Card，可查看续费日与配额重置日。
+- 全站下拉已统一为深色主题组件，移动端点击、键盘操作更稳定。

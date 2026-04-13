@@ -1,10 +1,12 @@
 import { DemoRoleSwitcher } from '../components/DemoRoleSwitcher';
 import { CreatorPlanCard, MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
+import { PlanHealthCard, QuotaAlertBar } from '../components/CreatorOpsPanels';
 import { Link } from '../lib/router';
 import { ADD_ON_SERVICES, REFUND_POLICY_CONFIG, formatCommission, getCreatorPlan, getServiceEntitlement, getViewerPlan } from '../data/monetization';
 import { getCommissionForUser, resolveMembership } from '../hooks/usePlanAccess';
 import { getStatusLabel } from '../lib/roleDisplay';
 import { getCreatorQuotaSnapshot } from '../lib/services/quotaService';
+import { buildQuotaAlerts, getCycleDates, getHealthStatus } from '../lib/services/creatorHealthService';
 
 export function ProfilePage({ auth, platform }) {
   if (!auth.isLoggedIn) {
@@ -26,9 +28,12 @@ export function ProfilePage({ auth, platform }) {
   const creator = platform.creators.find((item) => item.profileId === auth.user.id);
   const uploads = creator ? platform.series.filter((item) => item.creatorId === creator.id).slice(0, 3) : [];
   const quota = creatorPlan && creator ? getCreatorQuotaSnapshot({ creatorPlanId: creatorPlan.id, creatorId: creator.id, profileId: auth.user.id, platform }) : null;
+  const cycle = getCycleDates(platform.memberships.find((m) => m.profileId === auth.user.id)?.renewAt);
 
   return (
     <div className="stack-lg">
+      {quota ? <QuotaAlertBar alerts={buildQuotaAlerts({ snapshot: quota, renewAt: cycle.renewalDate }).slice(0, 2)} compact /> : null}
+
       <section className="panel stack-md">
         <h1>{auth.user.name}</h1>
         <p className="small-text">{auth.user.email}</p>
@@ -42,25 +47,43 @@ export function ProfilePage({ auth, platform }) {
           <article className="mini-card"><h3>Viewer Subscription</h3><p className="small-text">{viewerPlan.name}</p></article>
           <article className="mini-card"><h3>Creator Plan</h3><p className="small-text">{creatorPlan?.name || 'None'}</p></article>
           <article className="mini-card"><h3>Platform Commission</h3><p className="small-text">{commission}</p></article>
-          <article className="mini-card"><h3>Included Benefits</h3><p className="small-text">{creatorPlan ? creatorPlan.reviewPriority : 'Viewer-only account'}</p></article>
-          <article className="mini-card"><h3>退款规则摘要</h3><p className="small-text">{creatorPlan ? REFUND_POLICY_CONFIG.creator.short : REFUND_POLICY_CONFIG.viewer.short}</p></article>
+          <article className="mini-card"><h3>Quota reset date</h3><p className="small-text">{cycle.quotaResetDate}</p></article>
+          <article className="mini-card"><h3>Billing renewal date</h3><p className="small-text">{cycle.renewalDate}</p></article>
         </div>
         <p className="small-text">Auth mode: {auth.mode === 'real' ? 'Supabase Auth' : 'Mock fallback'} · Demo Role Switcher only affects demo mode.</p>
         <DemoRoleSwitcher auth={auth} />
       </section>
 
       {quota ? (
-        <section className="panel stack-md">
-          <h3>Creator 上传配额</h3>
-          <div className="row wrap">
-            <UsageQuotaBadge label="Series" value={`${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`} tone={quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok'} details={[["Used", quota.usage.activeSeries], ["Remaining", quota.remaining.seriesLeft]]} cta={quota.upgradeHint} />
-            <UsageQuotaBadge label="Episodes" value={`${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes}`} details={[["Used", quota.usage.totalEpisodes], ["Remaining", quota.remaining.episodesLeft]]} />
-            <UsageQuotaBadge label="Storage" value={`${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`} tone={quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok'} details={[["Used", `${quota.usage.usedStorageGb.toFixed(1)}GB`], ["Remaining", `${quota.remaining.storageGbLeft.toFixed(1)}GB`]]} />
-            <UsageQuotaBadge label="Motion Poster" value={`${quota.remaining.motionPosterLeft} left`} details={[["Included", quota.limits.includedMotionPosterCount], ["Used", quota.usage.usedMotionPosterCount], ["Remaining", quota.remaining.motionPosterLeft]]} />
-            <UsageQuotaBadge label="Featured" value={`${quota.remaining.featuredRequestsLeft} left`} details={[["Per cycle", quota.limits.maxFeaturedRequestsPerCycle], ["Used", quota.usage.featuredRequestsUsed], ["Remaining", quota.remaining.featuredRequestsLeft], ["Platform commission", `${Math.round(quota.plan.commissionRate * 100)}%`]]} />
-          </div>
-          <CreatorPlanCard snapshot={quota} />
-        </section>
+        <>
+          <PlanHealthCard
+            data={{
+              healthStatus: getHealthStatus(quota),
+              cycleLabel: cycle.cycleLabel,
+              metrics: [
+                { label: 'Series', value: `${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`, tone: quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok', details: [['Used', quota.usage.activeSeries], ['Remaining', quota.remaining.seriesLeft]] },
+                { label: 'Storage', value: `${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`, tone: quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok', details: [['Used', `${quota.usage.usedStorageGb.toFixed(1)}GB`], ['Remaining', `${quota.remaining.storageGbLeft.toFixed(1)}GB`]] },
+              ],
+              summary: [
+                ['Viewer Plan', viewerPlan.name],
+                ['Creator Plan', creatorPlan.name],
+                ['Review Priority', quota.plan.reviewPriority],
+                ['Featured requests', `${quota.usage.featuredRequestsUsed} used / ${quota.remaining.featuredRequestsLeft} left`],
+              ],
+            }}
+          />
+          <section className="panel stack-md">
+            <h3>Creator 上传配额</h3>
+            <div className="row wrap">
+              <UsageQuotaBadge label="Series" value={`${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`} tone={quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok'} details={[["Used", quota.usage.activeSeries], ["Remaining", quota.remaining.seriesLeft]]} cta={quota.upgradeHint} />
+              <UsageQuotaBadge label="Episodes" value={`${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes}`} details={[["Used", quota.usage.totalEpisodes], ["Remaining", quota.remaining.episodesLeft]]} />
+              <UsageQuotaBadge label="Storage" value={`${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`} tone={quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok'} details={[["Used", `${quota.usage.usedStorageGb.toFixed(1)}GB`], ["Remaining", `${quota.remaining.storageGbLeft.toFixed(1)}GB`]]} />
+              <UsageQuotaBadge label="Motion Poster" value={`${quota.remaining.motionPosterLeft} left`} details={[["Included", quota.limits.includedMotionPosterCount], ["Used", quota.usage.usedMotionPosterCount], ["Remaining", quota.remaining.motionPosterLeft]]} />
+              <UsageQuotaBadge label="Featured" value={`${quota.remaining.featuredRequestsLeft} left`} details={[["Per cycle", quota.limits.maxFeaturedRequestsPerCycle], ["Used", quota.usage.featuredRequestsUsed], ["Remaining", quota.remaining.featuredRequestsLeft], ["Platform commission", `${Math.round(quota.plan.commissionRate * 100)}%`]]} />
+            </div>
+            <CreatorPlanCard snapshot={quota} />
+          </section>
+        </>
       ) : null}
 
       <section className="grid cards-2">

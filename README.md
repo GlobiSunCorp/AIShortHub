@@ -1,4 +1,4 @@
-# AIShortHub MVP (Phase 9 · 会员徽章系统 + 配额提示系统 + 权益卡交互)
+# AIShortHub MVP (Phase 10 · 下拉组件统一 + 配额预警 + 计划健康与动作中心)
 
 本轮重点打磨试运营闭环：Creator 上传配额、退款策略拆分、支付按钮真实跳转、Support 可信化、文档体系补齐。
 
@@ -30,7 +30,7 @@ VITE_POLICY_EMAIL=policy@aishorthub.com
 VITE_SUPPORT_FORM_URL=/support
 ```
 
-## Phase 9 完成内容
+## Phase 10 完成内容
 
 ### 1) Creator 上传限制与配额
 - Creator Plan 新增：`maxActiveSeries`、`maxTotalEpisodes`、`monthlyAssetStorageLimitGb`、`monthlyUploadLimit`、`includedMotionPosterCount`、`reviewPriority`、`featuredPlacementEligibility`。
@@ -113,3 +113,12 @@ VITE_SUPPORT_FORM_URL=/support
 - 真实 RLS 策略与多租户权限细化
 - 大视频转码与 CDN 分发（Mux/Cloudflare Stream）
 - 运营工单系统与自动化风控
+
+
+### 新增：运营化 Creator 面板升级
+- 统一替换原生 select 为 `DarkSelect` 组件，覆盖 Demo Role Switcher、Browse 筛选、Admin 状态筛选与 Signup 账户类型。
+- 新增 Quota Alert Bar（normal / near_limit / exhausted）并支持 CTA。
+- 新增 Plan Health Card：展示 Viewer/Creator plan、commission、review priority、Series/Episodes/Storage/Motion Poster/Featured 使用情况、renewal 与 quota reset 日期。
+- 新增 Creator Action Center：按 urgent / recommended / informational 分类行动项。
+- 新增 Submission Readiness Checklist：提交前显式校验缺项与状态（ready to submit / needs revision / upgrade recommended）。
+- Pricing / Services / Profile 补充 Included / Discounted / Add-on / quota / renewal 说明文案。

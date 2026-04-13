@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AccessGuidePanel } from '../components/AccessGuidePanel';
 import { minLength } from '../lib/validation';
+import { DarkSelect } from '../components/DarkSelect';
 
 const orderStatuses = ['pending', 'in_progress', 'completed', 'cancelled'];
 const reviewStatuses = ['draft', 'pending_review', 'published', 'rejected'];
@@ -38,10 +39,12 @@ export function AdminPage({ platform, auth }) {
       <section className="panel">
         <h2>Review Queue</h2>
         <div className="row wrap">
-          <select className="input" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-            <option value="all">All status</option>
-            {reviewStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <DarkSelect
+            id="admin-review-filter"
+            value={filterStatus}
+            onChange={setFilterStatus}
+            options={[{ value: 'all', label: 'All status' }, ...reviewStatuses.map((s) => ({ value: s, label: s }))]}
+          />
           <input className="input" placeholder="审核备注（reject 必填）" value={reviewNote} onChange={(e) => setReviewNote(e.target.value)} />
         </div>
         <div className="table-wrap"><table><thead><tr><th>Series</th><th>Status</th><th>Report</th><th>Flagged</th><th>Action</th></tr></thead><tbody>
@@ -61,9 +64,12 @@ export function AdminPage({ platform, auth }) {
         <div className="table-wrap"><table><thead><tr><th>ID</th><th>Type</th><th>Project</th><th>Status</th><th>Updated</th><th>Update</th></tr></thead><tbody>
           {platform.serviceOrders.length ? platform.serviceOrders.map((order) => (
             <tr key={order.id}><td>{order.id}</td><td>{order.serviceType}</td><td>{order.projectTitle}</td><td>{order.status}</td><td>{order.updated_at || order.updatedAt || '-'}</td><td>
-              <select className="input" value={order.status} onChange={async (e) => { await platform.actions.updateServiceOrderStatus(order.id, e.target.value, orderNote); setFeedback({ type: 'success', message: `订单 ${order.id} 状态更新为 ${e.target.value}。` }); }}>
-                {orderStatuses.map((s) => <option key={s}>{s}</option>)}
-              </select>
+              <DarkSelect
+                id={`admin-order-status-${order.id}`}
+                value={order.status}
+                onChange={async (next) => { await platform.actions.updateServiceOrderStatus(order.id, next, orderNote); setFeedback({ type: 'success', message: `订单 ${order.id} 状态更新为 ${next}。` }); }}
+                options={orderStatuses.map((s) => ({ value: s, label: s }))}
+              />
             </td></tr>
           )) : <tr><td colSpan={6} className="small-text">暂无服务订单，等待用户提交。</td></tr>}
         </tbody></table></div>

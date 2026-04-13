@@ -110,7 +110,10 @@ export function PricingPage({ auth, platform }) {
                 <li>月上传次数：{plan.monthlyUploadLimit}</li>
                 <li>Motion Poster：<FeatureCell value={plan.motionPoster} /></li>
                 <li>推荐位资格：<FeatureCell value={plan.featuredPlacementEligibility} /></li>
+                <li>Included Motion Poster 次数：{plan.includedMotionPosterCount}</li>
+                <li>配额重置：每个 billing cycle 自动刷新</li>
               </ul>
+              <p className="small-text">Upgrade benefit: lower commission · more storage · priority review · more featured slots.</p>
               <button type="button" className="btn btn-ghost" disabled={loadingKey === `creator-${plan.id}`} onClick={() => handleCreatorPlan(plan)}>
                 {loadingKey === `creator-${plan.id}` ? '跳转支付中...' : `选择 ${plan.name}`}
               </button>
