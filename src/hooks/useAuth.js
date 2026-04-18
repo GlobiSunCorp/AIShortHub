@@ -11,7 +11,20 @@ function profileToUser(profile, fallbackEmail) {
     role: profile.role || 'member',
     tier: profile.viewer_plan || 'free',
     creatorPlan: profile.creator_plan || null,
-    avatar: (profile.name || 'U').slice(0, 2).toUpperCase(),
+    avatar: (profile.name || fallbackEmail || 'U').slice(0, 2).toUpperCase(),
+  };
+}
+
+function sessionToFallbackUser(session, role = 'member') {
+  const email = session?.user?.email || 'user@aishorthub.com';
+  return {
+    id: session?.user?.id || `u_${email.split('@')[0]}`,
+    name: session?.user?.user_metadata?.name || email.split('@')[0] || 'User',
+    email,
+    role,
+    tier: 'free',
+    creatorPlan: role === 'creator' ? 'creator_basic' : null,
+    avatar: (email.split('@')[0] || 'U').slice(0, 2).toUpperCase(),
   };
 }
 
@@ -21,6 +34,9 @@ async function ensureProfile(session, role = 'member') {
 
   const query = `id=eq.${user.id}&select=*`;
   const profileResp = await fetchTable('profiles', query, session.access_token);
+  if (profileResp.error) {
+    return { user: sessionToFallbackUser(session, role), error: profileResp.error };
+  }
   if (profileResp.data?.length) return { user: profileToUser(profileResp.data[0], user.email), error: null };
 
   const payload = {
@@ -32,7 +48,7 @@ async function ensureProfile(session, role = 'member') {
     creator_plan: role === 'creator' ? 'creator_basic' : null,
   };
   const created = await insertTable('profiles', payload, session.access_token);
-  if (created.error) return { user: null, error: created.error };
+  if (created.error) return { user: sessionToFallbackUser(session, role), error: created.error };
   return { user: profileToUser(created.data?.[0] || payload, user.email), error: null };
 }
 
@@ -47,14 +63,23 @@ export function useAuth() {
     let mounted = true;
     async function bootstrap() {
       if (!hasSupabase || !session?.access_token) {
-        setLoading(false);
+        if (mounted) setLoading(false);
         return;
       }
-      const ensured = await ensureProfile(session);
-      if (mounted) {
-        setUser(ensured.user);
-        setNotice(ensured.error ? `Profile sync warning: ${ensured.error}` : '');
-        setLoading(false);
+
+      try {
+        const ensured = await ensureProfile(session);
+        if (mounted) {
+          setUser(ensured.user || sessionToFallbackUser(session));
+          setNotice(ensured.error ? `Profile sync warning: ${ensured.error}` : '');
+          setLoading(false);
+        }
+      } catch (error) {
+        if (mounted) {
+          setUser(sessionToFallbackUser(session));
+          setNotice(`Profile sync warning: ${error?.message || 'Unknown error'}`);
+          setLoading(false);
+        }
       }
     }
     bootstrap();
@@ -65,34 +90,51 @@ export function useAuth() {
 
   const login = async (email, password) => {
     if (!hasSupabase) return mock.login(email);
-    const result = await authRequest('token?grant_type=password', { email, password });
-    if (result.error) return { ok: false, message: result.error };
-    saveSession(result.data);
-    setSession(result.data);
-    const ensured = await ensureProfile(result.data);
-    setUser(ensured.user);
-    return { ok: true, message: '登录成功。' };
+    try {
+      const result = await authRequest('token?grant_type=password', { email, password });
+      if (result.error) return { ok: false, message: result.error };
+      saveSession(result.data);
+      setSession(result.data);
+      const ensured = await ensureProfile(result.data);
+      setUser(ensured.user || sessionToFallbackUser(result.data));
+      setNotice(ensured.error ? `Profile sync warning: ${ensured.error}` : '');
+      return { ok: true, message: '登录成功。' };
+    } catch (error) {
+      saveSession(null);
+      setSession(null);
+      setUser(null);
+      return { ok: false, message: error?.message || '登录失败，请稍后再试。' };
+    }
   };
 
   const signup = async ({ email, password, role }) => {
     if (!hasSupabase) return mock.signup({ email, role });
-    const result = await authRequest('signup', { email, password, data: { role } });
-    if (result.error) return { ok: false, message: result.error };
-    if (result.data?.access_token) {
-      saveSession(result.data);
-      setSession(result.data);
-      const ensured = await ensureProfile(result.data, role);
-      setUser(ensured.user);
+    try {
+      const result = await authRequest('signup', { email, password, data: { role } });
+      if (result.error) return { ok: false, message: result.error };
+      if (result.data?.access_token) {
+        saveSession(result.data);
+        setSession(result.data);
+        const ensured = await ensureProfile(result.data, role);
+        setUser(ensured.user || sessionToFallbackUser(result.data, role));
+        setNotice(ensured.error ? `Profile sync warning: ${ensured.error}` : '');
+      }
+      return { ok: true, message: '注册成功，请检查邮箱验证状态。' };
+    } catch (error) {
+      return { ok: false, message: error?.message || '注册失败，请稍后再试。' };
     }
-    return { ok: true, message: '注册成功，请检查邮箱验证状态。' };
   };
 
   const requestPasswordReset = async (email) => {
     if (!hasSupabase) return mock.requestPasswordReset(email);
-    const redirectTo = `${window.location.origin}/login`;
-    const result = await authRequest('recover', { email, redirect_to: redirectTo });
-    if (result.error) return { ok: false, message: result.error };
-    return { ok: true, message: `已发送重置链接到 ${email}` };
+    try {
+      const redirectTo = `${window.location.origin}/login`;
+      const result = await authRequest('recover', { email, redirect_to: redirectTo });
+      if (result.error) return { ok: false, message: result.error };
+      return { ok: true, message: `已发送重置链接到 ${email}` };
+    } catch (error) {
+      return { ok: false, message: error?.message || '重置邮件发送失败，请稍后再试。' };
+    }
   };
 
   const logout = async () => {
@@ -100,6 +142,7 @@ export function useAuth() {
     saveSession(null);
     setSession(null);
     setUser(null);
+    setNotice('');
   };
 
   const switchDemoRole = (value) => {
