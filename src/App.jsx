@@ -90,34 +90,36 @@ export default function App() {
 
   return (
     <RouterContext.Provider value={router}>
-      <AppLayout auth={auth} platform={platform}>
-        <ErrorBoundary>
-          {route.name === 'home' ? <HomePage auth={auth} platform={platform} /> : null}
-          {route.name === 'browse' ? <BrowsePage platform={platform} /> : null}
-          {route.name === 'series' ? <SeriesDetailPage id={route.id} platform={platform} auth={auth} /> : null}
-          {route.name === 'watch' ? <WatchPage auth={auth} id={route.id} episode={route.episode} platform={platform} /> : null}
-          {route.name === 'submit' ? <SubmitPage /> : null}
-          {route.name === 'creator' ? <CreatorDashboardPage auth={auth} platform={platform} /> : null}
-          {route.name === 'pricing' ? <PricingPage auth={auth} platform={platform} /> : null}
-          {route.name === 'services' ? <ServiceOrdersPage auth={auth} platform={platform} /> : null}
-          {route.name === 'serviceOrderDetail' ? <ServiceOrderDetailPage id={route.id} platform={platform} auth={auth} /> : null}
-          {route.name === 'profile' ? <ProfilePage auth={auth} platform={platform} /> : null}
-          {route.name === 'admin' ? <AdminPage platform={platform} auth={auth} /> : null}
-          {route.name === 'login' ? <LoginPage auth={auth} /> : null}
-          {route.name === 'signup' ? <SignupPage auth={auth} /> : null}
-          {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
-          {route.name === 'faq' ? <FAQPage /> : null}
-          {route.name === 'support' ? <ContactSupportPage /> : null}
-          {route.name === 'checkoutSuccess' ? <CheckoutResultPage type="success" /> : null}
-          {route.name === 'checkoutCancel' ? <CheckoutResultPage type="cancel" /> : null}
-          {route.name === 'terms' ? <PolicyPage type="terms" /> : null}
-          {route.name === 'privacy' ? <PolicyPage type="privacy" /> : null}
-          {route.name === 'refund' ? <PolicyPage type="refund" /> : null}
-          {route.name === 'creatorGuidelines' ? <PolicyPage type="creatorGuidelines" /> : null}
-          {route.name === 'contentPolicy' ? <PolicyPage type="contentPolicy" /> : null}
-          {route.name === 'commissionPayout' ? <PolicyPage type="commissionPayout" /> : null}
-        </ErrorBoundary>
-      </AppLayout>
+      <ErrorBoundary>
+        <AppLayout auth={auth} platform={platform}>
+          <ErrorBoundary>
+            {route.name === 'home' ? <HomePage auth={auth} platform={platform} /> : null}
+            {route.name === 'browse' ? <BrowsePage platform={platform} /> : null}
+            {route.name === 'series' ? <SeriesDetailPage id={route.id} platform={platform} auth={auth} /> : null}
+            {route.name === 'watch' ? <WatchPage auth={auth} id={route.id} episode={route.episode} platform={platform} /> : null}
+            {route.name === 'submit' ? <SubmitPage /> : null}
+            {route.name === 'creator' ? <CreatorDashboardPage auth={auth} platform={platform} /> : null}
+            {route.name === 'pricing' ? <PricingPage auth={auth} platform={platform} /> : null}
+            {route.name === 'services' ? <ServiceOrdersPage auth={auth} platform={platform} /> : null}
+            {route.name === 'serviceOrderDetail' ? <ServiceOrderDetailPage id={route.id} platform={platform} auth={auth} /> : null}
+            {route.name === 'profile' ? <ProfilePage auth={auth} platform={platform} /> : null}
+            {route.name === 'admin' ? <AdminPage platform={platform} auth={auth} /> : null}
+            {route.name === 'login' ? <LoginPage auth={auth} /> : null}
+            {route.name === 'signup' ? <SignupPage auth={auth} /> : null}
+            {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
+            {route.name === 'faq' ? <FAQPage /> : null}
+            {route.name === 'support' ? <ContactSupportPage /> : null}
+            {route.name === 'checkoutSuccess' ? <CheckoutResultPage type="success" /> : null}
+            {route.name === 'checkoutCancel' ? <CheckoutResultPage type="cancel" /> : null}
+            {route.name === 'terms' ? <PolicyPage type="terms" /> : null}
+            {route.name === 'privacy' ? <PolicyPage type="privacy" /> : null}
+            {route.name === 'refund' ? <PolicyPage type="refund" /> : null}
+            {route.name === 'creatorGuidelines' ? <PolicyPage type="creatorGuidelines" /> : null}
+            {route.name === 'contentPolicy' ? <PolicyPage type="contentPolicy" /> : null}
+            {route.name === 'commissionPayout' ? <PolicyPage type="commissionPayout" /> : null}
+          </ErrorBoundary>
+        </AppLayout>
+      </ErrorBoundary>
     </RouterContext.Provider>
   );
 }
