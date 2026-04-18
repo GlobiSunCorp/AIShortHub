@@ -6,6 +6,10 @@ import { resolveMembership } from '../hooks/usePlanAccess';
 import { MembershipBadge, PlanIdentityBadge } from '../components/EntitlementBadges';
 import { GlossaryTerm } from '../components/GlossaryTerm';
 import { OnboardingGuide } from '../components/OnboardingGuide';
+import { getBillingSummarySnapshot } from '../lib/selectors/getBillingSummarySnapshot';
+import { FeeBreakdownCard } from '../components/billing/FeeBreakdownCard';
+import { HowPricingWorksPanel } from '../components/billing/HowPricingWorksPanel';
+import { RevenueFlowDiagram } from '../components/billing/RevenueFlowDiagram';
 
 function FeatureCell({ value }) {
   return <span>{value === true ? '✅' : value === false ? '—' : value}</span>;
@@ -16,6 +20,8 @@ export function PricingPage({ auth, platform }) {
   const [loadingKey, setLoadingKey] = useState('');
   const membership = auth.user ? resolveMembership(auth, platform) : { tier: 'free', creatorPlan: null };
   const activeCreator = getCreatorPlan(membership.creatorPlan || 'creator_basic');
+  const creatorProfile = platform.creators.find((item) => item.profileId === auth?.user?.id) || platform.creators[0];
+  const billingSnapshot = getBillingSummarySnapshot({ platform, creatorId: creatorProfile?.id, membership });
 
   const handleViewerCheckout = async (plan) => {
     if (!auth.isLoggedIn) return setNotice({ type: 'error', text: '请先登录后再升级 Viewer Subscription。' });
@@ -137,6 +143,14 @@ export function PricingPage({ auth, platform }) {
             <h4>Creator Earnings Priority</h4>
             {REVENUE_MODEL.creator.map((item, idx) => <p key={item} className="small-text">{idx + 1}. {item}</p>)}
           </article>
+        </div>
+      </section>
+
+      <HowPricingWorksPanel viewerSummary={billingSnapshot.viewer} creatorSummary={billingSnapshot.creator} />
+      <section className="panel">
+        <div className="grid cards-2">
+          <RevenueFlowDiagram lines={billingSnapshot.creator.lines} netPayout={billingSnapshot.creator.netPayout} />
+          <FeeBreakdownCard gross={billingSnapshot.creator.gross} deductions={billingSnapshot.creator.deductions} net={billingSnapshot.creator.netPayout} />
         </div>
       </section>
 

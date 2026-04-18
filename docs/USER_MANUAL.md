@@ -25,3 +25,9 @@
 
 ## 5. 软上线阶段说明
 平台当前处于 early launch 阶段，可能会逐步扩充内容库；首页和 Browse 已支持少量内容的友好展示。
+
+
+## Phase 15 更新（用户侧）
+- 订阅、试看、单片/单集解锁说明已统一到可复用计费说明卡。
+- FAQ 增加术语分类（Viewer/Creator/Billing/Payout/Workflow/Moderation），桌面 hover、移动端 tap 均可查看解释。
+- 首页与浏览页使用统一数据快照，减少状态切换时的信息抖动或空白。

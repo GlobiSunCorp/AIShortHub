@@ -20,3 +20,12 @@
 - Creator 上传系统升级为专业工作流：Trailer 与 Main Episodes 分离、资产类型扩展、分辨率/比例维度、QC 检查提示。
 - 更新退款文案：Viewer/Creator/Add-on 独立且更清晰可信。
 - README、USER_MANUAL、CREATOR_MANUAL、ADMIN_PLAYBOOK 同步更新。
+
+
+## Phase 15
+- Added data normalization layer in `src/lib/normalizers`.
+- Added selector/view-model layer in `src/lib/selectors`.
+- Hardened key pages/components for missing membership/creator/quota/payment states.
+- Rebuilt Admin as operator-focused overview console with launch readiness module.
+- Added reusable billing explanation components and integrated into Pricing/Profile/Creator/FAQ.
+- Expanded glossary with grouped categories and additional launch/billing/workflow terms.
