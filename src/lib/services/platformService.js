@@ -1,4 +1,5 @@
 import {
+  creatorEarnings as mockCreatorEarnings,
   creators as mockCreators,
   episodes as mockEpisodes,
   memberships as mockMemberships,
@@ -25,6 +26,7 @@ function getMockPlatformPayload(mode = 'mock', warning = '') {
     serviceOrders: mockServiceOrders,
     payments: mockPayments,
     payouts: mockPayouts,
+    creatorEarnings: mockCreatorEarnings,
     reviewLogs: mockReviewLogs,
     memberships: mockMemberships,
     unlockedContent,
@@ -81,6 +83,7 @@ export async function loadPlatformData(accessToken) {
       unlockedContent,
       ordersHistory,
       platformConfig: PLATFORM_CONFIG,
+      creatorEarnings: mockCreatorEarnings,
       mode: 'real',
       warning: '',
     };

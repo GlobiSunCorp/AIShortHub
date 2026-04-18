@@ -1,28 +1,28 @@
 export const pricingPlans = [
   {
-    id: 'starter',
-    name: 'Audience Starter',
+    id: 'free',
+    name: 'Free',
     price: '$0',
-    note: 'Free browsing + limited watch',
-    features: ['Browse all series', 'Watch free episodes', 'Basic watchlist (requires login)'],
+    note: 'Trailer + preview episodes only',
+    features: ['Browse all series', 'Watch trailer and preview episodes', 'Upgrade anytime without lock-in'],
   },
   {
-    id: 'plus',
-    name: 'Drama Plus',
-    price: '$11/mo',
-    note: 'Unlock full stories',
-    features: ['Unlimited episode unlocks', 'No trailer ads', 'Continue watching across devices'],
+    id: 'pro_viewer',
+    name: 'Pro Viewer',
+    price: '$4.99/mo',
+    note: 'Low barrier full access plan',
+    features: ['Watch full series library', '1080p playback', 'Continue watching across devices'],
   },
   {
-    id: 'creator',
-    name: 'Creator Service',
-    price: 'Custom',
-    note: 'Submission + growth services',
-    features: ['Submission onboarding', 'Distribution dashboard', 'Traffic + conversion analytics'],
+    id: 'premium_viewer',
+    name: 'Premium Viewer',
+    price: '$9.99/mo',
+    note: 'Premium quality + early access',
+    features: ['Higher quality up to 1440p', 'Early access drops', 'Exclusive premium-only content'],
   },
 ];
 
 export const billingEntries = [
-  { id: 'INV-9001', item: 'Drama Plus Monthly', amount: '$11', status: 'Paid', date: '2026-04-01' },
-  { id: 'INV-9002', item: 'Creator Growth Pack', amount: '$149', status: 'Pending', date: '2026-04-09' },
+  { id: 'INV-9001', item: 'Pro Viewer Monthly', amount: '$4.99', status: 'Paid', date: '2026-04-01' },
+  { id: 'INV-9002', item: 'Creator Pro Monthly', amount: '$19', status: 'Paid', date: '2026-04-09' },
 ];

@@ -1,3 +1,5 @@
+import { formatUsd } from '../data/monetization';
+
 export function EpisodeList({ episodes, currentEpisodeNumber, onSelect, membershipLocked = () => false }) {
   if (!episodes.length) {
     return <p className="small-text">No episodes yet. Upload the first episode to start distribution.</p>;
@@ -16,7 +18,7 @@ export function EpisodeList({ episodes, currentEpisodeNumber, onSelect, membersh
           >
             <span>E{episode.number}</span>
             <small>{episode.title}</small>
-            {episode.isPreview ? <i>Preview</i> : <i>{locked ? 'Member only' : 'Unlocked'}</i>}
+            {episode.isPreview ? <i>Preview</i> : <i>{locked ? `Unlock ${formatUsd(episode.unlockPriceUsd || 0.99)}` : 'Unlocked'}</i>}
           </button>
         );
       })}

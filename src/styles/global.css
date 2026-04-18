@@ -704,3 +704,18 @@ textarea::placeholder {
     overflow: auto;
   }
 }
+
+.stacked-bar {
+  display: flex;
+  min-height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+}
+
+.stacked-bar span:nth-child(1) { background: #7c6dff; }
+.stacked-bar span:nth-child(2) { background: #4ea2ff; }
+.stacked-bar span:nth-child(3) { background: #47d1a8; }
+.stacked-bar span:nth-child(4) { background: #d59dff; }
+
+.stack-sm > * + * { margin-top: 0.55rem; }

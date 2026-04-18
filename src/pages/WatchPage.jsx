@@ -2,14 +2,19 @@ import { useMemo } from 'react';
 import { EpisodeList } from '../components/EpisodeList';
 import { VideoPlayerPlaceholder } from '../components/VideoPlayerPlaceholder';
 import { Link, useRouter } from '../lib/router';
+import { resolveMembership } from '../hooks/usePlanAccess';
+import { formatUsd } from '../data/monetization';
 
 export function WatchPage({ auth, id, episode, platform }) {
   const { navigate } = useRouter();
   const series = platform.series.find((item) => item.id === id) || platform.series[0];
   const episodes = platform.episodes.filter((item) => item.seriesId === series.id).sort((a, b) => a.number - b.number);
   const current = episodes.find((item) => item.number === Number(episode)) || episodes[0];
-  const isMember = ['member', 'creator', 'admin'].includes(auth.userState);
-  const canWatch = isMember || current.number <= platform.platformConfig.freeEpisodeCount;
+  const membership = resolveMembership(auth, platform);
+  const isMember = membership.tier !== 'free' || Boolean(membership.creatorPlan) || auth.userState === 'admin';
+  const monetization = series.monetization || { episodeUnlockPriceUsd: 0.99, freePreviewEpisodes: [1], titlePriceUsd: 7.99 };
+  const freePreviewEpisodes = monetization.freePreviewEpisodes || [1];
+  const canWatch = isMember || freePreviewEpisodes.includes(current.number);
   const watchSeconds = canWatch ? current.durationSeconds : Math.min(platform.platformConfig.trialSeconds, current.durationSeconds);
 
   const moreLikeThis = useMemo(() => platform.series.filter((item) => item.id !== series.id && item.status === 'published').slice(0, 3), [platform.series, series.id]);
@@ -27,7 +32,7 @@ export function WatchPage({ auth, id, episode, platform }) {
             helper={
               canWatch
                 ? `当前可播放 ${watchSeconds}s · 地址: ${current.videoUrl}`
-                : `guest 仅可试看前 ${platform.platformConfig.freeEpisodeCount} 集 / ${platform.platformConfig.trialSeconds}s`
+                : `guest 仅可试看预告和指定试看集；可单集解锁 ${formatUsd(current.unlockPriceUsd || monetization.episodeUnlockPriceUsd)} 或整季解锁 ${formatUsd(monetization.titlePriceUsd)}`
             }
           />
 
@@ -42,7 +47,7 @@ export function WatchPage({ auth, id, episode, platform }) {
           {!canWatch ? (
             <article className="watch-lock">
               <h3>当前分集仅会员可观看</h3>
-              <p className="small-text">非会员用户可观看 trailer 和首集试看，升级后自动解锁完整内容。</p>
+              <p className="small-text">非订阅用户可观看 trailer 和试看集，或按单集/整剧购买；Pro/Premium 自动解锁完整内容。</p>
               <div className="row wrap">
                 <Link className="btn btn-primary" to="/pricing">
                   立即开通 Pro
@@ -69,7 +74,7 @@ export function WatchPage({ auth, id, episode, platform }) {
             episodes={episodes}
             currentEpisodeNumber={current.number}
             onSelect={(ep) => navigate(`/watch/${series.id}/${ep}`)}
-            membershipLocked={(item) => !isMember && item.number > platform.platformConfig.freeEpisodeCount}
+            membershipLocked={(item) => !isMember && !freePreviewEpisodes.includes(item.number)}
           />
         </aside>
       </section>

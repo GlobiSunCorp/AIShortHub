@@ -1,56 +1,62 @@
-# AIShortHub 创作者说明书
+# AIShortHub 创作者说明书（Phase 13）
 
-## 1. 如何选择 Creator Plan
-- Creator Basic：1 部 active series、10 集总上限、2GB/月素材。
-- Creator Pro：5 部 active series、100 集、20GB/月素材。
-- Studio：20 部 active series、500 集、100GB/月素材。
+## 1. Creator 方案
+- Creator Basic：$0 / 15% 抽成 / 2 active series / 20 episodes / 5GB
+- Creator Pro：$19 / 10% 抽成 / 5 active series / 100 episodes / 25GB
+- Studio：$49 / 7% 抽成 / 20 active series / 500 episodes / 100GB
 
-## 2. 如何上传剧集
-1. 进入 Creator Studio Step 1 填写标题、简介、标签。
-2. Step 2 上传 Static Poster / Motion Poster / Thumbnail / Trailer。
-3. Step 3 上传分集视频占位或 URL。
-4. Step 4 勾选检查清单并提交审核。
+## 2. Creator 收益构成
+收益面板将拆分展示：
+1) 广告分成
+2) 订阅池分成
+3) 整剧销售
+4) 单集解锁销售
+5) 服务成本
+6) 平台抽成
+7) 净收入
+8) 待结算
+9) 已打款
 
-## 3. 如何上传资产
-- 支持 URL fallback 与 Storage 上传。
-- 每次上传受月上传次数与月存储配额限制。
-- 超出配额会在界面明确提示。
+## 3. Creator 自定价
+在 Creator Studio 的 Pricing & QC 步骤可配置：
+- Entire title price
+- Episode unlock price
+- Optional finale unlock
+- Free preview episodes
 
-## 4. 如何提交审核
-- 提交前需满足最小字段校验与检查清单。
-- 提交后状态进入 `pending_review`。
+同时区分：
+- 订阅用户可免费看哪些
+- 非订阅用户可按整剧/单集购买哪些
 
-## 5. 平台抽成如何计算
-- 默认平台抽成 20%。
-- Creator Plan 越高，抽成越低（Basic 30%、Pro 20%、Studio 15%）。
+## 4. 上传工作流（专业版）
+### A. Trailer（独立资产）
+- Trailer 标题、封面、时长、CTA、分辨率、比例
+- 用于首页、详情页、社媒引流
 
-## 6. Included / Add-on / Discounted
-- Included：方案内已包含，无需额外支付。
-- Discounted：可优惠购买。
-- Add-on/Optional：需单独付费。
+### B. Main Episodes（分集）
+- 集数排序
+- 是否试看 / 是否收费 / 单集价格
+- 上架时间
+- 字幕语言
+- 审核状态
 
-## 7. 退款与上传限制
-- Creator Plan 与 Viewer Subscription 独立退款。
-- 首次购买审核窗口可申请（mock 默认 7 天）。
-- 一旦上传内容/提交审核/使用权益，默认不可退款。
+### 资产类型支持
+- Static Poster / Motion Poster / Vertical Cover / Square Thumbnail
+- Trailer / Main Episode
+- Subtitle files / Caption pack / Promo pack
 
+## 5. QC 检查项
+提审前将提示：
+- 缺少封面
+- 缺少预告
+- 分辨率不足
+- 比例不推荐
+- 时长过短/过长
+- 文件过大
+- 分集命名不规范
+- 缺少字幕
 
-## 8. 徽章与额度看板
-- Creator Studio 顶部提供方案徽章与核心额度徽章。
-- Hover/Tap 可展开权益卡，查看审核优先级、平台抽成、额度已用/剩余、续费占位。
-
-## 9. 资产与服务权益文案
-- 上传资产模块会提示当前计划状态：Included / Discounted / Add-on。
-- Services 页面会根据 Creator Plan 自动显示待遇（Included in Studio / Discounted for Creator Pro / Add-on for Basic）。
-
-## 10. 本轮新增：动作中心与提审清单
-- Creator Action Center 会按 urgent / recommended / informational 给出下一步操作建议。
-- 提交前检查清单会明确标红缺项，不再静默失败。
-- 若当前计划额度不足，会在检查清单中直接给出升级建议。
-- 配额提醒条可提示 Series/Storage/Motion Poster/Featured/Renewal 风险。
-
-## Iteration 11: Creator Plan Visibility and Upgrade Guidance
-- Creator Studio and Profile now show stronger plan identity badges (Creator Basic / Creator Pro / Studio).
-- Quota alert bar wording now follows Included / Optional / Add-on / Remaining / Resets-on style.
-- Sticky Upgrade Rail includes commission, active series remaining, storage remaining, motion poster status, featured request status.
-- Creator-only upgrade prompts are now isolated to Creator Pro / Studio / Add-on services.
+## 6. 退款说明（摘要）
+- Creator Plan 与 Viewer 订阅独立。
+- 上传、提审、权益消耗后默认不可退款。
+- Add-on 服务未开工可退，开工后默认不可退。
