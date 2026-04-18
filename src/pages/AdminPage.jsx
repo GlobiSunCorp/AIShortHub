@@ -3,21 +3,11 @@ import { AccessGuidePanel } from '../components/AccessGuidePanel';
 import { minLength } from '../lib/validation';
 import { DarkSelect } from '../components/DarkSelect';
 import { OnboardingGuide } from '../components/OnboardingGuide';
+import { getOperatorDashboardSnapshot } from '../lib/selectors/getOperatorDashboardSnapshot';
+import { formatUsd } from '../data/monetization';
 
-const orderStatuses = ['pending', 'in_progress', 'completed', 'cancelled'];
+const orderStatuses = ['pending', 'in_progress', 'pending_payment', 'completed', 'cancelled'];
 const reviewStatuses = ['draft', 'pending_review', 'published', 'rejected'];
-const launchChecklist = [
-  'Custom domain setup',
-  'Production env vars setup',
-  'Supabase production checklist',
-  'Stripe production checklist',
-  'Support email / pilot contact mode',
-  'Terms / Privacy / Refund / Content Policy review',
-  'First content batch readiness',
-  'Payment and checkout testing',
-  'Creator upload testing',
-  'Soft launch rehearsal',
-];
 
 export function AdminPage({ platform, auth }) {
   const [reviewNote, setReviewNote] = useState('');
@@ -25,9 +15,9 @@ export function AdminPage({ platform, auth }) {
   const [filterStatus, setFilterStatus] = useState('all');
   const [feedback, setFeedback] = useState({ type: '', message: '' });
 
-  const pending = platform.series.filter((item) => item.status === 'pending_review');
+  const dashboard = useMemo(() => getOperatorDashboardSnapshot(platform), [platform]);
   const filteredSeries = useMemo(
-    () => platform.series.filter((item) => (filterStatus === 'all' ? true : item.status === filterStatus)),
+    () => (platform.series || []).filter((item) => (filterStatus === 'all' ? true : item.status === filterStatus)),
     [platform.series, filterStatus]
   );
 
@@ -38,24 +28,45 @@ export function AdminPage({ platform, auth }) {
     <div className="stack-lg">
       <OnboardingGuide role="admin" />
       <section className="panel">
-        <h1>Admin Review Workbench</h1>
-        <p className="small-text">状态流：draft → pending_review → approved/published 或 rejected。预留 report_count / flagged 字段用于下一轮举报审核。</p>
+        <h1>Operator Overview</h1>
+        <p className="small-text">Solo founder operating console: monitor users, creator plans, review queue, billing issues, payout risks, and launch readiness in one place.</p>
       </section>
       {feedback.message ? <section className="panel"><p className={`form-feedback ${feedback.type}`}>{feedback.message}</p></section> : null}
 
+      <section className="grid cards-4">
+        <article className="stat-card"><p className="small-text">Total users</p><h3>{dashboard.totals.users}</h3></article>
+        <article className="stat-card"><p className="small-text">Total creators</p><h3>{dashboard.totals.creators}</h3></article>
+        <article className="stat-card"><p className="small-text">Active viewer subscriptions</p><h3>{dashboard.totals.activeViewerSubscriptions}</h3></article>
+        <article className="stat-card"><p className="small-text">Active creator plans</p><h3>{dashboard.totals.activeCreatorPlans}</h3></article>
+        <article className="stat-card"><p className="small-text">Published series</p><h3>{dashboard.totals.publishedSeries}</h3></article>
+        <article className="stat-card"><p className="small-text">Pending review</p><h3>{dashboard.totals.pendingReview}</h3></article>
+        <article className="stat-card"><p className="small-text">Flagged/report count</p><h3>{dashboard.totals.flagged}</h3></article>
+        <article className="stat-card"><p className="small-text">Service orders pending</p><h3>{dashboard.totals.serviceOrdersPending}</h3></article>
+        <article className="stat-card"><p className="small-text">Payment issues</p><h3>{dashboard.totals.paymentIssues}</h3></article>
+        <article className="stat-card"><p className="small-text">Pending payouts</p><h3>{dashboard.totals.pendingPayouts}</h3></article>
+      </section>
+
+      <section className="grid cards-3">
+        <article className="mini-card"><h3>Needs attention</h3><p className="small-text">{dashboard.cards.needsAttention} items need follow-up.</p></article>
+        <article className="mini-card"><h3>Awaiting review</h3><p className="small-text">{dashboard.cards.awaitingReview.map((item) => item.title).join(' · ') || 'No series waiting.'}</p></article>
+        <article className="mini-card"><h3>Support / policy inbox summary</h3><p className="small-text">{dashboard.cards.supportInboxSummary} open support/order items.</p></article>
+        <article className="mini-card"><h3>Revenue this cycle</h3><p className="small-text">{formatUsd(dashboard.cards.revenueThisCycle)}</p></article>
+        <article className="mini-card"><h3>Top performing series</h3><p className="small-text">{dashboard.cards.topSeries.map((item) => item.title).join(' · ') || 'Waiting for published performance data.'}</p></article>
+        <article className="mini-card"><h3>Creators near quota</h3><p className="small-text">{dashboard.cards.creatorsNearQuota.map((item) => item.studioName).join(' · ') || 'No alert yet.'}</p></article>
+      </section>
+
       <section className="panel stack-md">
-        <h2>Production Readiness (Read-only)</h2>
-        <p className="small-text">详细版本见 docs/LAUNCH_CHECKLIST.md。此处用于运营巡检时快速核对。</p>
-        <div className="grid cards-2">
-          {launchChecklist.map((item) => <article key={item} className="mini-card"><p className="small-text">□ {item}</p></article>)}
+        <h2>Launch Readiness</h2>
+        <div className="grid cards-3">
+          {dashboard.launchReadiness.map((item) => <article key={item.key} className="mini-card"><p className="small-text">{item.label}: <strong>{item.ready ? 'Yes' : 'No'}</strong></p></article>)}
         </div>
       </section>
 
-      <section className="grid cards-4">
-        <article className="stat-card"><p className="small-text">Draft</p><h3>{platform.series.filter((s) => s.status === 'draft').length}</h3></article>
-        <article className="stat-card"><p className="small-text">Pending</p><h3>{pending.length}</h3></article>
-        <article className="stat-card"><p className="small-text">Published</p><h3>{platform.series.filter((s) => s.status === 'published').length}</h3></article>
-        <article className="stat-card"><p className="small-text">Rejected</p><h3>{platform.series.filter((s) => s.status === 'rejected').length}</h3></article>
+      <section className="panel stack-md">
+        <h2>Recent activity feed</h2>
+        <div className="grid cards-2">
+          {dashboard.recentActivity.length ? dashboard.recentActivity.map((item, idx) => <article key={`${item.id || item.seriesId || idx}-${idx}`} className="mini-card"><p className="small-text">{item.createdAt || item.updatedAt || '-'} · {item.decision || item.status || 'updated'} · {item.reason || item.projectTitle || item.id}</p></article>) : <article className="mini-card"><p className="small-text">No activity yet.</p></article>}
+        </div>
       </section>
 
       <section className="panel">
@@ -81,11 +92,10 @@ export function AdminPage({ platform, auth }) {
 
       <section className="panel">
         <h2>服务订单管理</h2>
-        <p className="small-text">状态更新记录会携带更新时间与备注占位（便于后续 SLA/审计）。</p>
         <input className="input" placeholder="订单状态备注" value={orderNote} onChange={(e) => setOrderNote(e.target.value)} />
         <div className="table-wrap"><table><thead><tr><th>ID</th><th>Type</th><th>Project</th><th>Status</th><th>Updated</th><th>Update</th></tr></thead><tbody>
           {platform.serviceOrders.length ? platform.serviceOrders.map((order) => (
-            <tr key={order.id}><td>{order.id}</td><td>{order.serviceType}</td><td>{order.projectTitle}</td><td>{order.status}</td><td>{order.updated_at || order.updatedAt || '-'}</td><td>
+            <tr key={order.id}><td>{order.id}</td><td>{order.serviceType || '-'}</td><td>{order.projectTitle || '-'}</td><td>{order.status}</td><td>{order.updatedAt || '-'}</td><td>
               <DarkSelect
                 id={`admin-order-status-${order.id}`}
                 value={order.status}

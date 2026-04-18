@@ -10,14 +10,14 @@ export function BrowsePage({ platform }) {
   const [tag, setTag] = useState('all');
   const [status, setStatus] = useState('all');
 
-  const creatorsById = useMemo(() => Object.fromEntries(platform.creators.map((c) => [c.id, c])), [platform.creators]);
+  const creatorsById = useMemo(() => Object.fromEntries((platform.creators || []).map((c) => [c.id, c])), [platform.creators]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return platform.series.filter((item) => {
+    return (platform.series || []).filter((item) => {
       const creatorName = creatorsById[item.creatorId]?.studioName || '';
-      const queryMatch = !q || item.title.toLowerCase().includes(q) || creatorName.toLowerCase().includes(q);
-      const tagMatch = tag === 'all' || item.tags.includes(tag);
+      const queryMatch = !q || (item.title || '').toLowerCase().includes(q) || creatorName.toLowerCase().includes(q);
+      const tagMatch = tag === 'all' || (item.tags || []).includes(tag);
       const statusMatch = status === 'all' || item.status === status;
       return queryMatch && tagMatch && statusMatch;
     });
@@ -41,8 +41,8 @@ export function BrowsePage({ platform }) {
             label="标签"
             value={tag}
             onChange={setTag}
-            options={[{ value: 'all', label: '全部' }, ...platform.series
-              .flatMap((s) => s.tags)
+            options={[{ value: 'all', label: '全部' }, ...(platform.series || [])
+              .flatMap((s) => s.tags || [])
               .filter((value, index, list) => list.indexOf(value) === index)
               .map((value) => ({ value, label: value }))]}
           />

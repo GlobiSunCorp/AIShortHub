@@ -12,6 +12,10 @@ import { evaluateQuotaLimits, getCreatorQuotaSnapshot } from '../lib/services/qu
 import { buildCreatorActions, buildQuotaAlerts, getCycleDates, getHealthStatus, getSubmissionChecklist } from '../lib/services/creatorHealthService';
 import { getCreatorEarningsSnapshot, getEarningsBreakdown, getPeriodComparison } from '../lib/services/earningsService';
 import { normalizePricingConfig, validateSeriesWorkflow } from '../lib/services/uploadWorkflowService';
+import { getCreatorDashboardSnapshot } from '../lib/selectors/getCreatorDashboardSnapshot';
+import { getBillingSummarySnapshot } from '../lib/selectors/getBillingSummarySnapshot';
+import { HowPricingWorksPanel } from '../components/billing/HowPricingWorksPanel';
+import { RevenueFlowDiagram } from '../components/billing/RevenueFlowDiagram';
 
 const STEPS = ['Basic Info', 'Trailer Assets', 'Main Episodes', 'Pricing & QC', 'Publishing & Review'];
 const bucketByAssetType = {
@@ -52,8 +56,9 @@ export function CreatorDashboardPage({ auth, platform }) {
   const [files, setFiles] = useState({});
   const [feedback, setFeedback] = useState({ type: '', message: '' });
 
-  const myCreator = platform.creators.find((item) => item.profileId === auth.user?.id) || platform.creators[0];
-  const mySeries = platform.series.filter((item) => item.creatorId === myCreator?.id);
+  const creatorSnapshot = getCreatorDashboardSnapshot({ platform, auth });
+  const myCreator = creatorSnapshot.creator || platform.creators[0];
+  const mySeries = creatorSnapshot.series;
   const quota = getCreatorQuotaSnapshot({ creatorPlanId: membership.creatorPlan || 'creator_basic', creatorId: myCreator?.id, profileId: auth.user?.id, platform });
   const metrics = useMemo(() => [['我的剧集', mySeries.length], ['待审核', mySeries.filter((item) => item.status === 'pending_review').length], ['已发布', mySeries.filter((item) => item.status === 'published').length]], [mySeries]);
   const cycle = getCycleDates(platform.memberships.find((m) => m.profileId === auth.user?.id)?.renewAt);
@@ -65,6 +70,7 @@ export function CreatorDashboardPage({ auth, platform }) {
   const earnings = getCreatorEarningsSnapshot({ platform, creatorId: myCreator?.id });
   const breakdown = getEarningsBreakdown(earnings);
   const period = getPeriodComparison(earnings);
+  const billingSnapshot = getBillingSummarySnapshot({ platform, creatorId: myCreator?.id, membership });
 
   const uploadAsset = async (assetType, onDone) => {
     const file = files[assetType];
@@ -135,7 +141,9 @@ export function CreatorDashboardPage({ auth, platform }) {
           <article className="mini-card"><p className="small-text">Paid out</p><strong>{formatUsd(earnings.paidOut)}</strong></article>
           <article className="mini-card"><p className="small-text">Period vs previous</p><strong>{period.delta >= 0 ? '+' : ''}{formatUsd(period.delta)} ({period.ratio.toFixed(1)}%)</strong></article>
         </div>
+        <RevenueFlowDiagram lines={billingSnapshot.creator.lines} netPayout={billingSnapshot.creator.netPayout} />
       </section>
+      <HowPricingWorksPanel viewerSummary={billingSnapshot.viewer} creatorSummary={billingSnapshot.creator} />
 
       <CreatorActionCenter actions={actions} />
       <CreatorPlanCard snapshot={quota} />

@@ -11,6 +11,9 @@ import { getStatusLabel } from '../lib/roleDisplay';
 import { getCreatorQuotaSnapshot } from '../lib/services/quotaService';
 import { buildQuotaAlerts, getCycleDates, getHealthStatus } from '../lib/services/creatorHealthService';
 import { getCreatorEarningsSnapshot } from '../lib/services/earningsService';
+import { getBillingSummarySnapshot } from '../lib/selectors/getBillingSummarySnapshot';
+import { HowPricingWorksPanel } from '../components/billing/HowPricingWorksPanel';
+import { RevenueFlowDiagram } from '../components/billing/RevenueFlowDiagram';
 
 export function ProfilePage({ auth, platform }) {
   if (!auth.isLoggedIn) {
@@ -37,6 +40,7 @@ export function ProfilePage({ auth, platform }) {
   const latestSeries = uploads[0];
   const monetization = latestSeries?.monetization;
   const earnings = creator ? getCreatorEarningsSnapshot({ platform, creatorId: creator.id }) : null;
+  const billingSnapshot = getBillingSummarySnapshot({ platform, creatorId: creator?.id, membership });
 
   return (
     <div className="stack-lg">
@@ -108,6 +112,8 @@ export function ProfilePage({ auth, platform }) {
       ) : null}
 
       {earnings ? <section className="panel stack-md"><h3>Earnings quick summary</h3><p className="small-text">Ad revenue <GlossaryTerm id="ad_revenue_share" /> {formatUsd(earnings.advertisingRevenue)} · Subscription share <GlossaryTerm id="subscription_pool_share" /> {formatUsd(earnings.subscriptionShare)} · Single-title {formatUsd(earnings.singleTitleSales)} · Episode unlock {formatUsd(earnings.episodeUnlockSales)} · Net <GlossaryTerm id="net_earnings" /> {formatUsd(earnings.netEarnings)}</p></section> : null}
+      <HowPricingWorksPanel viewerSummary={billingSnapshot.viewer} creatorSummary={billingSnapshot.creator} />
+      {creatorPlan ? <section className="panel"><RevenueFlowDiagram lines={billingSnapshot.creator.lines} netPayout={billingSnapshot.creator.netPayout} /></section> : null}
 
       <section className="grid cards-2">
         <article className="panel stack-md">

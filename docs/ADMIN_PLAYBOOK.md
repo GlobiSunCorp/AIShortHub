@@ -21,3 +21,11 @@
 
 ## 5. 软上线到正式切换
 建议先软上线 7-14 天，确认支付、审核、客服、结算链路稳定后，再放大流量。
+
+
+## Phase 15 Operator Console
+Admin 现包含 `Operator Overview`：
+- 核心指标：总用户、总创作者、活跃订阅、活跃 Creator Plan、已发布、待审核、举报/标记、待处理服务单、支付问题、待打款。
+- 运营卡片：Needs attention / Awaiting review / Support inbox / Revenue this cycle / Top series / Creators near quota。
+- 近期活动流：聚合审核日志和服务单状态变化。
+- Launch Readiness：站内核对项（生产环境、域名、客服邮箱、Stripe live、首批内容、checkout、上传、审核、结算检查）。

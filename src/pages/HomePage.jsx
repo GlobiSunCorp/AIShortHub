@@ -2,40 +2,18 @@ import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
 import { OnboardingGuide } from '../components/OnboardingGuide';
-
-function getCreatedAt(item) {
-  return item?.createdAt || item?.created_at || '';
-}
-
-function getSeriesStatus(item) {
-  return item?.status || 'draft';
-}
-
-function getSeriesVisibility(item) {
-  return item?.visibility || 'private';
-}
-
-function getPlatformTakeRate(platformConfig) {
-  return platformConfig?.platformTakeRate ?? platformConfig?.defaultTakeRate ?? 0.2;
-}
+import { getLatestSeries } from '../lib/selectors/getLatestSeries';
+import { getPublishedSeries } from '../lib/selectors/getPublishedSeries';
+import { getSeriesEpisodeCounts } from '../lib/selectors/getSeriesEpisodeCounts';
+import { getTrendingSeries } from '../lib/selectors/getTrendingSeries';
 
 export function HomePage({ platform }) {
-  const series = Array.isArray(platform?.series) ? platform.series : [];
-  const episodes = Array.isArray(platform?.episodes) ? platform.episodes : [];
-  const published = series.filter((item) => getSeriesStatus(item) === 'published' && getSeriesVisibility(item) === 'public');
-  const trending = published.slice(0, 3);
-  const latest = [...published].sort((a, b) => getCreatedAt(b).localeCompare(getCreatedAt(a))).slice(0, 3);
+  const published = getPublishedSeries(platform);
+  const trending = getTrendingSeries(platform);
+  const latest = getLatestSeries(platform);
   const launchReady = published.slice(0, 2);
-
-  const episodeCounts = Object.fromEntries(
-    published.map((s) => [
-      s.id,
-      {
-        total: episodes.filter((ep) => (ep.seriesId || ep.series_id) === s.id).length,
-        preview: episodes.filter((ep) => (ep.seriesId || ep.series_id) === s.id && (ep.isPreview || ep.is_preview)).length,
-      },
-    ])
-  );
+  const episodeCounts = getSeriesEpisodeCounts(published, Array.isArray(platform?.episodes) ? platform.episodes : []);
+  const takeRate = Number(platform?.platformConfig?.platformTakeRate ?? 0.2);
 
   return (
     <div className="stack-lg">
@@ -61,7 +39,7 @@ export function HomePage({ platform }) {
       <section className="grid cards-3">
         <article className="panel"><h3>平台定位</h3><p className="small-text">TikTok 负责前链路曝光，AIShortHub 负责承接转化与用户付费。</p></article>
         <article className="panel"><h3>创作者招募</h3><p className="small-text">低门槛 Creator 方案：有收入后才抽成，月费与抽成分离。</p></article>
-        <article className="panel"><h3>平台抽成政策</h3><p className="small-text">默认配置仍可调（{(getPlatformTakeRate(platform?.platformConfig) * 100).toFixed(0)}%），但 launch policy 面向 Creator 执行 8%/5%/3% 低抽成。</p></article>
+        <article className="panel"><h3>平台抽成政策</h3><p className="small-text">默认配置仍可调（{(takeRate * 100).toFixed(0)}%），但 launch policy 面向 Creator 执行 8%/5%/3% 低抽成。</p></article>
       </section>
 
       <section>

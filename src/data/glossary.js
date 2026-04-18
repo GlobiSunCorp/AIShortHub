@@ -1,87 +1,68 @@
 export const GLOSSARY = {
   viewer_subscription: {
+    category: 'Viewer terms',
     term: 'Viewer Subscription',
     short: '面向观众的月度会员方案。',
     detail: '用于解锁更多剧集、画质与功能；和 Creator Plan 是两套独立计费。',
   },
   creator_plan: {
+    category: 'Creator terms',
     term: 'Creator Plan',
     short: '创作者的工具与额度方案。',
     detail: '月费用于上传额度、审核优先级和运营工具，不等同于收入抽成。',
   },
   platform_commission: {
+    category: 'Billing terms',
     term: 'Platform Commission',
     short: '平台在创作者有收入后才收取的分成比例。',
     detail: '如果当期没有创作者收入，就不会产生收入抽成。',
   },
   ad_revenue_share: {
+    category: 'Billing terms',
     term: 'Ad Revenue Share',
     short: '广告收入分成。',
     detail: '平台广告变现后，按规则给创作者分配对应收益。',
   },
   subscription_pool_share: {
+    category: 'Billing terms',
     term: 'Subscription Pool Share',
     short: '订阅池分成。',
     detail: '观众会员收入进入分配池后，按内容表现向创作者结算。',
   },
   addon_services: {
+    category: 'Creator terms',
     term: 'Add-on Services',
     short: '可选增值服务。',
     detail: '例如 Motion Poster、本地化、推广包，可按需购买。',
   },
   motion_poster: {
+    category: 'Content workflow terms',
     term: 'Motion Poster',
     short: '动态海报素材。',
     detail: '一般是 5-10 秒循环动画，用于提高列表点击率。',
   },
   featured_placement: {
+    category: 'Review / moderation terms',
     term: 'Featured Placement',
     short: '推荐位资格。',
     detail: '符合条件后可申请首页或频道重点曝光。',
   },
-  early_access: {
-    term: 'Early Access',
-    short: '抢先看权益。',
-    detail: '部分内容会先对特定方案开放，再面向全量用户。',
-  },
-  exclusive_content: {
-    term: 'Exclusive Content',
-    short: '会员专属内容。',
-    detail: '仅指定方案可观看的独家剧集或版本。',
-  },
-  pending_payout: {
-    term: 'Pending Payout',
-    short: '待打款金额。',
-    detail: '已经确认但尚未到打款日的收益。',
-  },
-  net_earnings: {
-    term: 'Net Earnings',
-    short: '净收益。',
-    detail: '总收入减去服务成本和平台分成后，创作者最终可得金额。',
-  },
-  quota_reset: {
-    term: 'Quota Reset',
-    short: '额度重置日。',
-    detail: '上传次数、素材额度等按周期恢复可用。',
-  },
-  renewal_date: {
-    term: 'Renewal Date',
-    short: '续费日期。',
-    detail: '方案下一次自动续费或到期更新的日期。',
-  },
-  entire_title_price: {
-    term: 'Entire Title Price',
-    short: '整剧解锁价格。',
-    detail: '非订阅用户可一次性购买完整剧集。',
-  },
-  episode_unlock_price: {
-    term: 'Episode Unlock Price',
-    short: '单集解锁价格。',
-    detail: '非订阅用户按单集购买时的价格。',
-  },
-  entitlement_states: {
-    term: 'Included / Discounted / Add-on / Optional',
-    short: '服务权益状态标签。',
-    detail: 'Included=已包含；Discounted=有折扣；Add-on=单独购买；Optional=可选但不强制。',
-  },
+  pending_payout: { category: 'Payout terms', term: 'Pending Payout', short: '待打款金额。', detail: '已经确认但尚未到打款日的收益。' },
+  net_earnings: { category: 'Payout terms', term: 'Net Earnings', short: '净收益。', detail: '总收入减去服务成本和平台分成后，创作者最终可得金额。' },
+  quota_reset: { category: 'Creator terms', term: 'Quota Reset', short: '额度重置日。', detail: '上传次数、素材额度等按周期恢复可用。' },
+  renewal_date: { category: 'Billing terms', term: 'Renewal Date', short: '续费日期。', detail: '方案下一次自动续费或到期更新的日期。' },
+  entire_title_price: { category: 'Billing terms', term: 'Entire Title Price', short: '整剧解锁价格。', detail: '非订阅用户可一次性购买完整剧集。' },
+  episode_unlock_price: { category: 'Billing terms', term: 'Episode Unlock Price', short: '单集解锁价格。', detail: '非订阅用户按单集购买时的价格。' },
+  entitlement_states: { category: 'Creator terms', term: 'Included / Discounted / Add-on / Optional', short: '服务权益状态标签。', detail: 'Included=已包含；Discounted=有折扣；Add-on=单独购买；Optional=可选但不强制。' },
+  soft_launch: { category: 'Viewer terms', term: 'Soft Launch', short: '小范围上线试运行。', detail: '先用少量内容和用户验证流程，再扩大流量。' },
+  active_series: { category: 'Creator terms', term: 'Active Series', short: '处于上架或运营中的剧集。', detail: '用于占用 Creator Plan 的活跃剧集额度。' },
+  pending_review: { category: 'Review / moderation terms', term: 'Pending Review', short: '等待审核状态。', detail: '提交后进入审核队列，待运营确认质量与合规。' },
+  payout_cycle: { category: 'Payout terms', term: 'Payout Cycle', short: '收益结算周期。', detail: '按固定周期汇总收益并安排打款。' },
+  pilot_support_mode: { category: 'Review / moderation terms', term: 'Pilot Support Mode', short: '试运营支持模式。', detail: '运营团队优先处理上线关键问题与反馈。' },
+  entitlement: { category: 'Viewer terms', term: 'Entitlement', short: '用户当前可用权益。', detail: '由登录身份、订阅方案和购买记录共同决定。' },
+  quota_snapshot: { category: 'Creator terms', term: 'Quota Snapshot', short: '当前额度快照。', detail: '展示当周期已用与剩余上传/素材/服务额度。' },
+  title_pricing: { category: 'Billing terms', term: 'Title Pricing', short: '整剧定价。', detail: '可按整部短剧打包售价，区别于单集解锁。' },
+  finale_unlock: { category: 'Billing terms', term: 'Finale Unlock', short: '大结局单独解锁。', detail: '允许将终章设置额外付费门槛。' },
 };
+
+export const GLOSSARY_CATEGORIES = ['Viewer terms', 'Creator terms', 'Billing terms', 'Payout terms', 'Content workflow terms', 'Review / moderation terms'];

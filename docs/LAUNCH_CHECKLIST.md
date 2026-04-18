@@ -25,3 +25,16 @@
 - 先软上线 7-14 天，再切生产宣传流量。
 - 维持 creator-friendly launch policy：低抽成（8/5/3）+ 有收入后才抽成。
 - 若服务能力或审核能力不足，先限制新 creator 数量，避免体验崩盘。
+
+
+## In-product Launch Readiness Mirror (Phase 15)
+Admin → Operator Overview now mirrors launch checks with Yes/No placeholders:
+- production env configured
+- custom domain configured
+- support email configured
+- Stripe live mode ready
+- first content batch ready
+- checkout tested
+- creator upload tested
+- review queue tested
+- payout logic checked

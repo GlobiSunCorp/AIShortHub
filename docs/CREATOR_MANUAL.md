@@ -30,3 +30,9 @@
 - Pending Payout：已确认、待打款收益。
 - Net Earnings：扣除成本与抽成后的净额。
 - Included / Discounted / Add-on / Optional：服务权益状态。
+
+
+## Phase 15 更新（创作者侧）
+- Creator Studio 引入统一计费解释：月费覆盖范围、抽成生效条件、服务费与平台抽成差异。
+- 新增 Revenue Logic Breakdown（money in / deductions / net payout）。
+- 上传与发布流程继续沿用 5 步法，但底层数据已走规范化层，降低 mock/real 字段不一致导致的异常。
