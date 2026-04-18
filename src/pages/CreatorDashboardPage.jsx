@@ -55,6 +55,7 @@ export function CreatorDashboardPage({ auth, platform }) {
   const [uploading, setUploading] = useState({});
   const [files, setFiles] = useState({});
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [workspace, setWorkspace] = useState('overview');
 
   const creatorSnapshot = getCreatorDashboardSnapshot({ platform, auth });
   const myCreator = creatorSnapshot.creator || platform.creators[0];
@@ -92,10 +93,39 @@ export function CreatorDashboardPage({ auth, platform }) {
   if (!hasStudioAccess) return <AccessGuidePanel currentRoleLabel={auth.userState} requiredRoleLabel="Creator Plan" reason="当前账号没有 Creator Plan，请先升级。" action={<button className="btn btn-primary" onClick={() => auth.switchDemoRole('creator_basic')}>开启 Creator Basic</button>} />;
 
   return (
-    <div className="stack-lg">
+    <div className="ds-page">
+      <section className="panel ds-section">
+        <h1 className="ds-h1">Creator Studio Workspace</h1>
+        <p className="ds-meta">Use workspace tabs to focus on one task at a time: overview, content, assets, pricing, earnings, and review & publish.</p>
+        <div className="ds-tabs">
+          {[
+            ['overview', 'Overview'],
+            ['content', 'Content'],
+            ['assets', 'Assets'],
+            ['pricing', 'Pricing'],
+            ['earnings', 'Earnings'],
+            ['review', 'Review & Publish'],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              className={`ds-tab ${workspace === key ? 'active' : ''}`}
+              onClick={() => {
+                setWorkspace(key);
+                if (key === 'content') setStep(0);
+                if (key === 'assets') setStep(1);
+                if (key === 'pricing') setStep(3);
+                if (key === 'review') setStep(4);
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
       <OnboardingGuide role="creator" />
-      <QuotaAlertBar alerts={alerts.slice(0, 4)} />
-      <PlanHealthCard
+      {workspace === 'overview' ? <QuotaAlertBar alerts={alerts.slice(0, 4)} /> : null}
+      {workspace === 'overview' ? <PlanHealthCard
         hoverHint="Hover to review entitlement details and renewal dates."
         data={{
           healthStatus,
@@ -115,8 +145,9 @@ export function CreatorDashboardPage({ auth, platform }) {
           ],
         }}
       />
+      : null}
 
-      <section className="panel stack-md">
+      {workspace === 'overview' ? <section className="panel stack-md">
         <h1>Creator Studio</h1>
         <p className="small-text">{STEPS[step]}（{platform.mode === 'real' ? 'Real Data Mode' : 'Mock Fallback Mode'}）· 广告优先 + 服务 + 订阅 + 低抽成。</p>
         <div className="row wrap">
@@ -126,8 +157,9 @@ export function CreatorDashboardPage({ auth, platform }) {
           <UsageQuotaBadge label="Storage" value={`${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`} tone={quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok'} details={[["Used", `${quota.usage.usedStorageGb.toFixed(1)}GB`], ["Remaining", `${quota.remaining.storageGbLeft.toFixed(1)}GB`]]} />
         </div>
       </section>
+      : null}
 
-      <section className="panel stack-md">
+      {workspace === 'earnings' ? <section className="panel stack-md">
         <h3>Earnings Breakdown</h3>
         <p className="small-text">Period {earnings.period} · 净收入 <GlossaryTerm id="net_earnings" /> {formatUsd(breakdown.netEarnings)} · Pending payout <GlossaryTerm id="pending_payout" /> {formatUsd(earnings.pendingPayout)} · Paid out {formatUsd(earnings.paidOut)}</p>
         <div className="stacked-bar">
@@ -143,14 +175,15 @@ export function CreatorDashboardPage({ auth, platform }) {
         </div>
         <RevenueFlowDiagram lines={billingSnapshot.creator.lines} netPayout={billingSnapshot.creator.netPayout} />
       </section>
-      <HowPricingWorksPanel viewerSummary={billingSnapshot.viewer} creatorSummary={billingSnapshot.creator} />
+      : null}
+      {workspace === 'pricing' || workspace === 'earnings' ? <HowPricingWorksPanel viewerSummary={billingSnapshot.viewer} creatorSummary={billingSnapshot.creator} /> : null}
 
-      <CreatorActionCenter actions={actions} />
-      <CreatorPlanCard snapshot={quota} />
-      <section className="grid cards-3">{metrics.map(([label, value]) => <article className="stat-card" key={label}><p className="small-text">{label}</p><h3>{value}</h3></article>)}</section>
+      {workspace === 'overview' ? <CreatorActionCenter actions={actions} /> : null}
+      {workspace === 'overview' ? <CreatorPlanCard snapshot={quota} /> : null}
+      {workspace === 'overview' ? <section className="grid cards-3">{metrics.map(([label, value]) => <article className="stat-card" key={label}><p className="small-text">{label}</p><h3>{value}</h3></article>)}</section> : null}
 
-      <section className="panel form-grid">
-        {step === 0 ? <>
+      {(workspace === 'content' || workspace === 'assets' || workspace === 'pricing' || workspace === 'review') ? <section className="panel form-grid">
+        {(workspace === 'content' && step === 0) ? <>
           <h2>Step 1: Basic Info</h2>
           <input className="input" placeholder="剧名" value={draft.title} onChange={(e) => setDraft((p) => ({ ...p, title: e.target.value }))} />
           <textarea className="input" placeholder="简介" value={draft.synopsis} onChange={(e) => setDraft((p) => ({ ...p, synopsis: e.target.value }))} />
@@ -158,7 +191,7 @@ export function CreatorDashboardPage({ auth, platform }) {
           <input className="input" placeholder="Audience（required）" value={draft.audience} onChange={(e) => setDraft((p) => ({ ...p, audience: e.target.value }))} />
         </> : null}
 
-        {step === 1 ? <>
+        {(workspace === 'assets' && step === 1) ? <>
           <h2>Step 2: Trailer & Marketing Assets</h2>
           <p className="small-text">Assets: {CREATOR_ASSETS.join(' · ')}</p>
           <div className="grid cards-2">{Object.entries(assetEntitlementText).map(([key, [label, desc]]) => <article key={key} className="mini-card"><h4>{key.replace('_', ' ')}</h4><p className="small-text">{label}</p><p className="small-text">{desc}</p></article>)}</div>
@@ -172,7 +205,7 @@ export function CreatorDashboardPage({ auth, platform }) {
           <div className="grid cards-2">{ADD_ON_SERVICES.map((s) => <article key={s.id} className="mini-card"><h4>{s.name}</h4><p className="small-text">{getServiceEntitlement(s, membership.creatorPlan || 'creator_basic')}</p></article>)}</div>
         </> : null}
 
-        {step === 2 ? <>
+        {(workspace === 'content' && step === 2) ? <>
           <h2>Step 3: Main Episodes Workflow</h2>
           {draft.episodes.map((item, index) => (
             <article key={`${item.number}-${index}`} className="mini-card stack-md">
@@ -195,7 +228,7 @@ export function CreatorDashboardPage({ auth, platform }) {
           <button className="btn btn-ghost" type="button" onClick={addEpisode}>+ 新增分集</button>
         </> : null}
 
-        {step === 3 ? <>
+        {(workspace === 'pricing' && step === 3) ? <>
           <h2>Step 4: Creator-set Pricing & QC</h2>
           <p className="small-text">订阅与单买分离：Pro/Premium 可完整观看；非订阅用户可按整剧或单集解锁。平台前期执行 low-friction onboarding + low commission policy。</p>
           <input className="input" type="number" placeholder="Entire title price (整剧价)" value={draft.pricing.titlePriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, titlePriceUsd: Number(e.target.value) } }))} />
@@ -209,7 +242,7 @@ export function CreatorDashboardPage({ auth, platform }) {
           </article>
         </> : null}
 
-        {step === 4 ? <>
+        {(workspace === 'review' && step === 4) ? <>
           <h2>Step 5: Publishing & Review</h2>
           <SubmissionReadinessChecklist checklist={checklist} />
           <label className="small-text"><input type="checkbox" checked={draft.checklistReady} onChange={(e) => setDraft((p) => ({ ...p, checklistReady: e.target.checked }))} /> 提交审核前检查清单已完成</label>
@@ -259,17 +292,18 @@ export function CreatorDashboardPage({ auth, platform }) {
           <button className="btn btn-ghost" type="button" onClick={() => setStep((s) => Math.max(s - 1, 0))} disabled={step === 0}>上一步</button>
           <button className="btn btn-primary" type="button" onClick={() => setStep((s) => Math.min(s + 1, STEPS.length - 1))} disabled={step === STEPS.length - 1}>下一步</button>
         </div>
-      </section>
+      </section> : null}
 
-      <section className="panel stack-md">
+      {workspace === 'earnings' || workspace === 'pricing' ? <section className="panel stack-md">
         <h3>Revenue Model / Platform Monetization</h3>
         <div className="grid cards-2">
           <article className="mini-card"><h4>Platform收入优先级</h4>{REVENUE_MODEL.platform.map((item) => <p key={item.key} className="small-text">• {item.label}: {item.detail}</p>)}</article>
           <article className="mini-card"><h4>Creator收入路径（低抽成后）</h4>{REVENUE_MODEL.creator.map((item) => <p key={item} className="small-text">• {item}</p>)}</article>
         </div>
       </section>
+      : null}
 
-      <section className="panel"><h3>当前草稿摘要</h3><p className="small-text">{draft.title || '未命名草稿'} · {highTier ? '高阶 Creator 权益已开启' : '基础 Creator 权益'}</p><p className="small-text">退款提示：{REFUND_POLICY_CONFIG.creator.short} <Link className="text-link" to="/refund">查看详情 →</Link></p></section>
+      {workspace === 'review' ? <section className="panel"><h3>当前草稿摘要</h3><p className="small-text">{draft.title || '未命名草稿'} · {highTier ? '高阶 Creator 权益已开启' : '基础 Creator 权益'}</p><p className="small-text">退款提示：{REFUND_POLICY_CONFIG.creator.short} <Link className="text-link" to="/refund">查看详情 →</Link></p></section> : null}
     </div>
   );
 }

@@ -11,22 +11,22 @@ export function FloatingCreatorToolbox({ auth, platform }) {
 
   const entries = useMemo(
     () => [
-      ['新建剧集', '/creator'],
-      ['上传分集', '/creator'],
-      ['上传素材', '/creator'],
-      ['提交审核', '/creator'],
-      ['我的内容', '/creator'],
-      ['我的服务订单', '/services'],
-      ['数据面板', '/profile'],
-      ['方案权益', '/pricing'],
-      ['联系支持', '/services'],
+      ['Overview workspace', '/creator'],
+      ['Content & episodes', '/creator'],
+      ['Assets upload', '/creator'],
+      ['Pricing setup', '/creator'],
+      ['Review & publish', '/creator'],
+      ['Service orders', '/services'],
+      ['Account center', '/profile'],
+      ['Plans & entitlements', '/pricing'],
+      ['Support', '/services'],
       ...(highTier
         ? [
             ['Motion Poster', '/services'],
             ['TikTok Promo Pack', '/services'],
-            ['推荐位申请', '/creator'],
-            ['收益 / 结算', '/profile'],
-            ['优先支持', '/services'],
+            ['Featured request', '/creator'],
+            ['Earnings & payout', '/profile'],
+            ['Priority support', '/services'],
           ]
         : []),
     ],

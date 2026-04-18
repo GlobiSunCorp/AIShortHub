@@ -38,3 +38,14 @@ Admin → Operator Overview now mirrors launch checks with Yes/No placeholders:
 - creator upload tested
 - review queue tested
 - payout logic checked
+
+## Phase 16 Soft Launch Presentation Notes
+- 当内容库存较低（2-3 部）时：
+  - 保持首页 Featured 区不断层
+  - Browse 使用 Starter Picks 强化首发引导
+  - 明确 Trailer 与 Preview 的免费入口
+- Founder Console 每日检查：
+  - 待审核是否积压
+  - 待支付/支付异常是否升高
+  - 支持入口是否可达
+  - billing 文案是否仍清晰可理解
