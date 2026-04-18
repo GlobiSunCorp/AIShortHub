@@ -2,17 +2,35 @@ import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
 
+function getCreatedAt(item) {
+  return item?.createdAt || item?.created_at || '';
+}
+
+function getSeriesStatus(item) {
+  return item?.status || 'draft';
+}
+
+function getSeriesVisibility(item) {
+  return item?.visibility || 'private';
+}
+
+function getPlatformTakeRate(platformConfig) {
+  return platformConfig?.platformTakeRate ?? platformConfig?.defaultTakeRate ?? 0.2;
+}
+
 export function HomePage({ platform }) {
-  const published = platform.series.filter((item) => item.status === 'published' && item.visibility === 'public');
+  const series = Array.isArray(platform?.series) ? platform.series : [];
+  const episodes = Array.isArray(platform?.episodes) ? platform.episodes : [];
+  const published = series.filter((item) => getSeriesStatus(item) === 'published' && getSeriesVisibility(item) === 'public');
   const trending = published.slice(0, 3);
-  const latest = [...published].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 3);
+  const latest = [...published].sort((a, b) => getCreatedAt(b).localeCompare(getCreatedAt(a))).slice(0, 3);
 
   const episodeCounts = Object.fromEntries(
     published.map((s) => [
       s.id,
       {
-        total: platform.episodes.filter((ep) => ep.seriesId === s.id).length,
-        preview: platform.episodes.filter((ep) => ep.seriesId === s.id && ep.isPreview).length,
+        total: episodes.filter((ep) => (ep.seriesId || ep.series_id) === s.id).length,
+        preview: episodes.filter((ep) => (ep.seriesId || ep.series_id) === s.id && (ep.isPreview || ep.is_preview)).length,
       },
     ])
   );
@@ -40,7 +58,7 @@ export function HomePage({ platform }) {
       <section className="grid cards-3">
         <article className="panel"><h3>平台定位</h3><p className="small-text">TikTok 负责前链路曝光，AIShortHub 负责承接转化与用户付费。</p></article>
         <article className="panel"><h3>创作者招募</h3><p className="small-text">支持上传封面、预告、分集内容，进入审核后上线变现。</p></article>
-        <article className="panel"><h3>平台抽成</h3><p className="small-text">默认抽成 {(platform.platformConfig.platformTakeRate * 100).toFixed(0)}%，可在配置中调整。</p></article>
+        <article className="panel"><h3>平台抽成</h3><p className="small-text">默认抽成 {(getPlatformTakeRate(platform?.platformConfig) * 100).toFixed(0)}%，可在配置中调整。</p></article>
       </section>
 
       <section>
