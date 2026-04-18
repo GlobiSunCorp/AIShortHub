@@ -23,7 +23,7 @@ const policies = {
   },
   commissionPayout: {
     title: 'Commission & Payout Policy',
-    points: ['Default platform take-rate is 20% unless creator plan specifies otherwise.', 'Creator Pro / Studio may get discounted commission rules.', 'Payouts are settled monthly after dispute/risk checks.', 'Service orders are billed separately from revenue sharing.'],
+    points: ['Platform default take-rate remains configurable at 20%, while Creator plans apply lower commissions (15% / 10% / 7%).', 'Platform monetization is ad-first with service + subscription + unlock income in parallel.', 'Payouts are settled monthly after dispute/risk checks and policy review.', 'Service orders are billed separately and can appear as creator-side operating costs.'],
   },
 };
 

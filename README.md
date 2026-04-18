@@ -1,11 +1,12 @@
-# AIShortHub MVP (Phase 10 · 下拉组件统一 + 配额预警 + 计划健康与动作中心)
+# AIShortHub MVP（Phase 13 · 商业模型重构 + Creator 自定价 + 专业视频工作流）
 
-本轮重点打磨试运营闭环：Creator 上传配额、退款策略拆分、支付按钮真实跳转、Support 可信化、文档体系补齐。
+本轮将平台商业结构从“订阅 + 抽成导向”重构为：
+**广告优先 + 服务收入 + Viewer 订阅 + 单次解锁 + 低抽成**，并升级 Creator Studio 上传流程为更专业的视频 CMS 工作流。
 
 ## 技术栈
 - Vite + React
-- Supabase Auth + Supabase REST + Supabase Storage（缺配置时自动 mock fallback）
-- Stripe Checkout Session（前后端结构预留 + mock fallback）
+- Supabase Auth + REST + Storage（缺配置自动 mock fallback）
+- Stripe Checkout Session（mock + real 兼容）
 
 ## 本地运行
 ```bash
@@ -14,118 +15,62 @@ npm run dev
 npm run build
 ```
 
-## 环境变量（`.env.example`）
-```bash
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-VITE_STRIPE_PUBLISHABLE_KEY=
-VITE_STRIPE_SECRET_KEY=
-VITE_STRIPE_WEBHOOK_SECRET=
-VITE_STRIPE_CHECKOUT_ENDPOINT=
-VITE_PLATFORM_TAKE_RATE=0.2
-VITE_SUPPORT_PILOT_MODE=1
-VITE_SUPPORT_EMAIL=support@aishorthub.com
-VITE_CREATOR_OPS_EMAIL=creatorops@aishorthub.com
-VITE_POLICY_EMAIL=policy@aishorthub.com
-VITE_SUPPORT_FORM_URL=/support
-```
+## 关键改动（Phase 13）
 
-## Phase 10 完成内容
+### 1) Viewer 定价重构（低门槛）
+- Free：$0（仅预告/试看）
+- Pro Viewer：$4.99/月（完整内容）
+- Premium Viewer：$9.99/月（更高质量 + 抢先看 + 专属内容）
+- Pricing / Profile / Watch / Series Detail 的升级引导与访问说明已同步。
 
-### 1) Creator 上传限制与配额
-- Creator Plan 新增：`maxActiveSeries`、`maxTotalEpisodes`、`monthlyAssetStorageLimitGb`、`monthlyUploadLimit`、`includedMotionPosterCount`、`reviewPriority`、`featuredPlacementEligibility`。
-- Pricing 展示计划对比。
-- Creator Studio 展示已用/可用配额，并在超限时给出明确提示。
-- Profile 增加 Creator 配额摘要。
+### 2) Creator 方案重构（低抽成）
+- Creator Basic：$0 / 15% commission / 2 active series / 20 episodes / 5GB
+- Creator Pro：$19 / 10% commission / 5 active series / 100 episodes / 25GB
+- Studio：$49 / 7% commission / 20 active series / 500 episodes / 100GB
+- Sticky Upgrade Rail、Profile、Pricing、配额卡与方案说明已同步。
 
-### 1) Membership Badge System
-- 新增统一会员徽章组件，覆盖 Free/Pro/Premium Viewer、Creator Basic/Pro、Studio、Admin。
-- Header、Profile、Creator Studio、Services、Pricing 统一展示身份徽章。
-- 徽章支持 hover/tap 弹出权益卡，移动端可点按查看。
+### 3) 广告优先平台化模型
+新增 Revenue Model / Platform Monetization 模块，展示：
+- 平台收入：广告、服务订单、订阅、单次解锁、低抽成
+- 创作者收入：广告分成、订阅池分成、整剧/单集销售、服务成本、平台抽成、净收入
 
-### 2) Usage Quota Badge System
-- Creator 配额统一通过 `quotaService` 聚合输出：
-  - `maxActiveSeries`
-  - `maxTotalEpisodes`
-  - `monthlyAssetStorageLimit` / `monthlyAssetStorageLimitGb`
-  - `includedMotionPosterCount`
-  - `maxFeaturedRequestsPerCycle`
-  - `reviewPriority`
-  - `commissionRate`
-- 在 Profile 与 Creator Studio 展示简洁配额徽章（如 `2/5 Series`、`12GB/20GB`、`Motion Poster 0 left`）。
+### 4) Creator 自定价系统
+- 支持整剧价（Entire title price）
+- 支持单集解锁价（Episode unlock price）
+- 支持结局额外包（Finale unlock）
+- 支持试看集配置（Free preview episodes）
+- Creator Studio 提供配置入口，Series Detail / Watch / Profile 可读到这些价格结构。
 
-### 3) Entitlement Hover / Tap Card
-- 徽章弹层改为迷你方案状态卡，支持：
-  - 当前方案
-  - 审核优先级
-  - 平台抽成
-  - 系列/分集/存储已用与剩余
-  - Motion Poster / Featured request 剩余额度
-  - 计费周期占位与升级 CTA
-- Creator Studio 增加接近上限提醒（如 `Only 1 series slot left`、`2GB storage remaining`）。
+### 5) 收益面板升级（钱从哪里来）
+- 新增 Earnings Breakdown（广告、订阅分成、整剧销售、单集销售、服务成本、平台抽成、净收入、待结算、已打款）
+- 提供堆叠条 + 明细卡 + 环比占位（本期 vs 上期）
 
-### 4) Upload/Services 权益呈现
-- Creator 上传资产模块增加 Included / Discounted / Add-on 说明。
-- Services 卡片显示当前计划待遇，并给出专业化文案（Included in Studio / Discounted for Creator Pro / Add-on for Basic）。
+### 6) 上传流程升级（Trailer 与 Main Episodes 分离）
+- Trailer 独立资产：标题、封面、时长、CTA、比例/分辨率
+- Main Episodes 独立工作流：分集顺序、试看/收费、单集价格、上架时间、字幕语言、审核状态
+- QC 占位检查：缺封面、缺预告、分辨率不足、比例不推荐、时长异常、文件过大、命名不规范、缺字幕
 
-### 2) 退款策略矩阵
-- Refund Policy 拆分为：
-  - Viewer Subscription Refund Policy
-  - Creator Plan Refund Policy
-  - Add-on Services Refund Policy
-- Pricing / Services / Creator Studio / Profile 均提供退款入口。
-
-### 3) 支付联动修复
-- Pricing 的 Viewer / Creator 购买按钮：返回 `session.url` 时立即跳转。
-- Services 下单：
-  - Included 服务直接下单进入详情。
-  - 需支付服务优先跳转 checkout。
-- 所有支付动作提供 loading 与错误提示。
-- Checkout success/cancel 展示支付类型与下一步建议。
-
-### 4) 播放按钮统一化
-- Browse / Home 卡片封面保留统一播放按钮。
-- Home Hero 与 Series Detail 主视觉新增可见 Play 标识。
-
-### 5) Contact / Support 真实化
-- 支持 custom domain 模式与 pilot fallback 模式。
-- 区分 Support / Creator Ops / Policy&Abuse 联系用途。
-- Footer / FAQ / Support 文案一致。
+### 7) 退款策略同步
+- Viewer：低摩擦取消，已开始计费周期默认不按比例退款
+- Creator：独立退款规则，上传/审核/权益消耗后不可退款
+- Add-on：未开工可退，开工后默认不可退
 
 ## 文档入口
-- 用户说明书：`docs/USER_MANUAL.md`
-- 创作者说明书：`docs/CREATOR_MANUAL.md`
-- 管理后台操作手册：`docs/ADMIN_PLAYBOOK.md`
-- 更新日志：`docs/CHANGELOG.md`
-- Supabase Schema：`docs/supabase-schema.sql`
+- `docs/USER_MANUAL.md`
+- `docs/CREATOR_MANUAL.md`
+- `docs/ADMIN_PLAYBOOK.md`
+- `docs/CHANGELOG.md`
+- `docs/supabase-schema.sql`
 
-## 真实接入范围 vs 仍为 mock
-
-### 已接入真实结构
-- Auth 登录/注册/找回/登出流程
-- Profiles 同步
-- 基础表读写服务层
+## 真实接入 vs mock
+### 已接入结构
+- Auth（登录/注册/找回/登出）
+- Profiles + 基础表读写服务层
 - Storage 上传骨架
-- Stripe Checkout 调用结构和回跳页
+- Stripe Checkout 调用结构与回跳页
 
-### 仍为 mock 或待下一轮
-- Stripe webhook 完整落库与幂等对账
-- 真实 RLS 策略与多租户权限细化
-- 大视频转码与 CDN 分发（Mux/Cloudflare Stream）
-- 运营工单系统与自动化风控
-
-
-### 新增：运营化 Creator 面板升级
-- 统一替换原生 select 为 `DarkSelect` 组件，覆盖 Demo Role Switcher、Browse 筛选、Admin 状态筛选与 Signup 账户类型。
-- 新增 Quota Alert Bar（normal / near_limit / exhausted）并支持 CTA。
-- 新增 Plan Health Card：展示 Viewer/Creator plan、commission、review priority、Series/Episodes/Storage/Motion Poster/Featured 使用情况、renewal 与 quota reset 日期。
-- 新增 Creator Action Center：按 urgent / recommended / informational 分类行动项。
-- 新增 Submission Readiness Checklist：提交前显式校验缺项与状态（ready to submit / needs revision / upgrade recommended）。
-- Pricing / Services / Profile 补充 Included / Discounted / Add-on / quota / renewal 说明文案。
-
-## Iteration 11 UI Upgrade (Membership Identity System)
-- Added a unified Plan Identity System with reusable badge icons for Free Viewer / Pro Viewer / Premium Viewer / Creator Basic / Creator Pro / Studio / Admin.
-- Upgraded header membership badge into a status entry popover with entitlement detail cards and audience-specific CTAs.
-- Introduced Sticky Upgrade Rail (desktop floating rail + mobile compact drawer style) with separate Viewer / Creator / Admin guidance.
-- Refined dark-mode contrast for badge, tooltip, popover, select, info cards, and quota surfaces.
-- Viewer and Creator upgrade messaging is now separated across profile/pricing/header/sticky rail to avoid cross-role confusion.
+### 仍为 mock/占位
+- webhook 完整落库与幂等
+- 真实 RLS 细粒度策略
+- 视频转码/CDN（Mux/Cloudflare Stream）
+- 广告实时分账与财务对账流水

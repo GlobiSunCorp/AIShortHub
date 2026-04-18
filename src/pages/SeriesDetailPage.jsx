@@ -1,4 +1,6 @@
 import { Link, useRouter } from '../lib/router';
+import { resolveMembership } from '../hooks/usePlanAccess';
+import { formatUsd } from '../data/monetization';
 import { EpisodeList } from '../components/EpisodeList';
 
 export function SeriesDetailPage({ id, platform, auth }) {
@@ -7,7 +9,9 @@ export function SeriesDetailPage({ id, platform, auth }) {
   const creator = platform.creators.find((item) => item.id === series.creatorId);
   const trailer = platform.trailers.find((item) => item.id === series.trailerId);
   const episodes = platform.episodes.filter((item) => item.seriesId === series.id).sort((a, b) => a.number - b.number);
-  const isMember = ['member', 'creator', 'admin'].includes(auth.userState);
+  const membership = resolveMembership(auth, platform);
+  const isMember = membership.tier !== 'free' || Boolean(membership.creatorPlan) || auth.userState === 'admin';
+  const pricing = series.monetization || { titlePriceUsd: 0, episodeUnlockPriceUsd: 0, finaleUnlockEnabled: false, finaleUnlockPriceUsd: 0, freePreviewEpisodes: [1] };
 
   return (
     <div className="stack-lg">
@@ -40,10 +44,17 @@ export function SeriesDetailPage({ id, platform, auth }) {
             </Link>
           </div>
 
+          <article className="mini-card" style={{ marginTop: '0.85rem' }}>
+            <h4>Access & Pricing</h4>
+            <p className="small-text">Subscription: Free only trailer/preview · Pro/Premium full access.</p>
+            <p className="small-text">Single-title unlock: {formatUsd(pricing.titlePriceUsd)} · Episode unlock: {formatUsd(pricing.episodeUnlockPriceUsd)}</p>
+            <p className="small-text">Free preview episodes: {pricing.freePreviewEpisodes?.join(', ') || '1'} · Finale pack: {pricing.finaleUnlockEnabled ? formatUsd(pricing.finaleUnlockPriceUsd) : 'Disabled'}</p>
+          </article>
+
           {!isMember ? (
             <article className="watch-lock" style={{ marginTop: '1rem' }}>
               <h3>会员解锁提示</h3>
-              <p className="small-text">guest 仅可看 Trailer 与前 1 集（前 {platform.platformConfig.trialSeconds}s）。升级 Pro 可观看完整内容。</p>
+              <p className="small-text">Free 用户仅可看 Trailer 与试看集（前 {platform.platformConfig.trialSeconds}s）。可升级 Pro/Premium 或按整剧/单集解锁。</p>
               <Link className="text-link" to="/pricing">
                 查看会员方案 →
               </Link>
@@ -54,7 +65,7 @@ export function SeriesDetailPage({ id, platform, auth }) {
 
       <section className="panel">
         <h2>分集列表</h2>
-        <EpisodeList episodes={episodes} currentEpisodeNumber={1} onSelect={(ep) => navigate(`/watch/${series.id}/${ep}`)} membershipLocked={(item) => !isMember && item.number > platform.platformConfig.freeEpisodeCount} />
+        <EpisodeList episodes={episodes} currentEpisodeNumber={1} onSelect={(ep) => navigate(`/watch/${series.id}/${ep}`)} membershipLocked={(item) => !isMember && !pricing.freePreviewEpisodes?.includes(item.number)} />
       </section>
     </div>
   );

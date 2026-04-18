@@ -44,11 +44,12 @@ export function getCreatorPlanHighlights(planId) {
     ['Current Creator Plan', plan.name],
     ['Review priority', plan.reviewPriority],
     ['Platform commission', formatCommission(plan.commissionRate)],
-    ['Active Series cap', `${plan.maxActiveSeries} Remaining / cycle`],
-    ['Episodes cap', `${plan.maxTotalEpisodes} Remaining / cycle`],
+    ['Active Series cap', `${plan.maxActiveSeries} active series`],
+    ['Episodes cap', `${plan.maxTotalEpisodes} total episodes`],
     ['Storage cap', formatStorageGb(plan.monthlyAssetStorageLimitGb)],
     ['Motion Poster', plan.includedMotionPosterCount ? `${plan.includedMotionPosterCount} Included` : 'Add-on'],
-    ['Featured requests', plan.maxFeaturedRequestsPerCycle ? `${plan.maxFeaturedRequestsPerCycle} Remaining / cycle` : 'Add-on'],
+    ['Featured requests', plan.maxFeaturedRequestsPerCycle ? `${plan.maxFeaturedRequestsPerCycle} / cycle` : 'Add-on'],
+    ['Creator-set pricing', plan.creatorSetPricing ? 'Included' : 'Not included'],
   ];
 }
 

@@ -13,7 +13,7 @@ import {
 
 export function usePlatformState(auth) {
   const [state, setState] = useState({
-    profiles: [], creators: [], series: [], episodes: [], trailers: [], assets: [], serviceOrders: [], payments: [], payouts: [], reviewLogs: [], memberships: [],
+    profiles: [], creators: [], series: [], episodes: [], trailers: [], assets: [], serviceOrders: [], payments: [], payouts: [], creatorEarnings: [], reviewLogs: [], memberships: [],
     unlockedContent: {}, ordersHistory: [], platformConfig: { platformTakeRate: 0.2, settlementCycle: 'Monthly (mock)' }, mode: 'mock', loading: true,
   });
 

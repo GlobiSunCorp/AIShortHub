@@ -26,7 +26,8 @@ export function StickyUpgradeRail({ auth, platform }) {
           `Full access: ${viewerPlan.fullSeriesAccess ? 'Included' : 'Upgrade required'}`,
           `Quality: ${viewerPlan.quality}`,
           `Early access: ${viewerPlan.earlyAccess ? 'Included' : 'Optional'}`,
-          `Exclusive content: ${viewerPlan.exclusiveContent ? 'Included' : 'Optional'}`,
+          `Exclusive content: ${viewerPlan.exclusiveContent ? 'Included' : 'Premium only'}` ,
+          `Price: $${viewerPlan.monthlyPrice}/month`,
         ],
         ctas: getViewerUpgradeTargets(membership.tier).map((plan) => `Upgrade to ${plan.name}`),
       };
@@ -43,8 +44,9 @@ export function StickyUpgradeRail({ auth, platform }) {
           `Storage remaining: ${quota.remaining.storageGbLeft.toFixed(1)}GB`,
           `Motion Poster: ${quota.remaining.motionPosterLeft > 0 ? `${quota.remaining.motionPosterLeft} Remaining` : 'Add-on required'}`,
           `Featured requests: ${quota.remaining.featuredRequestsLeft} Remaining`,
+          'Creator-set pricing: title + episode unlock supported',
         ],
-        ctas: [...getCreatorUpgradeTargets(membership.creatorPlan).map((planItem) => `Upgrade to ${planItem.name}`), 'Buy add-on services'],
+        ctas: [...getCreatorUpgradeTargets(membership.creatorPlan).map((planItem) => `Upgrade to ${planItem.name}`), 'Tune creator pricing', 'Buy add-on services'],
       };
     }
 
