@@ -17,10 +17,23 @@ function buildHeaders(accessToken, extra = {}) {
 
 async function parseResponse(response) {
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!response.ok) {
-    return { data: null, error: data?.error_description || data?.message || `HTTP ${response.status}` };
+  let data = null;
+
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { raw: text };
+    }
   }
+
+  if (!response.ok) {
+    return {
+      data: null,
+      error: data?.error_description || data?.message || data?.raw || `HTTP ${response.status}`,
+    };
+  }
+
   return { data, error: null };
 }
 
