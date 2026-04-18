@@ -29,3 +29,12 @@
 - Rebuilt Admin as operator-focused overview console with launch readiness module.
 - Added reusable billing explanation components and integrated into Pricing/Profile/Creator/FAQ.
 - Expanded glossary with grouped categories and additional launch/billing/workflow terms.
+
+## Phase 16 · 2026-04-18
+- Creator Studio 完成 IA 重排：增加 workspace tabs（Overview / Content / Assets / Pricing / Earnings / Review & Publish），减少单页拥挤感。
+- Profile 重构为 Account Center，分离计划、配额、订单上传、收益与帮助区。
+- Admin 增加 Founder Quick Actions 与更可执行的 Launch Readiness 区块。
+- 新增 design-system 样式层（`ds-*`）与 5 类卡片体系（Primary / Secondary / Data / Status / Action）。
+- Glossary 升级为双层解释：Quick explain + Learn more 链接。
+- 新增 `getCatalogSnapshot` 与 `getAccountCenterSnapshot`，推进页面 selector-driven 消费。
+- Home/Browse/Series/Watch 文案与展示增强 low-content launch 适配，并提升 trailer/preview/paid 区分。

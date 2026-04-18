@@ -31,3 +31,15 @@
 - 订阅、试看、单片/单集解锁说明已统一到可复用计费说明卡。
 - FAQ 增加术语分类（Viewer/Creator/Billing/Payout/Workflow/Moderation），桌面 hover、移动端 tap 均可查看解释。
 - 首页与浏览页使用统一数据快照，减少状态切换时的信息抖动或空白。
+
+## Phase 16 更新（用户侧）
+- Profile 已升级为 Account Center，更容易找到：会员方案、账单规则、退款入口、最近订单和上传记录。
+- 观看说明更清晰：Trailer（始终可看）/ Preview（免费试看）/ Main Episodes（订阅或购买）。
+- Home/Browse 在内容较少时也会保持推荐结构，不会显得空。
+- 术语提示改为两层：悬浮快速解释 + Learn more 深入页。
+
+### IA 快速导航
+- `/profile`：Account Center 总览
+- `/pricing`：会员与计费逻辑
+- `/browse`：按标签和状态发现内容
+- `/watch/:series/:episode`：播放与解锁入口

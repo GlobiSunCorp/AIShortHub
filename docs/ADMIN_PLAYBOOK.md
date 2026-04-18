@@ -29,3 +29,14 @@ Admin 现包含 `Operator Overview`：
 - 运营卡片：Needs attention / Awaiting review / Support inbox / Revenue this cycle / Top series / Creators near quota。
 - 近期活动流：聚合审核日志和服务单状态变化。
 - Launch Readiness：站内核对项（生产环境、域名、客服邮箱、Stripe live、首批内容、checkout、上传、审核、结算检查）。
+
+## Phase 16 Operator Guidance
+- Admin 新增 Founder Quick Actions，适合 solo founder 日常：
+  - 上传首批内容
+  - 审核待审剧集
+  - 检查支付流
+  - 打开支持页
+  - 快速回看计费逻辑
+  - 查看最新上传/订单
+- Launch Readiness 区块改为“已就绪 / 待配置”清单，便于非技术角色快速判断能否对外。
+- 建议每周执行一次 launch rehearse：支付、上传、审核、客服、结算全链路走通。
