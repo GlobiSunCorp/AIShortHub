@@ -1,26 +1,27 @@
-# AIShortHub 用户说明书（Phase 13）
+# AIShortHub 用户说明书（Phase 14）
 
-## 1. 订阅与解锁
-- Free：可看预告与试看集。
-- Pro Viewer（$4.99/月）：可看完整剧集。
-- Premium Viewer（$9.99/月）：完整剧集 + 更高画质 + 抢先看 + 专属内容。
-- 非订阅用户可按整剧或单集解锁（由创作者定价）。
+## 1. 你会看到哪些付费方式
+- **Viewer Subscription**：按月会员，解锁完整内容。
+- **Single-title / Single-episode unlock**：不订阅也能单买。
 
-## 2. 关键页面
-- `/pricing`：Viewer/Creator 方案与平台商业模型说明。
-- `/series/:id`：剧集详情、试看规则、整剧/单集价格。
-- `/watch/:id/:episode`：播放、试看、单集解锁提示。
-- `/profile`：当前订阅、账单周期、方案权益与（创作者）收益摘要。
+## 2. 观众 onboarding（首次建议）
+1. 先在 `/browse` 看 Trailer 和试看。
+2. 觉得合适再开通会员。
+3. 不想订阅也可以按整剧/单集购买。
+4. 在 `/profile` 查看续费日期与账单。
 
-## 3. 支付与账单
-1. 在 Pricing 选择方案。
+## 3. 术语说明入口
+页面中带 `ⓘ` 的术语可 hover/tap 查看解释，例如：
+- Viewer Subscription
+- Early Access
+- Exclusive Content
+- Entire Title Price / Episode Unlock Price
+
+## 4. 支付与账单
+1. 在 `/pricing` 选择方案。
 2. 跳转 Checkout（真实 Stripe 或 mock）。
 3. 返回 `/checkout/success` 查看结果。
-4. 在 Profile 确认订阅状态。
+4. 在 `/profile` 确认订阅状态。
 
-## 4. 退款说明（摘要）
-- Viewer：支持取消自动续费；已开始计费周期默认不按比例退款。
-- 如有重复扣费/支付异常/重大故障，可提交人工审核。
-
-## 5. 商业模型说明（用户视角）
-平台收入不只依赖抽成，包含广告、服务、订阅、单次解锁和低比例佣金，目标是维持更低订阅门槛与更持续的内容供给。
+## 5. 软上线阶段说明
+平台当前处于 early launch 阶段，可能会逐步扩充内容库；首页和 Browse 已支持少量内容的友好展示。

@@ -3,6 +3,8 @@ import { AccessGuidePanel } from '../components/AccessGuidePanel';
 import { CreatorPlanCard, MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 import { CreatorActionCenter, PlanHealthCard, QuotaAlertBar, SubmissionReadinessChecklist } from '../components/CreatorOpsPanels';
 import { Link } from '../lib/router';
+import { GlossaryTerm } from '../components/GlossaryTerm';
+import { OnboardingGuide } from '../components/OnboardingGuide';
 import { ADD_ON_SERVICES, CREATOR_ASSETS, REFUND_POLICY_CONFIG, REVENUE_MODEL, formatUsd, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
 import { canAccessCreatorStudio, isHighTierCreator, resolveMembership } from '../hooks/usePlanAccess';
 import { isValidUrl, minLength } from '../lib/validation';
@@ -85,6 +87,7 @@ export function CreatorDashboardPage({ auth, platform }) {
 
   return (
     <div className="stack-lg">
+      <OnboardingGuide role="creator" />
       <QuotaAlertBar alerts={alerts.slice(0, 4)} />
       <PlanHealthCard
         hoverHint="Hover to review entitlement details and renewal dates."
@@ -99,7 +102,7 @@ export function CreatorDashboardPage({ auth, platform }) {
           summary: [
             ['Viewer Plan', membership.tier],
             ['Creator Plan', quota.plan.name],
-            ['Platform Commission', `${Math.round(quota.plan.commissionRate * 100)}%`],
+            ['Platform Commission', `${Math.round(quota.plan.commissionRate * 100)}% · only after revenue`],
             ['Review Priority', quota.plan.reviewPriority],
             ['Billing Renewal', cycle.renewalDate],
             ['Quota Reset Date', cycle.quotaResetDate],
@@ -120,7 +123,7 @@ export function CreatorDashboardPage({ auth, platform }) {
 
       <section className="panel stack-md">
         <h3>Earnings Breakdown</h3>
-        <p className="small-text">Period {earnings.period} · 净收入 {formatUsd(breakdown.netEarnings)} · Pending payout {formatUsd(earnings.pendingPayout)} · Paid out {formatUsd(earnings.paidOut)}</p>
+        <p className="small-text">Period {earnings.period} · 净收入 <GlossaryTerm id="net_earnings" /> {formatUsd(breakdown.netEarnings)} · Pending payout <GlossaryTerm id="pending_payout" /> {formatUsd(earnings.pendingPayout)} · Paid out {formatUsd(earnings.paidOut)}</p>
         <div className="stacked-bar">
           {breakdown.incomeItems.map(([label, value]) => <span key={label} style={{ width: `${(value / (breakdown.grossIncome || 1)) * 100}%` }} title={`${label}: ${formatUsd(value)}`} />)}
         </div>
@@ -186,9 +189,9 @@ export function CreatorDashboardPage({ auth, platform }) {
 
         {step === 3 ? <>
           <h2>Step 4: Creator-set Pricing & QC</h2>
-          <p className="small-text">订阅与单买分离：Pro/Premium 可完整观看；非订阅用户可按整剧或单集解锁。</p>
-          <input className="input" type="number" placeholder="Entire title price" value={draft.pricing.titlePriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, titlePriceUsd: Number(e.target.value) } }))} />
-          <input className="input" type="number" placeholder="Episode unlock price" value={draft.pricing.episodeUnlockPriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, episodeUnlockPriceUsd: Number(e.target.value) } }))} />
+          <p className="small-text">订阅与单买分离：Pro/Premium 可完整观看；非订阅用户可按整剧或单集解锁。平台前期执行 low-friction onboarding + low commission policy。</p>
+          <input className="input" type="number" placeholder="Entire title price (整剧价)" value={draft.pricing.titlePriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, titlePriceUsd: Number(e.target.value) } }))} />
+          <input className="input" type="number" placeholder="Episode unlock price (单集价)" value={draft.pricing.episodeUnlockPriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, episodeUnlockPriceUsd: Number(e.target.value) } }))} />
           <label className="small-text"><input type="checkbox" checked={draft.pricing.finaleUnlockEnabled} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, finaleUnlockEnabled: e.target.checked } }))} /> 启用结局额外包</label>
           {draft.pricing.finaleUnlockEnabled ? <input className="input" type="number" value={draft.pricing.finaleUnlockPriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, finaleUnlockPriceUsd: Number(e.target.value) } }))} /> : null}
           <input className="input" placeholder="Free preview episodes (e.g. 1,2)" value={draft.pricing.freePreviewEpisodes.join(',')} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, freePreviewEpisodes: e.target.value.split(',').map((x) => Number(x.trim())).filter(Boolean) } }))} />
@@ -253,8 +256,8 @@ export function CreatorDashboardPage({ auth, platform }) {
       <section className="panel stack-md">
         <h3>Revenue Model / Platform Monetization</h3>
         <div className="grid cards-2">
-          <article className="mini-card"><h4>Platform收入</h4>{REVENUE_MODEL.platform.map((item) => <p key={item.key} className="small-text">• {item.label}: {item.detail}</p>)}</article>
-          <article className="mini-card"><h4>Creator收入路径</h4>{REVENUE_MODEL.creator.map((item) => <p key={item} className="small-text">• {item}</p>)}</article>
+          <article className="mini-card"><h4>Platform收入优先级</h4>{REVENUE_MODEL.platform.map((item) => <p key={item.key} className="small-text">• {item.label}: {item.detail}</p>)}</article>
+          <article className="mini-card"><h4>Creator收入路径（低抽成后）</h4>{REVENUE_MODEL.creator.map((item) => <p key={item} className="small-text">• {item}</p>)}</article>
         </div>
       </section>
 

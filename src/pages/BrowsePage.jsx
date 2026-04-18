@@ -23,10 +23,14 @@ export function BrowsePage({ platform }) {
     });
   }, [query, tag, status, platform.series, creatorsById]);
 
+  const published = filtered.filter((item) => item.status === 'published');
+  const firstBatch = published.slice(0, 3);
+
   return (
     <div className="stack-lg">
       <section className="panel">
         <SectionTitle title="Browse" desc="按题材、标签、状态筛选，支持搜索剧名/创作者" />
+        <p className="small-text">若当前处于首批内容阶段，系统将优先展示首发推荐，避免空白浏览体验。</p>
         <div className="browse-filters">
           <label>
             搜索
@@ -52,6 +56,18 @@ export function BrowsePage({ platform }) {
         </div>
       </section>
 
+      {firstBatch.length && query.trim() === '' && status === 'all' ? (
+        <section>
+          <SectionTitle title="首发推荐" desc="Trailer 优先 + 主剧集跟进" />
+          <div className="grid cards-3">
+            {firstBatch.map((item) => {
+              const episodes = platform.episodes.filter((ep) => ep.seriesId === item.id);
+              return <SeriesCard key={`starter-${item.id}`} series={item} episodeCount={episodes.length} previewCount={episodes.filter((ep) => ep.isPreview).length} />;
+            })}
+          </div>
+        </section>
+      ) : null}
+
       <div className="grid cards-3">
         {filtered.map((item) => {
           const episodes = platform.episodes.filter((ep) => ep.seriesId === item.id);
@@ -59,7 +75,7 @@ export function BrowsePage({ platform }) {
         })}
       </div>
 
-      {filtered.length === 0 ? <section className="panel">暂无匹配剧集，试试更宽松的筛选条件。</section> : null}
+      {filtered.length === 0 ? <section className="panel">暂无匹配剧集，试试更宽松的筛选条件。若你在准备软上线，建议先上架 2-3 部含 Trailer 的短剧。</section> : null}
     </div>
   );
 }

@@ -1,62 +1,32 @@
-# AIShortHub 创作者说明书（Phase 13）
+# AIShortHub 创作者说明书（Phase 14）
 
-## 1. Creator 方案
-- Creator Basic：$0 / 15% 抽成 / 2 active series / 20 episodes / 5GB
-- Creator Pro：$19 / 10% 抽成 / 5 active series / 100 episodes / 25GB
-- Studio：$49 / 7% 抽成 / 20 active series / 500 episodes / 100GB
+## 1. Creator 方案（低抽成）
+- Creator Basic：$0 / **8%** / 2 active series / 20 episodes / 5GB
+- Creator Pro：$19 / **5%** / 5 active series / 100 episodes / 25GB
+- Studio：$49 / **3%** / 20 active series / 500 episodes / 100GB
 
-## 2. Creator 收益构成
-收益面板将拆分展示：
-1) 广告分成
-2) 订阅池分成
-3) 整剧销售
-4) 单集解锁销售
-5) 服务成本
-6) 平台抽成
-7) 净收入
-8) 待结算
-9) 已打款
+> 核心原则：**仅在你有收入后才会抽成**。无收入，不抽成。
 
-## 3. Creator 自定价
-在 Creator Studio 的 Pricing & QC 步骤可配置：
-- Entire title price
-- Episode unlock price
-- Optional finale unlock
-- Free preview episodes
+## 2. 月费与抽成的区别
+- 月费：工具、额度、优先审核、支持服务。
+- 抽成：你实际产生收入后按比例计提。
 
-同时区分：
-- 订阅用户可免费看哪些
-- 非订阅用户可按整剧/单集购买哪些
+## 3. Creator onboarding（快速上手）
+1. 选择 Creator Plan。
+2. 上传 Trailer 与 Main Episodes。
+3. 设置整剧价与单集价。
+4. 完成 QC 后提交审核。
+5. 在收益面板查看净收益、待打款。
 
-## 4. 上传工作流（专业版）
-### A. Trailer（独立资产）
-- Trailer 标题、封面、时长、CTA、分辨率、比例
-- 用于首页、详情页、社媒引流
+## 4. 收益结构（creator-friendly）
+1. Ad revenue share
+2. Subscription pool share
+3. Single-title sales
+4. Single-episode sales
+5. Net payout after low commission
 
-### B. Main Episodes（分集）
-- 集数排序
-- 是否试看 / 是否收费 / 单集价格
-- 上架时间
-- 字幕语言
-- 审核状态
-
-### 资产类型支持
-- Static Poster / Motion Poster / Vertical Cover / Square Thumbnail
-- Trailer / Main Episode
-- Subtitle files / Caption pack / Promo pack
-
-## 5. QC 检查项
-提审前将提示：
-- 缺少封面
-- 缺少预告
-- 分辨率不足
-- 比例不推荐
-- 时长过短/过长
-- 文件过大
-- 分集命名不规范
-- 缺少字幕
-
-## 6. 退款说明（摘要）
-- Creator Plan 与 Viewer 订阅独立。
-- 上传、提审、权益消耗后默认不可退款。
-- Add-on 服务未开工可退，开工后默认不可退。
+## 5. 常见术语
+- Platform Commission：有收入后才生效。
+- Pending Payout：已确认、待打款收益。
+- Net Earnings：扣除成本与抽成后的净额。
+- Included / Discounted / Add-on / Optional：服务权益状态。

@@ -88,7 +88,7 @@ export function CreatorPlanCard({ snapshot }) {
   const items = [
     ['Current Creator Plan', snapshot.plan.name],
     ['Review priority', snapshot.plan.reviewPriority],
-    ['Platform commission', formatCommission(snapshot.plan.commissionRate)],
+    ['Platform commission', `${formatCommission(snapshot.plan.commissionRate)} (only after revenue)`],
     ['Active Series', `${snapshot.usage.activeSeries}/${snapshot.limits.maxActiveSeries} · Remaining ${snapshot.remaining.seriesLeft}`],
     ['Episodes', `${snapshot.usage.totalEpisodes}/${snapshot.limits.maxTotalEpisodes} · Remaining ${snapshot.remaining.episodesLeft}`],
     ['Storage', `${snapshot.usage.usedStorageGb.toFixed(1)}GB/${snapshot.limits.monthlyAssetStorageLimitGb}GB · Remaining ${snapshot.remaining.storageGbLeft.toFixed(1)}GB`],
