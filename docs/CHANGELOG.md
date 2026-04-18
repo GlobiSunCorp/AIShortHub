@@ -38,3 +38,11 @@
 - Glossary 升级为双层解释：Quick explain + Learn more 链接。
 - 新增 `getCatalogSnapshot` 与 `getAccountCenterSnapshot`，推进页面 selector-driven 消费。
 - Home/Browse/Series/Watch 文案与展示增强 low-content launch 适配，并提升 trailer/preview/paid 区分。
+
+## Phase 17 · 2026-04-18
+- 顶部导航按 Viewer 与 Creator/Admin 分区重组，Creator 功能整合为下拉式 Creator Studio 入口。
+- Creator Studio 下拉支持 Dashboard、My Series、Upload Assets、Episodes、Pricing & Monetization、Earnings、Service Orders、Creator Guidelines，以及高阶权益项。
+- Browse 完成智能发现增强：15 类分类、10 种排序、智能搜索（标题/标签/创作者/简介/题材/付费类型）、搜索建议、热门关键词、空结果推荐、筛选状态显示。
+- Creator Studio 增加更专业化的内容字段分组（基础信息、商业信息、资产信息、分发信息）。
+- 首页新增 For Viewers / For Creators audience toggle；内容卡标签强化 Free Preview / Included with Subscription / Paid Unlock / In Review。
+- 全站视觉精修：导航布局、按钮半径、筛选 chip、dropdown 质感、字体与层次细节。

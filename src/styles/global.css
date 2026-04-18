@@ -24,7 +24,7 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
-.container { width: min(1200px, calc(100% - 2rem)); margin: 0 auto; }
+.container { width: min(1260px, calc(100% - 2rem)); margin: 0 auto; }
 .page-shell { padding: 2rem 0 4rem; min-height: calc(100vh - 160px); }
 .stack-lg > * + * { margin-top: 1.5rem; }
 .stack-md > * + * { margin-top: 0.85rem; }
@@ -41,16 +41,20 @@ a { color: inherit; text-decoration: none; }
   background: rgba(4, 7, 15, 0.8);
   backdrop-filter: blur(14px);
 }
-.site-header .container { padding: 0.9rem 0; }
+.site-header .container { padding: 0.8rem 0; display: grid; grid-template-columns: auto 1fr auto auto; gap: 0.9rem; align-items: center; }
 .brand {
   font-size: clamp(1.3rem, 2vw, 1.75rem);
   font-weight: 800;
   letter-spacing: -0.04em;
 }
-.nav-wrap { gap: 0.9rem; flex-wrap: wrap; }
-.nav-link { font-size: 0.875rem; color: var(--muted); }
+.nav-wrap { gap: 0.75rem; flex-wrap: wrap; }
+.viewer-nav { justify-content: center; }
+.creator-nav { justify-content: flex-end; }
+.nav-link { font-size: 0.86rem; color: var(--muted); padding: 0.4rem 0.65rem; border-radius: 12px; }
 .nav-link.active,
-.nav-link:hover { color: var(--text); }
+.nav-link:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.creator-trigger { border: 1px solid var(--line-soft); background: rgba(255, 255, 255, 0.02); }
+.locked-link { border: 1px dashed rgba(255, 196, 117, 0.4); color: #f5cc95; }
 .header-actions,
 .account-wrap { position: relative; }
 .account-menu {
@@ -63,12 +67,13 @@ a { color: inherit; text-decoration: none; }
   padding: 12px;
   border-radius: 14px;
 }
+.creator-menu { width: 260px; background: rgba(8, 12, 25, 0.98); border: 1px solid rgba(157, 176, 255, 0.25); }
 .account-menu small { color: var(--muted); }
 .account-menu a { font-size: 14px; color: #ccd4ff; }
 
 .btn {
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 14px;
   padding: 0.65rem 1.1rem;
   color: var(--text);
   cursor: pointer;
@@ -127,7 +132,7 @@ a { color: inherit; text-decoration: none; }
 .hero h1 {
   margin: 0.5rem 0;
   font-size: clamp(2rem, 5.4vw, 3.8rem);
-  line-height: 0.95;
+  line-height: 0.98;
   letter-spacing: -0.04em;
 }
 .hero p,
@@ -212,7 +217,7 @@ a { color: inherit; text-decoration: none; }
 .cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .section-title { display: flex; justify-content: space-between; gap: 10px; align-items: end; }
-.section-title h2 { margin: 0; font-size: clamp(1.2rem, 3vw, 1.6rem); letter-spacing: -0.02em; }
+.section-title h2 { margin: 0; font-size: clamp(1.28rem, 3vw, 1.72rem); letter-spacing: -0.02em; }
 
 .series-card { overflow: hidden; display: grid; min-height: 100%; }
 .cover {
@@ -229,7 +234,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 0.73rem;
 }
 .series-card-body { padding: 0.9rem; }
-.series-card h3 { margin: 0; font-size: 1.05rem; }
+.series-card h3 { margin: 0; font-size: 1.08rem; letter-spacing: -0.01em; }
 .series-card p { margin: 0; color: var(--muted); }
 .series-card-foot { border-top: 1px solid var(--line-soft); padding-top: 0.7rem; }
 .genre-tag { border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px; font-size: 12px; }
@@ -253,6 +258,7 @@ select {
   gap: 0.75rem;
 }
 .filter-chip { padding: 0.65rem 0.8rem; font-size: 0.83rem; color: var(--muted); }
+.filter-chip.active-chip { color: #eef2ff; border-color: rgba(168, 183, 255, 0.6); background: rgba(113, 126, 255, 0.2); }
 
 .detail-hero {
   display: grid;
@@ -366,8 +372,8 @@ td { text-align: left; padding: 10px; border-bottom: 1px solid var(--line-soft);
   .cards-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .episode-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-  .site-header .container { flex-direction: column; align-items: flex-start; }
-  .header-actions { width: 100%; justify-content: flex-start; }
+  .site-header .container { grid-template-columns: 1fr; }
+  .header-actions, .creator-nav, .viewer-nav { width: 100%; justify-content: flex-start; }
 }
 
 @media (max-width: 640px) {
@@ -378,7 +384,7 @@ td { text-align: left; padding: 10px; border-bottom: 1px solid var(--line-soft);
   .cards-4,
   .hero-stats { grid-template-columns: 1fr; }
   .nav-wrap { width: 100%; }
-  .btn { width: 100%; text-align: center; }
+  .btn { width: 100%; text-align: center; border-radius: 12px; }
   .row.wrap { gap: 0.55rem; }
 }
 

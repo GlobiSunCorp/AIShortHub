@@ -3,8 +3,10 @@ import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
 import { OnboardingGuide } from '../components/OnboardingGuide';
 import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
+import { useState } from 'react';
 
 export function HomePage({ platform }) {
+  const [audience, setAudience] = useState('viewer');
   const catalog = getCatalogSnapshot(platform);
   const takeRate = Number(platform?.platformConfig?.platformTakeRate ?? 0.2);
 
@@ -20,6 +22,11 @@ export function HomePage({ platform }) {
             <Link className="btn btn-primary" to="/browse">Browse titles</Link>
             <Link className="btn btn-ghost" to="/pricing">View plans</Link>
           </div>
+          <div className="row wrap">
+            <button type="button" className={`filter-chip ${audience === 'viewer' ? 'active-chip' : ''}`} onClick={() => setAudience('viewer')}>For Viewers</button>
+            <button type="button" className={`filter-chip ${audience === 'creator' ? 'active-chip' : ''}`} onClick={() => setAudience('creator')}>For Creators</button>
+          </div>
+          <p className="ds-meta">{audience === 'viewer' ? 'Viewer mode: discover free previews, subscription-included titles, and trending episodes.' : 'Creator mode: plan uploads, monetization setup, review readiness, and growth services in Creator Studio.'}</p>
         </div>
         <Link className="hero-cover from-fuchsia cover-link" to="/browse">
           <span className="status">Launch-prep mode</span>

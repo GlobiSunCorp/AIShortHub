@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AccessGuidePanel } from '../components/AccessGuidePanel';
 import { CreatorPlanCard, MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 import { CreatorActionCenter, PlanHealthCard, QuotaAlertBar, SubmissionReadinessChecklist } from '../components/CreatorOpsPanels';
@@ -31,8 +31,13 @@ const bucketByAssetType = {
 };
 
 const initialDraft = {
-  title: '', synopsis: '', tags: '', category: 'Romance', audience: '',
+  title: '', subtitle: '', altTitle: '', shortSynopsis: '', synopsis: '', tags: '', category: 'Romance', secondaryCategory: 'Mystery',
+  language: 'English', contentRating: 'PG-13', regionTarget: 'Global', releaseStatus: 'ongoing',
+  audience: '', inclusionMode: 'subscription_and_unlock',
+  business: { adRevenueEligible: true, subscriptionPoolEligible: true, featuredPlacementRequest: false, promoPackSelected: 'Hook Booster Pack' },
   staticPoster: '', motionPoster: '', verticalCover: '', squareThumbnail: '',
+  trailerReady: false, tiktokHookStatus: 'draft', qcStatus: 'pending', moderationStatus: 'not_submitted',
+  recommendedAspectRatio: '9:16', resolutionSet: '720p/1080p',
   trailer: { title: '', url: '', coverUrl: '', durationSeconds: 30, cta: 'Watch full series', aspectRatio: '9:16', resolutions: ['720p', '1080p'] },
   episodes: [{ number: 1, title: 'Episode 1 - Untitled', url: '', durationSeconds: 60, isPreview: true, isPaid: false, unlockPriceUsd: 0.99, publishAt: '', subtitleLanguages: ['en'], reviewStatus: 'draft', resolutions: ['360p', '540p', '720p'], aspectRatio: '9:16', fileSizeMb: 80 }],
   pricing: { titlePriceUsd: 7.99, episodeUnlockPriceUsd: 0.99, finaleUnlockEnabled: false, finaleUnlockPriceUsd: 1.99, freePreviewEpisodes: [1] },
@@ -56,6 +61,15 @@ export function CreatorDashboardPage({ auth, platform }) {
   const [files, setFiles] = useState({});
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [workspace, setWorkspace] = useState('overview');
+  useEffect(() => {
+    const applyHash = () => {
+      const next = (window.location.hash || '').replace('#', '');
+      if (['overview', 'content', 'assets', 'pricing', 'earnings', 'review'].includes(next)) setWorkspace(next);
+    };
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+    return () => window.removeEventListener('hashchange', applyHash);
+  }, []);
 
   const creatorSnapshot = getCreatorDashboardSnapshot({ platform, auth });
   const myCreator = creatorSnapshot.creator || platform.creators[0];
@@ -112,6 +126,7 @@ export function CreatorDashboardPage({ auth, platform }) {
               className={`ds-tab ${workspace === key ? 'active' : ''}`}
               onClick={() => {
                 setWorkspace(key);
+                window.history.replaceState({}, '', `/creator#${key}`);
                 if (key === 'content') setStep(0);
                 if (key === 'assets') setStep(1);
                 if (key === 'pricing') setStep(3);
@@ -158,6 +173,55 @@ export function CreatorDashboardPage({ auth, platform }) {
         </div>
       </section>
       : null}
+
+      {(workspace === 'content' || workspace === 'pricing' || workspace === 'assets') ? (
+        <section className="panel ds-section stack-md">
+          <h2 className="ds-h2">Professional Content Structure</h2>
+          <div className="grid cards-2">
+            <article className="mini-card stack-md">
+              <h3>Basic Information</h3>
+              <input className="input" placeholder="Title" value={draft.title} onChange={(e) => setDraft((p) => ({ ...p, title: e.target.value }))} />
+              <input className="input" placeholder="Subtitle / Alternative title" value={draft.subtitle} onChange={(e) => setDraft((p) => ({ ...p, subtitle: e.target.value, altTitle: e.target.value }))} />
+              <input className="input" placeholder="Short synopsis" value={draft.shortSynopsis} onChange={(e) => setDraft((p) => ({ ...p, shortSynopsis: e.target.value }))} />
+              <textarea className="input" placeholder="Full synopsis" value={draft.synopsis} onChange={(e) => setDraft((p) => ({ ...p, synopsis: e.target.value }))} />
+              <input className="input" placeholder="Tags (comma separated)" value={draft.tags} onChange={(e) => setDraft((p) => ({ ...p, tags: e.target.value }))} />
+            </article>
+            <article className="mini-card stack-md">
+              <h3>Classification & Editorial</h3>
+              <input className="input" placeholder="Primary category" value={draft.category} onChange={(e) => setDraft((p) => ({ ...p, category: e.target.value }))} />
+              <input className="input" placeholder="Secondary category" value={draft.secondaryCategory} onChange={(e) => setDraft((p) => ({ ...p, secondaryCategory: e.target.value }))} />
+              <input className="input" placeholder="Language" value={draft.language} onChange={(e) => setDraft((p) => ({ ...p, language: e.target.value }))} />
+              <input className="input" placeholder="Content rating" value={draft.contentRating} onChange={(e) => setDraft((p) => ({ ...p, contentRating: e.target.value }))} />
+              <input className="input" placeholder="Region target" value={draft.regionTarget} onChange={(e) => setDraft((p) => ({ ...p, regionTarget: e.target.value }))} />
+              <input className="input" placeholder="Release status (ongoing/completed)" value={draft.releaseStatus} onChange={(e) => setDraft((p) => ({ ...p, releaseStatus: e.target.value }))} />
+            </article>
+          </div>
+          <div className="grid cards-2">
+            <article className="mini-card stack-md">
+              <h3>Business & Monetization</h3>
+              <input className="input" placeholder="Viewer inclusion mode" value={draft.inclusionMode} onChange={(e) => setDraft((p) => ({ ...p, inclusionMode: e.target.value }))} />
+              <input className="input" type="number" placeholder="Entire title price" value={draft.pricing.titlePriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, titlePriceUsd: Number(e.target.value) } }))} />
+              <input className="input" type="number" placeholder="Episode unlock price" value={draft.pricing.episodeUnlockPriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, episodeUnlockPriceUsd: Number(e.target.value) } }))} />
+              <input className="input" type="number" placeholder="Finale unlock price" value={draft.pricing.finaleUnlockPriceUsd} onChange={(e) => setDraft((p) => ({ ...p, pricing: { ...p.pricing, finaleUnlockPriceUsd: Number(e.target.value) } }))} />
+              <label className="small-text"><input type="checkbox" checked={draft.business.adRevenueEligible} onChange={(e) => setDraft((p) => ({ ...p, business: { ...p.business, adRevenueEligible: e.target.checked } }))} /> Ad revenue eligible</label>
+              <label className="small-text"><input type="checkbox" checked={draft.business.subscriptionPoolEligible} onChange={(e) => setDraft((p) => ({ ...p, business: { ...p.business, subscriptionPoolEligible: e.target.checked } }))} /> Subscription pool eligible</label>
+              <label className="small-text"><input type="checkbox" checked={draft.business.featuredPlacementRequest} onChange={(e) => setDraft((p) => ({ ...p, business: { ...p.business, featuredPlacementRequest: e.target.checked } }))} /> Featured placement request</label>
+            </article>
+            <article className="mini-card stack-md">
+              <h3>Assets & Distribution Readiness</h3>
+              <input className="input" placeholder="Poster URL" value={draft.staticPoster} onChange={(e) => setDraft((p) => ({ ...p, staticPoster: e.target.value }))} />
+              <input className="input" placeholder="Motion poster URL" value={draft.motionPoster} onChange={(e) => setDraft((p) => ({ ...p, motionPoster: e.target.value }))} />
+              <input className="input" placeholder="Vertical cover URL" value={draft.verticalCover} onChange={(e) => setDraft((p) => ({ ...p, verticalCover: e.target.value }))} />
+              <input className="input" placeholder="Square thumbnail URL" value={draft.squareThumbnail} onChange={(e) => setDraft((p) => ({ ...p, squareThumbnail: e.target.value }))} />
+              <input className="input" placeholder="Recommended aspect ratio" value={draft.recommendedAspectRatio} onChange={(e) => setDraft((p) => ({ ...p, recommendedAspectRatio: e.target.value }))} />
+              <input className="input" placeholder="Resolution set" value={draft.resolutionSet} onChange={(e) => setDraft((p) => ({ ...p, resolutionSet: e.target.value }))} />
+              <input className="input" placeholder="TikTok hook status" value={draft.tiktokHookStatus} onChange={(e) => setDraft((p) => ({ ...p, tiktokHookStatus: e.target.value }))} />
+              <input className="input" placeholder="QC status" value={draft.qcStatus} onChange={(e) => setDraft((p) => ({ ...p, qcStatus: e.target.value }))} />
+              <input className="input" placeholder="Moderation status" value={draft.moderationStatus} onChange={(e) => setDraft((p) => ({ ...p, moderationStatus: e.target.value }))} />
+            </article>
+          </div>
+        </section>
+      ) : null}
 
       {workspace === 'earnings' ? <section className="panel stack-md">
         <h3>Earnings Breakdown</h3>
