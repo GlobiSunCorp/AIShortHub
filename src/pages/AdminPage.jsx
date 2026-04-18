@@ -2,9 +2,22 @@ import { useMemo, useState } from 'react';
 import { AccessGuidePanel } from '../components/AccessGuidePanel';
 import { minLength } from '../lib/validation';
 import { DarkSelect } from '../components/DarkSelect';
+import { OnboardingGuide } from '../components/OnboardingGuide';
 
 const orderStatuses = ['pending', 'in_progress', 'completed', 'cancelled'];
 const reviewStatuses = ['draft', 'pending_review', 'published', 'rejected'];
+const launchChecklist = [
+  'Custom domain setup',
+  'Production env vars setup',
+  'Supabase production checklist',
+  'Stripe production checklist',
+  'Support email / pilot contact mode',
+  'Terms / Privacy / Refund / Content Policy review',
+  'First content batch readiness',
+  'Payment and checkout testing',
+  'Creator upload testing',
+  'Soft launch rehearsal',
+];
 
 export function AdminPage({ platform, auth }) {
   const [reviewNote, setReviewNote] = useState('');
@@ -23,11 +36,20 @@ export function AdminPage({ platform, auth }) {
 
   return (
     <div className="stack-lg">
+      <OnboardingGuide role="admin" />
       <section className="panel">
         <h1>Admin Review Workbench</h1>
         <p className="small-text">状态流：draft → pending_review → approved/published 或 rejected。预留 report_count / flagged 字段用于下一轮举报审核。</p>
       </section>
       {feedback.message ? <section className="panel"><p className={`form-feedback ${feedback.type}`}>{feedback.message}</p></section> : null}
+
+      <section className="panel stack-md">
+        <h2>Production Readiness (Read-only)</h2>
+        <p className="small-text">详细版本见 docs/LAUNCH_CHECKLIST.md。此处用于运营巡检时快速核对。</p>
+        <div className="grid cards-2">
+          {launchChecklist.map((item) => <article key={item} className="mini-card"><p className="small-text">□ {item}</p></article>)}
+        </div>
+      </section>
 
       <section className="grid cards-4">
         <article className="stat-card"><p className="small-text">Draft</p><h3>{platform.series.filter((s) => s.status === 'draft').length}</h3></article>

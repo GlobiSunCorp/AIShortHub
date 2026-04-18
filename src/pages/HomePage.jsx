@@ -1,6 +1,7 @@
 import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
+import { OnboardingGuide } from '../components/OnboardingGuide';
 
 function getCreatedAt(item) {
   return item?.createdAt || item?.created_at || '';
@@ -24,6 +25,7 @@ export function HomePage({ platform }) {
   const published = series.filter((item) => getSeriesStatus(item) === 'published' && getSeriesVisibility(item) === 'public');
   const trending = published.slice(0, 3);
   const latest = [...published].sort((a, b) => getCreatedAt(b).localeCompare(getCreatedAt(a))).slice(0, 3);
+  const launchReady = published.slice(0, 2);
 
   const episodeCounts = Object.fromEntries(
     published.map((s) => [
@@ -37,28 +39,36 @@ export function HomePage({ platform }) {
 
   return (
     <div className="stack-lg">
+      <OnboardingGuide role="viewer" />
       <section className="hero premium-hero">
         <div>
           <span className="kicker">TikTok 引流 + 站内订阅闭环</span>
           <h1>AI 短剧创作与变现平台 MVP</h1>
-          <p>创作者发布剧集、用户试看转会员、平台抽成与服务订单一体化。先跑通运营闭环，再逐步接入自动化增长能力。</p>
+          <p>平台已进入 soft launch 准备：广告优先 + 服务收入 + 订阅 + 单次解锁 + 低抽成。适合 2-3 部首发短剧快速上线测试。</p>
           <div className="row wrap">
             <Link className="btn btn-primary" to="/browse">浏览热剧</Link>
             <Link className="btn btn-ghost" to="/pricing">开通会员</Link>
           </div>
         </div>
         <Link className="hero-cover from-fuchsia cover-link" to="/browse">
-          <span className="status">MVP Ready</span>
-          <h3>可运营闭环</h3>
-          <p>内容展示、试看、会员、创作者上传、审核、服务订单、管理后台</p>
+          <span className="status">Soft Launch Ready</span>
+          <h3>首发内容承接</h3>
+          <p>即使内容不多，也能通过 Trailer + 首发推荐位保持完整体验</p>
           <div className="play-overlay">▶ Play</div>
         </Link>
       </section>
 
       <section className="grid cards-3">
         <article className="panel"><h3>平台定位</h3><p className="small-text">TikTok 负责前链路曝光，AIShortHub 负责承接转化与用户付费。</p></article>
-        <article className="panel"><h3>创作者招募</h3><p className="small-text">支持上传封面、预告、分集内容，进入审核后上线变现。</p></article>
-        <article className="panel"><h3>平台抽成</h3><p className="small-text">默认抽成 {(getPlatformTakeRate(platform?.platformConfig) * 100).toFixed(0)}%，可在配置中调整。</p></article>
+        <article className="panel"><h3>创作者招募</h3><p className="small-text">低门槛 Creator 方案：有收入后才抽成，月费与抽成分离。</p></article>
+        <article className="panel"><h3>平台抽成政策</h3><p className="small-text">默认配置仍可调（{(getPlatformTakeRate(platform?.platformConfig) * 100).toFixed(0)}%），但 launch policy 面向 Creator 执行 8%/5%/3% 低抽成。</p></article>
+      </section>
+
+      <section>
+        <SectionTitle title="首发推荐（First Batch）" desc="适配少量优质内容的上新模式" />
+        <div className="grid cards-2">
+          {launchReady.length ? launchReady.map((item) => <SeriesCard key={item.id} series={item} episodeCount={episodeCounts[item.id]?.total} previewCount={episodeCounts[item.id]?.preview} />) : <article className="panel"><p className="small-text">可先准备 2-3 部短剧：每部至少 1 条 Trailer + 2 条 Main Episodes。</p></article>}
+        </div>
       </section>
 
       <section>

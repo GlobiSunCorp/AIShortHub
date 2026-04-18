@@ -1,7 +1,6 @@
-# AIShortHub MVP（Phase 13 · 商业模型重构 + Creator 自定价 + 专业视频工作流）
+# AIShortHub MVP（Phase 14 · 软上线准备 + 术语系统 + Onboarding + 低抽成策略）
 
-本轮将平台商业结构从“订阅 + 抽成导向”重构为：
-**广告优先 + 服务收入 + Viewer 订阅 + 单次解锁 + 低抽成**，并升级 Creator Studio 上传流程为更专业的视频 CMS 工作流。
+本轮目标：把“可运行原型”推进到“可小范围正式上线”状态，重点是规则清晰、体验顺滑、文档可执行。
 
 ## 技术栈
 - Vite + React
@@ -15,50 +14,59 @@ npm run dev
 npm run build
 ```
 
-## 关键改动（Phase 13）
+## Phase 14 重点
 
-### 1) Viewer 定价重构（低门槛）
-- Free：$0（仅预告/试看）
-- Pro Viewer：$4.99/月（完整内容）
-- Premium Viewer：$9.99/月（更高质量 + 抢先看 + 专属内容）
-- Pricing / Profile / Watch / Series Detail 的升级引导与访问说明已同步。
+### 1) Creator-friendly 低抽成策略（默认）
+- Creator Basic：$0 / **8%** commission / 2 active series / 20 episodes / 5GB
+- Creator Pro：$19 / **5%** commission / 5 active series / 100 episodes / 25GB
+- Studio：$49 / **3%** commission / 20 active series / 500 episodes / 100GB
 
-### 2) Creator 方案重构（低抽成）
-- Creator Basic：$0 / 15% commission / 2 active series / 20 episodes / 5GB
-- Creator Pro：$19 / 10% commission / 5 active series / 100 episodes / 25GB
-- Studio：$49 / 7% commission / 20 active series / 500 episodes / 100GB
-- Sticky Upgrade Rail、Profile、Pricing、配额卡与方案说明已同步。
+> 规则：**平台抽成仅在 creator 产生收入后生效；无收入不抽成。**
+> 月费用于工具、额度、优先服务，和收入抽成完全分离。
 
-### 3) 广告优先平台化模型
-新增 Revenue Model / Platform Monetization 模块，展示：
-- 平台收入：广告、服务订单、订阅、单次解锁、低抽成
-- 创作者收入：广告分成、订阅池分成、整剧/单集销售、服务成本、平台抽成、净收入
+### 2) 商业模型表达升级（广告优先）
+平台收入优先级：
+1. Advertising revenue
+2. Service revenue
+3. Viewer subscriptions
+4. Single-title / single-episode unlocks
+5. Low platform commission
 
-### 4) Creator 自定价系统
-- 支持整剧价（Entire title price）
-- 支持单集解锁价（Episode unlock price）
-- 支持结局额外包（Finale unlock）
-- 支持试看集配置（Free preview episodes）
-- Creator Studio 提供配置入口，Series Detail / Watch / Profile 可读到这些价格结构。
+Creator 收入路径：
+1. Ad revenue share
+2. Subscription pool share
+3. Single-title sales
+4. Single-episode sales
+5. Net payout after low commission
 
-### 5) 收益面板升级（钱从哪里来）
-- 新增 Earnings Breakdown（广告、订阅分成、整剧销售、单集销售、服务成本、平台抽成、净收入、待结算、已打款）
-- 提供堆叠条 + 明细卡 + 环比占位（本期 vs 上期）
+### 3) 全站术语解释系统
+新增统一 glossary + hover/tap explain 组件，重点覆盖 Pricing / Profile / Creator Studio / Services。
 
-### 6) 上传流程升级（Trailer 与 Main Episodes 分离）
-- Trailer 独立资产：标题、封面、时长、CTA、比例/分辨率
-- Main Episodes 独立工作流：分集顺序、试看/收费、单集价格、上架时间、字幕语言、审核状态
-- QC 占位检查：缺封面、缺预告、分辨率不足、比例不推荐、时长异常、文件过大、命名不规范、缺字幕
+### 4) Onboarding 系统
+新增 role-based onboarding（Viewer / Creator / Admin），首次访问引导 + 快速步骤提示。
 
-### 7) 退款策略同步
-- Viewer：低摩擦取消，已开始计费周期默认不按比例退款
-- Creator：独立退款规则，上传/审核/权益消耗后不可退款
-- Add-on：未开工可退，开工后默认不可退
+### 5) 页面切换与状态反馈
+- 页面顶部增加当前位置与切换状态提示。
+- CTA 行为统一 loading / success / error 反馈。
+
+### 6) 首批内容上线支持
+Home/Browse 支持“少量优质内容”的展示策略，避免内容少时出现空白感。
+
+### 7) Production Readiness
+- 新增 `docs/LAUNCH_CHECKLIST.md`。
+- Admin 页面提供只读 checklist 快速核对。
+
+## 生产切换说明（给非工程负责人）
+1. 先完成域名、支付、数据库、客服邮箱四项基础配置。
+2. 准备首批 2-3 部短剧（含 Trailer、主剧集、封面、字幕）。
+3. 全流程演练：浏览→支付→观看→上传→提审→审核→结算。
+4. 软上线 7-14 天，确认稳定后再放大流量。
 
 ## 文档入口
 - `docs/USER_MANUAL.md`
 - `docs/CREATOR_MANUAL.md`
 - `docs/ADMIN_PLAYBOOK.md`
+- `docs/LAUNCH_CHECKLIST.md`
 - `docs/CHANGELOG.md`
 - `docs/supabase-schema.sql`
 

@@ -51,10 +51,11 @@ export const CREATOR_PLANS = [
     id: 'creator_basic',
     name: 'Creator Basic',
     monthlyPrice: 0,
-    commissionRate: 0.15,
+    commissionRate: 0.08,
+    commissionPolicy: 'Only applies after creator-generated revenue exists.',
     reviewPriority: 'Standard queue',
     staticPoster: true,
-    motionPoster: 'Add-on only',
+    motionPoster: 'Add-on',
     tiktokPromoPack: false,
     featuredPlacementRequest: false,
     advancedAnalytics: false,
@@ -75,7 +76,8 @@ export const CREATOR_PLANS = [
     id: 'creator_pro',
     name: 'Creator Pro',
     monthlyPrice: 19,
-    commissionRate: 0.1,
+    commissionRate: 0.05,
+    commissionPolicy: 'Only applies after creator-generated revenue exists.',
     reviewPriority: 'Priority queue',
     staticPoster: true,
     motionPoster: 'Discounted',
@@ -99,7 +101,8 @@ export const CREATOR_PLANS = [
     id: 'studio',
     name: 'Studio',
     monthlyPrice: 49,
-    commissionRate: 0.07,
+    commissionRate: 0.03,
+    commissionPolicy: 'Only applies after creator-generated revenue exists.',
     reviewPriority: 'Top priority review',
     staticPoster: true,
     motionPoster: 'Included',
@@ -131,20 +134,18 @@ export const ADD_ON_SERVICES = [
 
 export const REVENUE_MODEL = {
   platform: [
-    { key: 'advertising', label: 'Advertising revenue', detail: 'Mid-roll / feed ad inventory and brand placements.' },
-    { key: 'services', label: 'Creator service orders', detail: 'Trailer editing, promo packs, localization and packaging services.' },
-    { key: 'viewer_subscription', label: 'Viewer subscriptions', detail: 'Free / Pro / Premium recurring subscriptions.' },
-    { key: 'single_unlocks', label: 'Single-title / episode unlocks', detail: 'One-time unlock purchases by non-subscribers.' },
-    { key: 'low_commission', label: 'Low platform commission', detail: 'Commission remains visible but no longer the only core income source.' },
+    { key: 'advertising', label: 'Advertising revenue', detail: 'Primary launch-stage revenue source from feed / mid-roll inventory and brand placement.' },
+    { key: 'services', label: 'Service revenue', detail: 'Creator support services like trailer editing, promo packs, localization and packaging.' },
+    { key: 'viewer_subscription', label: 'Viewer subscriptions', detail: 'Recurring viewer membership helps finance platform operations and payout pool.' },
+    { key: 'single_unlocks', label: 'Single-title / single-episode unlocks', detail: 'One-time unlock purchases by non-subscribers.' },
+    { key: 'low_commission', label: 'Low platform commission', detail: 'Low launch-stage commission only after creators generate revenue.' },
   ],
   creator: [
     'Ad revenue share',
     'Subscription pool share',
     'Single-title sales',
-    'Single-episode unlock sales',
-    'Add-on service costs',
-    'Platform commission deduction',
-    'Net payout',
+    'Single-episode sales',
+    'Net payout after low commission',
   ],
 };
 
@@ -193,6 +194,7 @@ export const SUPPORT_CONTACT_CONFIG = {
 
 export const COMMISSION_RULES = {
   defaultTakeRate: Number(import.meta.env.VITE_PLATFORM_TAKE_RATE || 0.2),
+  launchPolicy: 'Creator-friendly launch policy: low commission, charged only after creator revenue is generated.',
 };
 
 export const CREATOR_ASSETS = [

@@ -1,4 +1,6 @@
 import { DemoRoleSwitcher } from '../components/DemoRoleSwitcher';
+import { GlossaryTerm } from '../components/GlossaryTerm';
+import { OnboardingGuide } from '../components/OnboardingGuide';
 import { CreatorPlanCard, MembershipBadge, PlanIdentityBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 import { PlanHealthCard, QuotaAlertBar } from '../components/CreatorOpsPanels';
 import { Link } from '../lib/router';
@@ -38,6 +40,7 @@ export function ProfilePage({ auth, platform }) {
 
   return (
     <div className="stack-lg">
+      <OnboardingGuide role={creatorPlan ? 'creator' : 'viewer'} />
       {quota ? <QuotaAlertBar alerts={buildQuotaAlerts({ snapshot: quota, renewAt: cycle.renewalDate }).slice(0, 2)} compact /> : null}
 
       <section className="panel stack-md">
@@ -52,9 +55,9 @@ export function ProfilePage({ auth, platform }) {
           <article className="mini-card"><h3>Status</h3><p className="small-text">{statusLabel}</p></article>
           <article className="mini-card"><h3>Viewer Subscription</h3><PlanIdentityBadge badgeKey={membership.tier === 'free' ? 'free_viewer' : membership.tier} subtle /><p className="small-text">{viewerPlan.name} · {formatUsd(viewerPlan.monthlyPrice)}/month</p></article>
           <article className="mini-card"><h3>Creator Plan</h3>{creatorPlan ? <><PlanIdentityBadge badgeKey={creatorPlan.id} subtle /><p className="small-text">{formatUsd(creatorPlan.monthlyPrice)}/month</p></> : <p className="small-text">Viewer-only account · Creator plan optional</p>}</article>
-          <article className="mini-card"><h3>Platform Commission</h3><p className="small-text">{commission}</p></article>
-          <article className="mini-card"><h3>Quota reset date</h3><p className="small-text">{cycle.quotaResetDate}</p></article>
-          <article className="mini-card"><h3>Billing renewal date</h3><p className="small-text">{cycle.renewalDate}</p></article>
+          <article className="mini-card"><h3>Platform Commission <GlossaryTerm id="platform_commission" /></h3><p className="small-text">{commission} · 仅在创作者有收入后才生效</p></article>
+          <article className="mini-card"><h3>Quota reset date <GlossaryTerm id="quota_reset" /></h3><p className="small-text">{cycle.quotaResetDate}</p></article>
+          <article className="mini-card"><h3>Billing renewal date <GlossaryTerm id="renewal_date" /></h3><p className="small-text">{cycle.renewalDate}</p></article>
         </div>
         <p className="small-text">Auth mode: {auth.mode === 'real' ? 'Supabase Auth' : 'Mock fallback'} · Demo Role Switcher only affects demo mode.</p>
         <DemoRoleSwitcher auth={auth} />
@@ -65,8 +68,8 @@ export function ProfilePage({ auth, platform }) {
           <h3>Creator-set Pricing Snapshot (Latest Series)</h3>
           <p className="small-text">Series: {latestSeries.title}</p>
           <div className="grid cards-2">
-            <article className="mini-card"><p className="small-text">Entire title price</p><strong>{formatUsd(monetization.titlePriceUsd)}</strong></article>
-            <article className="mini-card"><p className="small-text">Episode unlock price</p><strong>{formatUsd(monetization.episodeUnlockPriceUsd)}</strong></article>
+            <article className="mini-card"><p className="small-text">Entire title price <GlossaryTerm id="entire_title_price" /></p><strong>{formatUsd(monetization.titlePriceUsd)}</strong></article>
+            <article className="mini-card"><p className="small-text">Episode unlock price <GlossaryTerm id="episode_unlock_price" /></p><strong>{formatUsd(monetization.episodeUnlockPriceUsd)}</strong></article>
             <article className="mini-card"><p className="small-text">Finale unlock</p><strong>{monetization.finaleUnlockEnabled ? formatUsd(monetization.finaleUnlockPriceUsd) : 'Disabled'}</strong></article>
             <article className="mini-card"><p className="small-text">Free preview episodes</p><strong>{monetization.freePreviewEpisodes.join(', ')}</strong></article>
           </div>
@@ -104,7 +107,7 @@ export function ProfilePage({ auth, platform }) {
         </>
       ) : null}
 
-      {earnings ? <section className="panel stack-md"><h3>Earnings quick summary</h3><p className="small-text">Ad revenue {formatUsd(earnings.advertisingRevenue)} · Subscription share {formatUsd(earnings.subscriptionShare)} · Single-title {formatUsd(earnings.singleTitleSales)} · Episode unlock {formatUsd(earnings.episodeUnlockSales)} · Net {formatUsd(earnings.netEarnings)}</p></section> : null}
+      {earnings ? <section className="panel stack-md"><h3>Earnings quick summary</h3><p className="small-text">Ad revenue <GlossaryTerm id="ad_revenue_share" /> {formatUsd(earnings.advertisingRevenue)} · Subscription share <GlossaryTerm id="subscription_pool_share" /> {formatUsd(earnings.subscriptionShare)} · Single-title {formatUsd(earnings.singleTitleSales)} · Episode unlock {formatUsd(earnings.episodeUnlockSales)} · Net <GlossaryTerm id="net_earnings" /> {formatUsd(earnings.netEarnings)}</p></section> : null}
 
       <section className="grid cards-2">
         <article className="panel stack-md">
