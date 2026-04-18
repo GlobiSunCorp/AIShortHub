@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { DemoRoleSwitcher } from './DemoRoleSwitcher';
+import { ErrorBoundary } from './ErrorBoundary';
 import { Link, useRouter } from '../lib/router';
 import { getStatusLabel } from '../lib/roleDisplay';
 import { canAccessCreatorStudio, resolveMembership } from '../hooks/usePlanAccess';
@@ -10,7 +11,14 @@ export function Header({ auth, platform }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const membership = auth.user ? resolveMembership(auth, platform) : null;
   const showCreatorStudio = canAccessCreatorStudio(auth, platform);
-  const statusLabel = getStatusLabel(auth.userState, membership?.tier, auth.user?.tier, membership?.creatorPlan);
+  const statusLabel = useMemo(() => {
+    try {
+      return getStatusLabel(auth.userState, membership?.tier, auth.user?.tier, membership?.creatorPlan);
+    } catch (error) {
+      console.error('Header status label fallback:', error);
+      return auth.isLoggedIn ? 'Status: Member' : 'Status: Guest';
+    }
+  }, [auth.isLoggedIn, auth.user?.tier, auth.userState, membership?.creatorPlan, membership?.tier]);
 
   const nav = useMemo(
     () => [
@@ -23,6 +31,11 @@ export function Header({ auth, platform }) {
     ],
     [showCreatorStudio]
   );
+
+  const safeAvatar = auth.user?.avatar || auth.user?.name?.slice(0, 2)?.toUpperCase() || 'U';
+  const safeName = auth.user?.name || 'User';
+  const safeEmail = auth.user?.email || 'Unknown email';
+  const safeRole = auth.user?.role || auth.userState || 'member';
 
   return (
     <header className="site-header">
@@ -40,17 +53,21 @@ export function Header({ auth, platform }) {
         </nav>
         <div className="row center header-actions">
           <span className="meta-pill">{statusLabel}</span>
-          {auth.isLoggedIn && membership ? <MembershipBadge auth={auth} membership={membership} /> : null}
+          {auth.isLoggedIn && membership ? (
+            <ErrorBoundary fallback={null}>
+              <MembershipBadge auth={auth} membership={membership} />
+            </ErrorBoundary>
+          ) : null}
           {auth.isLoggedIn ? (
             <div className="account-wrap">
               <button className="avatar" onClick={() => setMenuOpen((open) => !open)}>
-                {auth.user.avatar}
+                {safeAvatar}
               </button>
               {menuOpen ? (
                 <div className="account-menu panel">
-                  <strong>{auth.user.name}</strong>
+                  <strong>{safeName}</strong>
                   <small>
-                    {auth.user.email} · {auth.user.role}
+                    {safeEmail} · {safeRole}
                   </small>
                   <Link to="/profile">My Profile</Link>
                   {showCreatorStudio ? <Link to="/creator">Creator Studio</Link> : null}
