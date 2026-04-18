@@ -16,6 +16,9 @@ export class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback !== undefined) {
+        return this.props.fallback;
+      }
       return <section className="panel">页面出现错误，请刷新后重试。</section>;
     }
     return this.props.children;
