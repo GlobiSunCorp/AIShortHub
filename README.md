@@ -117,3 +117,10 @@ UI 页面统一消费 normalizer 输出，避免页面层继续猜测 snake_case
 - 空状态统一升级为 premium empty-state 语气与视觉。
 - Trailer / Preview / Main Episode / Paid Unlock 的表达更明显。
 
+
+## Phase 17（第十五轮：导航重组 + Browse 智能发现 + Creator Studio 专业化）
+- 顶部导航重组为 Viewer 主导航与 Creator/Admin 区域，Creator 入口改为下拉式 Creator Studio。
+- Browse 增加分类体系、排序体系、智能搜索建议、热门关键词、快速筛选与空结果推荐。
+- Creator Studio 增加更专业的内容结构：基础信息、商业信息、资产信息、分发信息四大分组。
+- 首页新增 Audience Toggle（For Viewers / For Creators），更利于不同角色快速上手。
+- 视觉系统精修：导航对齐、按钮圆角、chip 高亮、dropdown 层次、卡片信息标签更统一。

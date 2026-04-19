@@ -50,3 +50,12 @@
   - 平台何时抽成（有收入后）
   - 哪些是可选服务费（add-on）
 - 软上线低内容建议：每部首发剧至少 1 条 Trailer + 1-2 条 Preview + 若干 Main Episodes。
+
+## Phase 17 更新（创作者工作区）
+- 顶部新增下拉式 Creator Studio，统一进入 Dashboard、My Series、Upload Assets、Episodes、Pricing、Earnings 等模块。
+- Creator Studio 表单结构升级为四大分组：
+  1) 基础信息（标题、副标题、简介、分类、标签、语言、分级、地区、连载状态）
+  2) 商业信息（包含模式、整剧价、单集价、结局价、广告资格、订阅池资格、推荐位请求、Promo 方案）
+  3) 资产信息（Poster / Motion Poster / Vertical Cover / Thumbnail / Trailer / Subtitle / Caption / Promo）
+  4) 分发信息（比例、分辨率、发布排期、TikTok hook、QC、审核状态）
+- 高阶 Creator / Studio 会看到额外权益入口：Featured placement、Motion Poster、Promo tools、Priority support。

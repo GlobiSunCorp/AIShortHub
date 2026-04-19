@@ -1,54 +1,83 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SeriesCard } from '../components/SeriesCard';
 import { SectionTitle } from '../components/SectionTitle';
 import { DarkSelect } from '../components/DarkSelect';
-import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
-
-const statuses = ['all', 'published', 'pending_review', 'draft', 'rejected'];
+import { useBrowseDiscovery } from '../hooks/useBrowseDiscovery';
 
 export function BrowsePage({ platform }) {
-  const [query, setQuery] = useState('');
-  const [tag, setTag] = useState('all');
-  const [status, setStatus] = useState('all');
-  const catalog = getCatalogSnapshot(platform, { query, tag, status });
+  const [filters, setFilters] = useState({
+    query: '',
+    category: 'All',
+    sort: 'Featured',
+    quickFilter: 'All',
+  });
+  const discovery = useBrowseDiscovery(platform, filters);
+  const suggestions = useMemo(() => discovery.suggestions.slice(0, 5), [discovery.suggestions]);
 
   return (
     <div className="ds-page">
       <section className="panel ds-section">
-        <SectionTitle title="Browse" desc="Search by title, creator, tag, and release status" />
-        <p className="ds-meta">The browse experience stays intentional even in low-content launch mode.</p>
+        <SectionTitle title="Browse" desc="Discover short dramas by category, mood, monetization mode, and creator profile." />
+        <p className="ds-meta">Smart discovery supports title/tag/creator/synopsis/theme/payment keywords with guided suggestions.</p>
         <div className="browse-filters">
           <label>
-            Search
-            <input className="input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Title or creator" />
+            Smart Search
+            <input
+              className="input"
+              value={filters.query}
+              onChange={(event) => setFilters((prev) => ({ ...prev, query: event.target.value }))}
+              placeholder="Search title, tag, creator, synopsis, theme, or payment type"
+            />
           </label>
           <DarkSelect
-            id="browse-tag"
-            label="Tag"
-            value={tag}
-            onChange={setTag}
-            options={[{ value: 'all', label: 'All tags' }, ...catalog.tags.map((value) => ({ value, label: value }))]}
+            id="browse-category"
+            label="Category"
+            value={filters.category}
+            onChange={(value) => setFilters((prev) => ({ ...prev, category: value }))}
+            options={discovery.categories.map((value) => ({ value, label: value }))}
           />
           <DarkSelect
-            id="browse-status"
-            label="Status"
-            value={status}
-            onChange={setStatus}
-            options={statuses.map((item) => ({ value: item, label: item.replace('_', ' ') }))}
+            id="browse-sort"
+            label="Sort"
+            value={filters.sort}
+            onChange={(value) => setFilters((prev) => ({ ...prev, sort: value }))}
+            options={discovery.sortOptions.map((item) => ({ value: item, label: item }))}
           />
         </div>
+        <div className="row wrap">
+          {discovery.quickFilters.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={`filter-chip ${filters.quickFilter === item ? 'active-chip' : ''}`}
+              onClick={() => setFilters((prev) => ({ ...prev, quickFilter: item }))}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+        <div className="row wrap">
+          <strong className="ds-caption">Hot keywords:</strong>
+          {discovery.hotKeywords.map((word) => (
+            <button key={word} className="text-link" type="button" onClick={() => setFilters((prev) => ({ ...prev, query: word }))}>
+              {word}
+            </button>
+          ))}
+        </div>
+        {suggestions.length ? <p className="ds-meta">Suggestions: {suggestions.join(' · ')}</p> : null}
+        {discovery.activeFilters.length ? <p className="ds-caption">Active filters: {discovery.activeFilters.join(' | ')}</p> : <p className="ds-caption">Active filters: none</p>}
       </section>
 
-      {catalog.firstBatch.length && query.trim() === '' && status === 'all' ? (
+      {discovery.catalog.firstBatch.length && filters.query.trim() === '' ? (
         <section className="ds-section">
-          <SectionTitle title="Launch Starter Picks" desc="Trailer-first discovery for first visitors" />
+          <SectionTitle title="Launch Starter Picks" desc="Curated featured entries for first-time viewers" />
           <div className="grid cards-3">
-            {catalog.firstBatch.map((item) => (
+            {discovery.catalog.firstBatch.map((item) => (
               <SeriesCard
                 key={`starter-${item.id}`}
                 series={item}
-                episodeCount={catalog.episodeMap[item.id]?.total}
-                previewCount={catalog.episodeMap[item.id]?.preview}
+                episodeCount={discovery.catalog.episodeMap[item.id]?.total}
+                previewCount={discovery.catalog.episodeMap[item.id]?.preview}
               />
             ))}
           </div>
@@ -56,20 +85,30 @@ export function BrowsePage({ platform }) {
       ) : null}
 
       <section className="grid cards-3">
-        {catalog.allSeries.map((item) => (
+        {discovery.result.map((item) => (
           <SeriesCard
             key={item.id}
             series={item}
-            episodeCount={catalog.episodeMap[item.id]?.total}
-            previewCount={catalog.episodeMap[item.id]?.preview}
+            episodeCount={discovery.catalog.episodeMap[item.id]?.total}
+            previewCount={discovery.catalog.episodeMap[item.id]?.preview}
           />
         ))}
       </section>
 
-      {catalog.allSeries.length === 0 ? (
+      {discovery.result.length === 0 ? (
         <section className="empty-state">
-          <h3 className="ds-h3">No title matches this filter yet</h3>
-          <p className="ds-meta">Try removing one filter or start with a launch catalog of 2-3 titles that each include a trailer.</p>
+          <h3 className="ds-h3">No exact match yet</h3>
+          <p className="ds-meta">Try broader keywords or switch quick filters. You can also start from trending picks below.</p>
+          <div className="grid cards-3">
+            {discovery.fallbackRecommendations.map((item) => (
+              <SeriesCard
+                key={`fallback-${item.id}`}
+                series={item}
+                episodeCount={discovery.catalog.episodeMap[item.id]?.total}
+                previewCount={discovery.catalog.episodeMap[item.id]?.preview}
+              />
+            ))}
+          </div>
         </section>
       ) : null}
     </div>

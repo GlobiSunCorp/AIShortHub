@@ -43,3 +43,9 @@
 - `/pricing`：会员与计费逻辑
 - `/browse`：按标签和状态发现内容
 - `/watch/:series/:episode`：播放与解锁入口
+
+## Phase 17 更新（用户侧发现体验）
+- 顶部导航更清楚：Home / Browse / Pricing / Services 面向普通观众，Creator 与 Admin 入口独立分区。
+- Browse 支持更细分类和排序，并提供热门关键词与搜索建议。
+- 浏览结果会显示更清晰标签：Free Preview、Included with Subscription、Paid Unlock、In Review。
+- 首页增加受众切换（For Viewers / For Creators），帮助你更快找到想做的事。
