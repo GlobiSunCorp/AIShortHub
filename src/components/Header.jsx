@@ -6,6 +6,20 @@ import { getStatusLabel } from '../lib/roleDisplay';
 import { canAccessCreatorStudio, resolveMembership } from '../hooks/usePlanAccess';
 import { MembershipBadge } from './EntitlementBadges';
 
+const CREATOR_HASH_ALIASES = {
+  overview: 'overview',
+  content: 'content',
+  assets: 'assets',
+  episodes: 'content',
+  pricing: 'pricing',
+  earnings: 'earnings',
+  review: 'review',
+  featured: 'review',
+  'motion-poster': 'assets',
+  'promo-tools': 'assets',
+  'priority-support': 'review',
+};
+
 export function Header({ auth, platform }) {
   const { pathname } = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,14 +48,20 @@ export function Header({ auth, platform }) {
       ['/creator#overview', 'Dashboard'],
       ['/creator#content', 'My Series'],
       ['/creator#assets', 'Upload Assets'],
-      ['/creator#episodes', 'Episodes'],
+      ['/creator#content', 'Episodes'],
       ['/creator#pricing', 'Pricing & Monetization'],
       ['/creator#earnings', 'Earnings'],
       ['/services', 'Service Orders'],
       ['/creator-guidelines', 'Creator Guidelines'],
     ];
     if (membership?.creatorPlan === 'creator_pro' || membership?.creatorPlan === 'studio' || auth.userState === 'admin') {
-      return [...base, ['/creator#featured', 'Featured placement'], ['/creator#motion-poster', 'Motion Poster'], ['/creator#promo-tools', 'Promo tools'], ['/creator#priority-support', 'Priority support']];
+      return [
+        ...base,
+        ['/creator#review', 'Featured placement'],
+        ['/creator#assets', 'Motion Poster'],
+        ['/creator#assets', 'Promo tools'],
+        ['/support', 'Priority support'],
+      ];
     }
     return base;
   }, [auth.userState, membership?.creatorPlan]);
@@ -73,10 +93,13 @@ export function Header({ auth, platform }) {
               {creatorMenuOpen ? (
                 <div className="account-menu panel creator-menu">
                   {creatorStudioItems.map(([to, label]) => {
-                    const targetHash = to.includes('#') ? to.slice(to.indexOf('#')) : '';
-                    const active = pathname === '/creator' && (!targetHash || hash === targetHash);
+                    const targetHash = to.includes('#') ? to.slice(to.indexOf('#') + 1) : '';
+                    const normalizedTargetHash = CREATOR_HASH_ALIASES[targetHash] || targetHash;
+                    const currentHash = (hash || '').replace('#', '');
+                    const normalizedCurrentHash = CREATOR_HASH_ALIASES[currentHash] || currentHash;
+                    const active = to.startsWith('/creator') ? pathname === '/creator' && (!normalizedTargetHash || normalizedCurrentHash === normalizedTargetHash) : pathname === to;
                     return (
-                      <Link key={to} to={to} className={active ? 'nav-link active' : 'nav-link'} onClick={() => setCreatorMenuOpen(false)}>
+                      <Link key={`${to}-${label}`} to={to} className={active ? 'nav-link active' : 'nav-link'} onClick={() => setCreatorMenuOpen(false)}>
                         {label}
                       </Link>
                     );
@@ -108,7 +131,7 @@ export function Header({ auth, platform }) {
                     {safeEmail} · {safeRole}
                   </small>
                   <Link to="/profile">My Profile</Link>
-                  {showCreatorStudio ? <Link to="/creator">Creator Studio</Link> : null}
+                  {showCreatorStudio ? <Link to="/creator#overview">Creator Studio</Link> : null}
                   <DemoRoleSwitcher auth={auth} compact />
                   <button className="btn btn-ghost" onClick={auth.logout}>
                     Logout
