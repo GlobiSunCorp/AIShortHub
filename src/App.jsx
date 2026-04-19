@@ -28,36 +28,41 @@ function getPathname() {
   return window.location.pathname || '/';
 }
 
-function resolveRoute(pathname) {
-  if (pathname === '/') return { name: 'home' };
-  if (pathname === '/browse') return { name: 'browse' };
-  if (pathname === '/submit') return { name: 'submit' };
-  if (pathname === '/creator') return { name: 'creator' };
-  if (pathname === '/pricing') return { name: 'pricing' };
-  if (pathname === '/admin') return { name: 'admin' };
-  if (pathname === '/services') return { name: 'services' };
-  if (pathname === '/profile') return { name: 'profile' };
-  if (pathname === '/login') return { name: 'login' };
-  if (pathname === '/signup') return { name: 'signup' };
-  if (pathname === '/forgot-password') return { name: 'forgot' };
-  if (pathname === '/faq') return { name: 'faq' };
-  if (pathname === '/support') return { name: 'support' };
-  if (pathname === '/checkout/success') return { name: 'checkoutSuccess' };
-  if (pathname === '/checkout/cancel') return { name: 'checkoutCancel' };
-  if (pathname === '/terms') return { name: 'terms' };
-  if (pathname === '/privacy') return { name: 'privacy' };
-  if (pathname === '/refund') return { name: 'refund' };
-  if (pathname === '/creator-guidelines') return { name: 'creatorGuidelines' };
-  if (pathname === '/content-policy') return { name: 'contentPolicy' };
-  if (pathname === '/commission-payout') return { name: 'commissionPayout' };
+function normalizePathname(pathname) {
+  return (pathname || '/').split('#')[0].split('?')[0] || '/';
+}
 
-  const serviceOrderMatch = pathname.match(/^\/services\/([^/]+)$/);
+function resolveRoute(pathname) {
+  const normalized = normalizePathname(pathname);
+  if (normalized === '/') return { name: 'home' };
+  if (normalized === '/browse') return { name: 'browse' };
+  if (normalized === '/submit') return { name: 'submit' };
+  if (normalized === '/creator') return { name: 'creator' };
+  if (normalized === '/pricing') return { name: 'pricing' };
+  if (normalized === '/admin') return { name: 'admin' };
+  if (normalized === '/services') return { name: 'services' };
+  if (normalized === '/profile') return { name: 'profile' };
+  if (normalized === '/login') return { name: 'login' };
+  if (normalized === '/signup') return { name: 'signup' };
+  if (normalized === '/forgot-password') return { name: 'forgot' };
+  if (normalized === '/faq') return { name: 'faq' };
+  if (normalized === '/support') return { name: 'support' };
+  if (normalized === '/checkout/success') return { name: 'checkoutSuccess' };
+  if (normalized === '/checkout/cancel') return { name: 'checkoutCancel' };
+  if (normalized === '/terms') return { name: 'terms' };
+  if (normalized === '/privacy') return { name: 'privacy' };
+  if (normalized === '/refund') return { name: 'refund' };
+  if (normalized === '/creator-guidelines') return { name: 'creatorGuidelines' };
+  if (normalized === '/content-policy') return { name: 'contentPolicy' };
+  if (normalized === '/commission-payout') return { name: 'commissionPayout' };
+
+  const serviceOrderMatch = normalized.match(/^\/services\/([^/]+)$/);
   if (serviceOrderMatch) return { name: 'serviceOrderDetail', id: serviceOrderMatch[1] };
 
-  const seriesMatch = pathname.match(/^\/series\/([^/]+)$/);
+  const seriesMatch = normalized.match(/^\/series\/([^/]+)$/);
   if (seriesMatch) return { name: 'series', id: seriesMatch[1] };
 
-  const watchMatch = pathname.match(/^\/watch\/([^/]+)\/(\d+)$/);
+  const watchMatch = normalized.match(/^\/watch\/([^/]+)\/(\d+)$/);
   if (watchMatch) return { name: 'watch', id: watchMatch[1], episode: Number(watchMatch[2]) };
 
   return { name: 'home' };
@@ -71,16 +76,21 @@ export default function App() {
   useEffect(() => {
     const updatePath = () => setPathname(getPathname());
     window.addEventListener('popstate', updatePath);
-    return () => window.removeEventListener('popstate', updatePath);
+    window.addEventListener('hashchange', updatePath);
+    return () => {
+      window.removeEventListener('popstate', updatePath);
+      window.removeEventListener('hashchange', updatePath);
+    };
   }, []);
 
   const router = useMemo(
     () => ({
-      pathname,
+      pathname: normalizePathname(pathname),
+      fullPath: pathname,
       navigate: (to, options = {}) => {
         const method = options.replace ? 'replaceState' : 'pushState';
         window.history[method]({}, '', to);
-        setPathname(to);
+        setPathname(getPathname());
       },
     }),
     [pathname]
