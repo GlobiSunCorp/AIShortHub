@@ -45,7 +45,6 @@ const initialDraft = {
   checklistReady: false,
 };
 
-
 const STUDIO_MODULE_META = {
   overview: { title: 'Dashboard', subtitle: 'Monitor quota health, pending actions, and release readiness from one workspace.', crumb: 'Creator Studio / Dashboard', ctaLabel: 'Open Service Orders', ctaTo: '/services', stateTag: 'Ready', stateHint: 'Live sync active' },
   content: { title: 'My Series', subtitle: 'Build scripts, edit episodes, and manage draft metadata before review.', crumb: 'Creator Studio / My Series', ctaLabel: 'Open Creator Pricing', ctaTo: '/creator#pricing', stateTag: 'Draft', stateHint: '3 drafts in progress' },
@@ -78,17 +77,29 @@ export function CreatorDashboardPage({ auth, platform }) {
   const [workspace, setWorkspace] = useState('overview');
   const [currentModule, setCurrentModule] = useState('overview');
 
+  const syncWorkspace = (moduleKey) => {
+    const normalized = CREATOR_HASH_ALIASES[moduleKey] || 'overview';
+    const workspaceKey = CREATOR_MODULE_TO_WORKSPACE[normalized] || 'overview';
+    setCurrentModule(normalized);
+    setWorkspace(workspaceKey);
+    if (workspaceKey === 'content') setStep(0);
+    if (workspaceKey === 'assets') setStep(1);
+    if (workspaceKey === 'pricing') setStep(3);
+    if (workspaceKey === 'review') setStep(4);
+  };
+
   useEffect(() => {
     const applyHash = () => {
       const next = (window.location.hash || '').replace('#', '');
-      const normalized = CREATOR_HASH_ALIASES[next] || 'overview';
-      const workspaceKey = CREATOR_MODULE_TO_WORKSPACE[normalized] || 'overview';
-      setCurrentModule(normalized);
-      setWorkspace(workspaceKey);
+      syncWorkspace(next || 'overview');
     };
     applyHash();
     window.addEventListener('hashchange', applyHash);
-    return () => window.removeEventListener('hashchange', applyHash);
+    window.addEventListener('app:navigation', applyHash);
+    return () => {
+      window.removeEventListener('hashchange', applyHash);
+      window.removeEventListener('app:navigation', applyHash);
+    };
   }, []);
 
   const creatorSnapshot = getCreatorDashboardSnapshot({ platform, auth });
@@ -110,6 +121,12 @@ export function CreatorDashboardPage({ auth, platform }) {
 
   const openModule = (target) => {
     if (!target) return;
+    if (target.startsWith('/creator#')) {
+      const nextModule = target.split('#')[1] || 'overview';
+      syncWorkspace(nextModule);
+      navigate(target);
+      return;
+    }
     if (target.startsWith('/')) {
       navigate(target);
       return;
@@ -117,7 +134,12 @@ export function CreatorDashboardPage({ auth, platform }) {
     if (target.startsWith('#')) {
       const id = target.replace('#', '');
       const node = typeof document !== 'undefined' ? document.getElementById(id) : null;
-      if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (node) {
+        node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        syncWorkspace(id);
+        navigate(`/creator#${id}`);
+      }
       return;
     }
   };
@@ -130,12 +152,11 @@ export function CreatorDashboardPage({ auth, platform }) {
       'Submit for Review': '/creator#review',
       'Upgrade to Studio': '/pricing',
       'Buy Add-on': '/services',
-      'Upload Trailer': '#upload-trailer',
+      'Upload Trailer': '/creator#assets',
       'Request featured placement': '/creator#featured',
     };
     openModule(actionMap[cta] || '/creator#overview');
   };
-
 
   const uploadAsset = async (assetType, onDone) => {
     const file = files[assetType];
@@ -187,15 +208,7 @@ export function CreatorDashboardPage({ auth, platform }) {
               key={key}
               type="button"
               className={`ds-tab ${workspace === key ? 'active' : ''}`}
-              onClick={() => {
-                setWorkspace(key);
-                setCurrentModule(key);
-                window.history.replaceState({}, '', `/creator#${key}`);
-                if (key === 'content') setStep(0);
-                if (key === 'assets') setStep(1);
-                if (key === 'pricing') setStep(3);
-                if (key === 'review') setStep(4);
-              }}
+              onClick={() => openModule(`/creator#${key}`)}
             >
               {label}
             </button>
@@ -412,7 +425,10 @@ export function CreatorDashboardPage({ auth, platform }) {
               });
             }
             await platform.actions.submitForReview(id);
-            setDraft(initialDraft); setStep(0); setFeedback({ type: 'success', message: '提交审核成功，内容已进入待审核队列。' });
+            setDraft(initialDraft);
+            setStep(0);
+            setFeedback({ type: 'success', message: '提交审核成功，内容已进入待审核队列。' });
+            openModule('/creator#overview');
           }}>Submit for Review</button>
         </> : null}
 
