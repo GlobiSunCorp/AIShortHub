@@ -18,15 +18,17 @@ export function HomePage({ platform }) {
           <span className="kicker">Soft launch viewer experience</span>
           <h1>Short drama streaming, creator tools, and clear monetization in one place.</h1>
           <p>AIShortHub is optimized for early launch with a small catalog: trailers stay visible, featured slots stay curated, and viewers always have a clear next title to watch.</p>
-          <div className="row wrap">
-            <Link className="btn btn-primary" to="/browse">Browse titles</Link>
-            <Link className="btn btn-ghost" to="/pricing">View plans</Link>
+          <div className="hero-actions-stack">
+            <div className="row wrap hero-primary-actions">
+              <Link className="btn btn-primary hero-action-btn" to="/browse">Browse titles</Link>
+              <Link className="btn btn-ghost hero-action-btn" to="/pricing">View plans</Link>
+            </div>
+            <div className="row wrap hero-audience-switches">
+              <button type="button" className={`filter-chip hero-audience-chip ${audience === 'viewer' ? 'active-chip' : ''}`} onClick={() => setAudience('viewer')}>For Viewers</button>
+              <button type="button" className={`filter-chip hero-audience-chip ${audience === 'creator' ? 'active-chip' : ''}`} onClick={() => setAudience('creator')}>For Creators</button>
+            </div>
           </div>
-          <div className="row wrap">
-            <button type="button" className={`filter-chip ${audience === 'viewer' ? 'active-chip' : ''}`} onClick={() => setAudience('viewer')}>For Viewers</button>
-            <button type="button" className={`filter-chip ${audience === 'creator' ? 'active-chip' : ''}`} onClick={() => setAudience('creator')}>For Creators</button>
-          </div>
-          <p className="ds-meta">{audience === 'viewer' ? 'Viewer mode: discover free previews, subscription-included titles, and trending episodes.' : 'Creator mode: plan uploads, monetization setup, review readiness, and growth services in Creator Studio.'}</p>
+          <p className="ds-meta hero-mode-copy">{audience === 'viewer' ? 'Viewer mode: discover free previews, subscription-included titles, and trending episodes.' : 'Creator mode: plan uploads, monetization setup, review readiness, and growth services in Creator Studio.'}</p>
         </div>
         <Link className="hero-cover from-fuchsia cover-link" to="/browse">
           <span className="status">Launch-prep mode</span>
