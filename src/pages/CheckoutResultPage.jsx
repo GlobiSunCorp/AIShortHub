@@ -6,6 +6,21 @@ const TYPE_LABELS = {
   addon_purchase: 'Add-on Service Order',
 };
 
+function CelebrationBurst() {
+  return (
+    <div className="celebration-burst" aria-hidden="true">
+      <span className="burst-dot burst-1" />
+      <span className="burst-dot burst-2" />
+      <span className="burst-dot burst-3" />
+      <span className="burst-dot burst-4" />
+      <span className="burst-dot burst-5" />
+      <span className="burst-dot burst-6" />
+      <span className="burst-ring burst-r1" />
+      <span className="burst-ring burst-r2" />
+    </div>
+  );
+}
+
 export function CheckoutResultPage({ type }) {
   const isSuccess = type === 'success';
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
@@ -14,6 +29,7 @@ export function CheckoutResultPage({ type }) {
 
   return (
     <section className={`panel stack-md checkout-result ${isSuccess ? 'success' : 'cancel'}`}>
+      {isSuccess ? <CelebrationBurst /> : null}
       <span className={`status ${isSuccess ? 'ok' : 'warn'}`}>{isSuccess ? 'Payment completed' : 'Checkout cancelled'}</span>
       <h1>{isSuccess ? 'Payment Success' : 'Checkout Cancelled'}</h1>
       <p className="small-text">支付类型：{checkoutLabel}。</p>
