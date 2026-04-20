@@ -9,6 +9,14 @@ export function useRouter() {
   return useContext(RouterContext);
 }
 
+function notifyRouteChange(to) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event('app:navigation'));
+  if (typeof to === 'string' && to.includes('#')) {
+    window.dispatchEvent(new Event('hashchange'));
+  }
+}
+
 export function Link({ to, className, children, onClick }) {
   const { navigate } = useRouter();
 
@@ -20,6 +28,7 @@ export function Link({ to, className, children, onClick }) {
 
     event.preventDefault();
     navigate(to);
+    notifyRouteChange(to);
   };
 
   return (
