@@ -3,67 +3,284 @@ import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
 import { OnboardingGuide } from '../components/OnboardingGuide';
 import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
-import { useState } from 'react';
+import { resolveMembership } from '../hooks/usePlanAccess';
 
-export function HomePage({ platform }) {
-  const [audience, setAudience] = useState('viewer');
-  const catalog = getCatalogSnapshot(platform);
-  const takeRate = Number(platform?.platformConfig?.platformTakeRate ?? 0.2);
+function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', emptyText }) {
+  return (
+    <section className="ds-section home-collection">
+      <SectionTitle title={title} desc={desc} />
+      <div className={`grid ${columns}`}>
+        {items.length ? (
+          items.map((item) => (
+            <SeriesCard
+              key={item.id}
+              series={item}
+              episodeCount={episodeMap[item.id]?.total}
+              previewCount={episodeMap[item.id]?.preview}
+            />
+          ))
+        ) : (
+          <article className="empty-state">
+            <p className="ds-meta">{emptyText}</p>
+          </article>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function PublicHome({ catalog, takeRate }) {
+  const heroTitle = catalog.firstBatch[0] || catalog.trending[0] || catalog.latest[0] || null;
+  const teaserTitles = catalog.trending.slice(0, 3);
 
   return (
-    <div className="ds-page">
+    <div className="ds-page home-public">
       <OnboardingGuide role="viewer" />
-      <section className="hero premium-hero">
-        <div>
-          <span className="kicker">Soft launch viewer experience</span>
-          <h1>Short drama streaming, creator tools, and clear monetization in one place.</h1>
-          <p>AIShortHub is optimized for early launch with a small catalog: trailers stay visible, featured slots stay curated, and viewers always have a clear next title to watch.</p>
-          <div className="hero-actions-stack">
-            <div className="row wrap hero-primary-actions">
-              <Link className="btn btn-primary hero-action-btn" to="/browse">Browse titles</Link>
-              <Link className="btn btn-ghost hero-action-btn" to="/pricing">View plans</Link>
-            </div>
-            <div className="row wrap hero-audience-switches">
-              <button type="button" className={`filter-chip hero-audience-chip ${audience === 'viewer' ? 'active-chip' : ''}`} onClick={() => setAudience('viewer')}>For Viewers</button>
-              <button type="button" className={`filter-chip hero-audience-chip ${audience === 'creator' ? 'active-chip' : ''}`} onClick={() => setAudience('creator')}>For Creators</button>
-            </div>
+      <section className="home-stage panel">
+        <div className="home-stage-copy">
+          <span className="kicker">Watch first. Create second.</span>
+          <h1>Vertical short dramas that start fast and keep moving.</h1>
+          <p className="ds-meta home-stage-lead">Free previews up front, paid unlocks when viewers want more, and a creator path that stays visible without taking over the first screen.</p>
+          <div className="row wrap home-stage-actions">
+            <Link className="btn btn-primary btn-cta home-stage-primary" to="/browse">Start watching</Link>
+            <Link className="btn btn-ghost btn-cta-secondary home-stage-secondary" to="/pricing">For creators</Link>
           </div>
-          <p className="ds-meta hero-mode-copy">{audience === 'viewer' ? 'Viewer mode: discover free previews, subscription-included titles, and trending episodes.' : 'Creator mode: plan uploads, monetization setup, review readiness, and growth services in Creator Studio.'}</p>
+          <div className="home-stage-notes">
+            <span className="meta-pill">Trailers stay visible</span>
+            <span className="meta-pill">Viewer-first layout</span>
+            <span className="meta-pill">Creator take rate starts below market</span>
+          </div>
         </div>
-        <Link className="hero-cover from-fuchsia cover-link" to="/browse">
-          <span className="status">Launch-prep mode</span>
-          <h3>Built for 2-3 launch titles</h3>
-          <p>Strong first impression even with a lean catalog.</p>
-          <div className="play-overlay">▶ Explore</div>
-        </Link>
+        <div className="home-stage-media">
+          <Link className={`home-hero-poster cover-link ${heroTitle ? '' : 'from-fuchsia'}`} to={heroTitle ? `/series/${heroTitle.id}` : '/browse'}>
+            <span className="status ok">Now featured</span>
+            <div>
+              <h2>{heroTitle?.title || 'Launch title waiting for poster'}</h2>
+              <p>{heroTitle?.synopsis || 'Put your strongest trailer here. One clear poster is better than ten paragraphs.'}</p>
+            </div>
+            <div className="play-overlay">▶ Play trailer</div>
+          </Link>
+          <div className="grid cards-3 home-teaser-grid">
+            {teaserTitles.length ? teaserTitles.map((item) => (
+              <Link key={item.id} className="mini-card home-teaser-card" to={`/series/${item.id}`}>
+                <p className="small-text">{item.tags?.[0] || item.category || 'Featured'}</p>
+                <strong>{item.title}</strong>
+                <span className="ds-caption">{catalog.episodeMap[item.id]?.preview || 1} free preview</span>
+              </Link>
+            )) : (
+              <article className="mini-card home-teaser-card">
+                <p className="small-text">Soft launch</p>
+                <strong>Add 2-3 teaser titles</strong>
+                <span className="ds-caption">Enough for a strong first impression</span>
+              </article>
+            )}
+          </div>
+        </div>
       </section>
 
-      <section className="grid cards-3">
-        <article className="card-primary"><h3 className="ds-h3">Creator-friendly economics</h3><p className="ds-meta">Monthly creator plan fee, separate service fees, and commission only after creator revenue exists.</p></article>
-        <article className="card-secondary"><h3 className="ds-h3">Clear viewer access</h3><p className="ds-meta">Preview, trailer, subscription access, and title pricing are presented separately to reduce confusion.</p></article>
-        <article className="card-data"><h3 className="ds-h3">Configurable platform take rate</h3><p className="ds-meta">Default configuration is {(takeRate * 100).toFixed(0)}%. Launch policy can run lower by plan tier.</p></article>
+      <section className="grid cards-3 home-value-grid">
+        <article className="card-primary home-value-card">
+          <h3 className="ds-h3">For viewers</h3>
+          <p className="ds-meta">The first thing people see is what to watch next, not platform logic.</p>
+        </article>
+        <article className="card-secondary home-value-card">
+          <h3 className="ds-h3">For creators</h3>
+          <p className="ds-meta">Upload, review, pricing, motion poster, and promo tools live in Creator Studio.</p>
+        </article>
+        <article className="card-data home-value-card">
+          <h3 className="ds-h3">Soft-launch economics</h3>
+          <p className="ds-meta">Default take rate is {(takeRate * 100).toFixed(0)}%, but launch creator plans can run much lower.</p>
+        </article>
       </section>
 
-      <section className="ds-section">
-        <SectionTitle title="Featured Launch Titles" desc="Curated first batch for soft launch" />
-        <div className="grid cards-2">
-          {catalog.firstBatch.length ? catalog.firstBatch.map((item) => <SeriesCard key={item.id} series={item} episodeCount={catalog.episodeMap[item.id]?.total} previewCount={catalog.episodeMap[item.id]?.preview} />) : <article className="empty-state"><p className="ds-meta">No featured title yet. Add 2-3 titles with at least one trailer and one preview episode.</p></article>}
-        </div>
-      </section>
+      <HomeCollection
+        title="Start with these"
+        desc="The first row should feel obvious, quick, and clickable."
+        items={catalog.firstBatch}
+        episodeMap={catalog.episodeMap}
+        columns="cards-2"
+        emptyText="No featured title yet. Put your strongest poster and trailer here first."
+      />
 
-      <section className="ds-section">
-        <SectionTitle title="Trending" desc="Live published content" />
-        <div className="grid cards-3">
-          {catalog.trending.length ? catalog.trending.map((item) => <SeriesCard key={item.id} series={item} episodeCount={catalog.episodeMap[item.id]?.total} previewCount={catalog.episodeMap[item.id]?.preview} />) : <article className="empty-state"><p className="ds-meta">Trending will populate automatically as view and unlock data grows.</p></article>}
-        </div>
-      </section>
+      <HomeCollection
+        title="Free preview lane"
+        desc="Give strangers something to sample before asking them to subscribe."
+        items={catalog.trending}
+        episodeMap={catalog.episodeMap}
+        emptyText="Add more preview-ready episodes so this lane feels alive."
+      />
 
-      <section className="ds-section">
-        <SectionTitle title="Latest Releases" desc="Recently updated" />
-        <div className="grid cards-3">
-          {catalog.latest.length ? catalog.latest.map((item) => <SeriesCard key={item.id} series={item} episodeCount={catalog.episodeMap[item.id]?.total} previewCount={catalog.episodeMap[item.id]?.preview} />) : <article className="empty-state"><p className="ds-meta">No new release yet. Start with one flagship trailer to keep this section fresh.</p></article>}
-        </div>
+      <section className="home-split-callout grid cards-2">
+        <article className="panel home-callout-card">
+          <h3 className="ds-h2">Viewer path</h3>
+          <p className="ds-meta">Browse → Play trailer → Watch preview → Unlock the rest.</p>
+          <Link className="info-link" to="/browse">Open viewer catalog</Link>
+        </article>
+        <article className="panel home-callout-card">
+          <h3 className="ds-h2">Creator path</h3>
+          <p className="ds-meta">Create series → Upload trailer → Set pricing → Submit for review.</p>
+          <Link className="info-link" to="/pricing">See creator plans</Link>
+        </article>
       </section>
     </div>
   );
+}
+
+function ViewerHome({ auth, catalog }) {
+  const heroTitle = catalog.trending[0] || catalog.firstBatch[0] || catalog.latest[0] || null;
+  const continueWatching = (catalog.latest.length ? catalog.latest : catalog.trending).slice(0, 3);
+  const freePreview = catalog.trending.slice(0, 4);
+  const romanceLane = [...catalog.firstBatch, ...catalog.latest].filter((item, index, arr) => arr.findIndex((candidate) => candidate.id === item.id) === index).slice(0, 4);
+
+  return (
+    <div className="ds-page home-viewer-auth">
+      <section className="panel viewer-hero">
+        <div className="viewer-hero-copy">
+          <span className="kicker">Welcome back</span>
+          <h1>Press play fast.</h1>
+          <p className="ds-meta">Hi {auth.user?.name || 'Viewer'}, your signed-in home is now all about content: continue watching, free previews, trending picks, and one obvious next tap.</p>
+          <div className="row wrap home-stage-actions">
+            <Link className="btn btn-primary btn-cta" to={heroTitle ? `/watch/${heroTitle.id}/1` : '/browse'}>Continue watching</Link>
+            <Link className="btn btn-ghost btn-cta-secondary" to="/browse">Open all titles</Link>
+          </div>
+        </div>
+        <Link className="viewer-feature-frame cover-link from-purple" to={heroTitle ? `/series/${heroTitle.id}` : '/browse'}>
+          <span className="status ok">Featured tonight</span>
+          <h2>{heroTitle?.title || 'Add a featured series'}</h2>
+          <p>{heroTitle?.synopsis || 'Your signed-in viewer home should always open with a strong title.'}</p>
+          <div className="play-overlay">▶ Resume</div>
+        </Link>
+      </section>
+
+      <section className="grid cards-3 home-progress-grid">
+        {continueWatching.map((item, index) => (
+          <Link key={item.id} className="mini-card viewer-progress-card" to={`/watch/${item.id}/1`}>
+            <p className="small-text">Continue watching</p>
+            <strong>{item.title}</strong>
+            <div className="meter"><span style={{ width: `${55 + index * 12}%` }} /></div>
+            <span className="ds-caption">{55 + index * 12}% watched</span>
+          </Link>
+        ))}
+      </section>
+
+      <HomeCollection
+        title="Free previews"
+        desc="Low-friction entries for people who just want to click and sample."
+        items={freePreview}
+        episodeMap={catalog.episodeMap}
+        emptyText="No preview lane yet. Flag at least one preview episode per launch series."
+      />
+
+      <HomeCollection
+        title="Trending now"
+        desc="The row that should always feel alive after login."
+        items={catalog.latest}
+        episodeMap={catalog.episodeMap}
+        emptyText="Trending will show here after you have a few active titles and fresh updates."
+      />
+
+      <HomeCollection
+        title="Because you like dramatic chaos"
+        desc="A more playful recommendation lane for signed-in viewers."
+        items={romanceLane}
+        episodeMap={catalog.episodeMap}
+        emptyText="Add more genres and tags so this lane can feel personal."
+      />
+    </div>
+  );
+}
+
+function CreatorHome({ auth, platform, membership, catalog }) {
+  const planName = membership.creatorPlan || 'creator_basic';
+  const creatorSeries = catalog.firstBatch.slice(0, 3);
+  const actionCards = [
+    { title: 'Upload trailer', desc: 'Your hook does the selling before the explanation starts.', to: '/creator#assets', badge: 'Core' },
+    { title: 'Finish pricing', desc: 'Decide preview, subscription, and paid unlock logic clearly.', to: '/creator#pricing', badge: 'Revenue' },
+    { title: 'Submit for review', desc: 'Don’t let a draft rot in the corner. Ship it.', to: '/creator#review', badge: 'Ready' },
+  ];
+  const workspaceCards = [
+    { title: 'My Series', desc: 'Drafts, release pacing, and episode structure.', to: '/creator#content' },
+    { title: 'Upload Assets', desc: 'Poster, motion poster, trailer, subtitles, and promo inputs.', to: '/creator#assets' },
+    { title: 'Earnings', desc: 'Gross, payout, deductions, and what is still pending.', to: '/creator#earnings' },
+    { title: 'Promo Tools', desc: 'Hook packs, copy blocks, and launch support.', to: '/creator#promo-tools' },
+  ];
+
+  return (
+    <div className="ds-page home-creator-auth">
+      <section className="panel creator-home-hero">
+        <div className="creator-home-copy">
+          <span className="kicker">Creator Studio home</span>
+          <h1>Make it clear. Make it launch-ready. Make it a little funny.</h1>
+          <p className="ds-meta">Hi {auth.user?.name || 'Creator'}, this home is built to answer three things fast: what is unfinished, what can be published, and where the money will show up when it starts moving.</p>
+          <div className="row wrap home-stage-actions">
+            <Link className="btn btn-primary btn-cta" to="/creator#content">Open my workspace</Link>
+            <Link className="btn btn-ghost btn-cta-secondary" to="/creator#review">Submit when ready</Link>
+          </div>
+        </div>
+        <div className="grid cards-3 creator-home-metrics">
+          <article className="card-primary home-metric-card">
+            <p className="small-text">Creator plan</p>
+            <strong>{planName}</strong>
+          </article>
+          <article className="card-secondary home-metric-card">
+            <p className="small-text">Series in motion</p>
+            <strong>{creatorSeries.length}</strong>
+          </article>
+          <article className="card-data home-metric-card">
+            <p className="small-text">Main objective</p>
+            <strong>Launch faster</strong>
+          </article>
+        </div>
+      </section>
+
+      <section className="grid cards-3 creator-action-grid">
+        {actionCards.map((item) => (
+          <Link key={item.title} className="panel creator-action-card" to={item.to}>
+            <span className="status">{item.badge}</span>
+            <h3 className="ds-h3">{item.title}</h3>
+            <p className="ds-meta">{item.desc}</p>
+          </Link>
+        ))}
+      </section>
+
+      <section className="panel creator-home-workbench">
+        <div className="section-title">
+          <div>
+            <h2 className="ds-h2">Creator workbench</h2>
+            <p className="ds-meta">Nothing hidden. Nothing vague. Everything should point to the next useful move.</p>
+          </div>
+          <Link className="info-link" to="/creator#overview">Open full Creator Studio</Link>
+        </div>
+        <div className="grid cards-2">
+          {workspaceCards.map((item) => (
+            <Link key={item.title} className="mini-card creator-workbench-card" to={item.to}>
+              <strong>{item.title}</strong>
+              <p className="ds-meta">{item.desc}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <HomeCollection
+        title="Your launch candidates"
+        desc="The titles that should be pushed into review, promo, or publish next."
+        items={creatorSeries}
+        episodeMap={catalog.episodeMap}
+        columns="cards-3"
+        emptyText="No series yet. Create one strong pilot, one trailer, and one clear poster first."
+      />
+    </div>
+  );
+}
+
+export function HomePage({ auth, platform }) {
+  const catalog = getCatalogSnapshot(platform);
+  const takeRate = Number(platform?.platformConfig?.platformTakeRate ?? 0.2);
+  const membership = resolveMembership(auth, platform);
+  const creatorMode = auth?.isLoggedIn && (['creator', 'admin'].includes(auth.userState) || Boolean(membership.creatorPlan));
+  const viewerMode = auth?.isLoggedIn && !creatorMode;
+
+  if (creatorMode) return <CreatorHome auth={auth} platform={platform} membership={membership} catalog={catalog} />;
+  if (viewerMode) return <ViewerHome auth={auth} catalog={catalog} />;
+  return <PublicHome catalog={catalog} takeRate={takeRate} />;
 }
