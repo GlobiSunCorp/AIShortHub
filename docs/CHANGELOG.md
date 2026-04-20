@@ -46,3 +46,13 @@
 - Creator Studio 增加更专业化的内容字段分组（基础信息、商业信息、资产信息、分发信息）。
 - 首页新增 For Viewers / For Creators audience toggle；内容卡标签强化 Free Preview / Included with Subscription / Paid Unlock / In Review。
 - 全站视觉精修：导航布局、按钮半径、筛选 chip、dropdown 质感、字体与层次细节。
+
+## Phase 18 · 2026-04-19
+- Creator Studio 下拉导航升级为四组：Workspace / Publishing / Growth Tools / Service，并支持分组标题、组间留白、专业后台风格层级。
+- 下拉项新增状态元信息与标签体系（Module / Add-on / Pro / Beta / Studio only / Locked / Ready / In Progress）。
+- 新增 `src/data/creatorStudio.js` 统一维护 Creator 导航结构、hash alias 与模块-工作区映射，减少分散硬编码。
+- Creator Studio 页面实现模块级联动：模块切换后自动同步顶部 breadcrumb、标题、副标题、状态提示与主 CTA。
+- 明确“页面 vs 模块”边界：Featured Placement / Motion Poster / Promo Tools / Priority Support 显示为模块面板并提供可执行入口。
+- CTA 文案与交互态精修：`Submit for Review`、`Upload Trailer`、`Save & Continue to Next Step`、`Upgrade to Studio`、`Buy Add-on` 等动作化文案落地。
+- 全局按钮与导航视觉细节增强：主次按钮层级、hover/active/disabled 反馈、Creator 菜单激活态与信息密度提升。
+- App context bar 现支持 Creator hash 子模块文案，页面切换感更明确。

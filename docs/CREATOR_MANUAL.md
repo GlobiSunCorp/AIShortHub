@@ -59,3 +59,20 @@
   3) 资产信息（Poster / Motion Poster / Vertical Cover / Thumbnail / Trailer / Subtitle / Caption / Promo）
   4) 分发信息（比例、分辨率、发布排期、TikTok hook、QC、审核状态）
 - 高阶 Creator / Studio 会看到额外权益入口：Featured placement、Motion Poster、Promo tools、Priority support。
+
+## Phase 18 更新（导航与交互闭环）
+- Creator Studio 下拉已改为专业后台分组导航：
+  1) Workspace：Dashboard / My Series / Upload Assets / Pricing & Monetization / Earnings
+  2) Publishing：Review & Publish / Featured Placement / Creator Guidelines
+  3) Growth Tools：Motion Poster / Promo Tools / Priority Support
+  4) Service：Service Orders
+- 每个导航项会显示轻量状态（例如 `3 drafts`、`2 files missing`、`Setup 80%`、`Locked`），hover 可查看短解释。
+- 页面项与模块项已明确区分：
+  - 页面：Dashboard、My Series、Upload Assets、Pricing & Monetization、Earnings、Service Orders、Creator Guidelines
+  - 模块：Featured Placement（Add-on）、Motion Poster（Pro）、Promo Tools（Beta）、Priority Support（Studio only）
+- 在 Creator Studio 中切换模块时，顶部会同步显示：
+  - `Creator Studio / Current Module`
+  - 当前模块标题与简短说明
+  - 当前状态标签（Ready / Draft / In Progress / Locked / Pending Review）
+  - 对应主 CTA（如 `Submit for Review`、`Upload Trailer`、`Open Service Orders`）
+- 操作按钮已统一为更清晰的动作文案与状态反馈（hover / active / disabled），减少“点击无感知”问题。

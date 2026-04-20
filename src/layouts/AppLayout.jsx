@@ -31,6 +31,7 @@ const PAGE_SUBTITLES = {
 export function AppLayout({ auth, platform, children }) {
   const { pathname } = useRouter();
   const [routing, setRouting] = useState(false);
+  const [hash, setHash] = useState(typeof window === 'undefined' ? '' : window.location.hash || '');
 
   useEffect(() => {
     setRouting(true);
@@ -39,8 +40,29 @@ export function AppLayout({ auth, platform, children }) {
     return () => clearTimeout(timer);
   }, [pathname]);
 
+  useEffect(() => {
+    const syncHash = () => setHash(window.location.hash || '');
+    window.addEventListener('hashchange', syncHash);
+    return () => window.removeEventListener('hashchange', syncHash);
+  }, []);
+
   const title = useMemo(() => PAGE_TITLES[pathname] || 'Workspace', [pathname]);
-  const subtitle = useMemo(() => PAGE_SUBTITLES[pathname] || 'Use the workspace below to continue your next task.', [pathname]);
+  const subtitle = useMemo(() => {
+    if (pathname !== '/creator') return PAGE_SUBTITLES[pathname] || 'Use the workspace below to continue your next task.';
+    const map = {
+      '#overview': 'Creator Studio / Dashboard · Overview of health, actions, and active quota.',
+      '#content': 'Creator Studio / My Series · Edit draft metadata, episode structure, and release plan.',
+      '#assets': 'Creator Studio / Upload Assets · Manage trailer, poster, subtitle, and promo deliverables.',
+      '#pricing': 'Creator Studio / Pricing & Monetization · Configure unlock pricing and platform revenue rules.',
+      '#earnings': 'Creator Studio / Earnings · Review payout, deductions, and period-over-period change.',
+      '#review': 'Creator Studio / Review & Publish · Final QA checks and submit to moderation queue.',
+      '#featured': 'Creator Studio / Featured Placement (Module) · Add-on quota and launch slot request.',
+      '#motion-poster': 'Creator Studio / Motion Poster (Module) · Pro rendering queue and asset status.',
+      '#promo-tools': 'Creator Studio / Promo Tools (Module) · Beta hooks, captions, and channel packs.',
+      '#priority-support': 'Creator Studio / Priority Support (Module) · Studio-only operational escalation.',
+    };
+    return map[hash] || PAGE_SUBTITLES[pathname] || 'Use the workspace below to continue your next task.';
+  }, [hash, pathname]);
 
   return (
     <div className="app-shell">

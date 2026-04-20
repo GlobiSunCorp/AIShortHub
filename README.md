@@ -124,3 +124,13 @@ UI 页面统一消费 normalizer 输出，避免页面层继续猜测 snake_case
 - Creator Studio 增加更专业的内容结构：基础信息、商业信息、资产信息、分发信息四大分组。
 - 首页新增 Audience Toggle（For Viewers / For Creators），更利于不同角色快速上手。
 - 视觉系统精修：导航对齐、按钮圆角、chip 高亮、dropdown 层次、卡片信息标签更统一。
+
+## Phase 18（第十六轮：Creator Studio 导航重构 + 状态化下拉 + CTA 精修）
+- Creator Studio 下拉重构为分组导航（Workspace / Publishing / Growth Tools / Service），并增加组间留白、标题层级与更明显激活态。
+- 每个下拉项新增轻量状态信息（如 `3 drafts`、`2 files missing`、`Setup 80%`、`Locked`），并通过 hover hint 解释术语和状态。
+- 明确区分“独立页面”与“模块功能”：
+  - 独立页面：Dashboard、My Series、Upload Assets、Pricing & Monetization、Earnings、Service Orders、Creator Guidelines。
+  - 模块功能：Featured Placement（Add-on）、Motion Poster（Pro）、Promo Tools（Beta）、Priority Support（Studio only）。
+- Creator Studio 页面增加“Creator Studio / Current Module”上下文头部，模块切换后标题、副标题、状态标签与主 CTA 同步变化，避免“像跳了又像没跳”。
+- CTA 与按钮系统精修：主次按钮层级、hover/active/disabled 状态、文案动作感增强（如 `Save & Continue to Next Step`、`Submit for Review`、`Open Service Orders`）。
+- Context bar 对 Creator hash 子模块感知增强，支持显示模块级说明。

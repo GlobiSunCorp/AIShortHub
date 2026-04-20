@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AccessGuidePanel } from '../components/AccessGuidePanel';
 import { CreatorPlanCard, MembershipBadge, UsageQuotaBadge } from '../components/EntitlementBadges';
 import { CreatorActionCenter, PlanHealthCard, QuotaAlertBar, SubmissionReadinessChecklist } from '../components/CreatorOpsPanels';
-import { Link } from '../lib/router';
+import { Link, useRouter } from '../lib/router';
 import { GlossaryTerm } from '../components/GlossaryTerm';
 import { OnboardingGuide } from '../components/OnboardingGuide';
 import { ADD_ON_SERVICES, CREATOR_ASSETS, REFUND_POLICY_CONFIG, REVENUE_MODEL, formatUsd, getCreatorPlan, getServiceEntitlement } from '../data/monetization';
@@ -16,6 +16,7 @@ import { getCreatorDashboardSnapshot } from '../lib/selectors/getCreatorDashboar
 import { getBillingSummarySnapshot } from '../lib/selectors/getBillingSummarySnapshot';
 import { HowPricingWorksPanel } from '../components/billing/HowPricingWorksPanel';
 import { RevenueFlowDiagram } from '../components/billing/RevenueFlowDiagram';
+import { CREATOR_HASH_ALIASES, CREATOR_MODULE_TO_WORKSPACE } from '../data/creatorStudio';
 
 const STEPS = ['Basic Info', 'Trailer Assets', 'Main Episodes', 'Pricing & QC', 'Publishing & Review'];
 const bucketByAssetType = {
@@ -44,6 +45,19 @@ const initialDraft = {
   checklistReady: false,
 };
 
+
+const STUDIO_MODULE_META = {
+  overview: { title: 'Dashboard', subtitle: 'Monitor quota health, pending actions, and release readiness from one workspace.', crumb: 'Creator Studio / Dashboard', ctaLabel: 'Open Service Orders', ctaTo: '/services', stateTag: 'Ready', stateHint: 'Live sync active' },
+  content: { title: 'My Series', subtitle: 'Build scripts, edit episodes, and manage draft metadata before review.', crumb: 'Creator Studio / My Series', ctaLabel: 'Open Creator Pricing', ctaTo: '/creator#pricing', stateTag: 'Draft', stateHint: '3 drafts in progress' },
+  assets: { title: 'Upload Assets', subtitle: 'Deliver posters, trailer, subtitle packs, and channel-specific creative assets.', crumb: 'Creator Studio / Upload Assets', ctaLabel: 'Upload Trailer', ctaTo: '#upload-trailer', stateTag: 'In Progress', stateHint: '2 required files still missing' },
+  pricing: { title: 'Pricing & Monetization', subtitle: 'Set episode pricing, package strategy, and monetization compliance.', crumb: 'Creator Studio / Pricing & Monetization', ctaLabel: 'View Earnings', ctaTo: '/creator#earnings', stateTag: 'In Progress', stateHint: 'Setup 80% complete' },
+  earnings: { title: 'Earnings', subtitle: 'Review gross income, deductions, pending payout, and settlement cycle.', crumb: 'Creator Studio / Earnings', ctaLabel: 'Open Service Orders', ctaTo: '/services', stateTag: 'Pending', stateHint: '$0 pending payout' },
+  review: { title: 'Review & Publish', subtitle: 'Run final checklist, quality validation, and submit to moderation queue.', crumb: 'Creator Studio / Review & Publish', ctaLabel: 'Submit for Review', ctaTo: '#submit-review', stateTag: 'Pending Review', stateHint: 'Checklist required before submit' },
+  featured: { title: 'Featured Placement Module', subtitle: 'Module · Add-on. Request featured slots based on plan quota and campaign strategy.', crumb: 'Creator Studio / Featured Placement', ctaLabel: 'Buy Add-on', ctaTo: '/services', stateTag: 'Add-on', stateHint: '0/2 placement quota used' },
+  'motion-poster': { title: 'Motion Poster Module', subtitle: 'Module · Pro. Generate short-loop motion posters optimized for paid and organic acquisition.', crumb: 'Creator Studio / Motion Poster', ctaLabel: 'Upgrade to Studio', ctaTo: '/pricing', stateTag: 'In Progress', stateHint: '1 rendering job queued' },
+  'promo-tools': { title: 'Promo Tools Module', subtitle: 'Module · Beta. Create hooks, captions, and ad-copy packs by channel format.', crumb: 'Creator Studio / Promo Tools', ctaLabel: 'Launch Promo Tools', ctaTo: '#promo-tools', stateTag: 'Ready', stateHint: 'Templates ready for export' },
+  'priority-support': { title: 'Priority Support Module', subtitle: 'Module · Studio only. Fast-track support for release blockers and escalation issues.', crumb: 'Creator Studio / Priority Support', ctaLabel: 'Upgrade to Studio', ctaTo: '/pricing', stateTag: 'Locked', stateHint: 'Studio plan required' },
+};
 const assetEntitlementText = {
   static_poster: ['Included', 'Included in all creator plans.'],
   motion_poster: ['Plan based', 'Included in Studio · Discounted for Creator Pro · Add-on for Basic.'],
@@ -60,11 +74,17 @@ export function CreatorDashboardPage({ auth, platform }) {
   const [uploading, setUploading] = useState({});
   const [files, setFiles] = useState({});
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const { navigate } = useRouter();
   const [workspace, setWorkspace] = useState('overview');
+  const [currentModule, setCurrentModule] = useState('overview');
+
   useEffect(() => {
     const applyHash = () => {
       const next = (window.location.hash || '').replace('#', '');
-      if (['overview', 'content', 'assets', 'pricing', 'earnings', 'review'].includes(next)) setWorkspace(next);
+      const normalized = CREATOR_HASH_ALIASES[next] || 'overview';
+      const workspaceKey = CREATOR_MODULE_TO_WORKSPACE[normalized] || 'overview';
+      setCurrentModule(normalized);
+      setWorkspace(workspaceKey);
     };
     applyHash();
     window.addEventListener('hashchange', applyHash);
@@ -86,6 +106,36 @@ export function CreatorDashboardPage({ auth, platform }) {
   const breakdown = getEarningsBreakdown(earnings);
   const period = getPeriodComparison(earnings);
   const billingSnapshot = getBillingSummarySnapshot({ platform, creatorId: myCreator?.id, membership });
+  const moduleMeta = STUDIO_MODULE_META[currentModule] || STUDIO_MODULE_META.overview;
+
+  const openModule = (target) => {
+    if (!target) return;
+    if (target.startsWith('/')) {
+      navigate(target);
+      return;
+    }
+    if (target.startsWith('#')) {
+      const id = target.replace('#', '');
+      const node = typeof document !== 'undefined' ? document.getElementById(id) : null;
+      if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+  };
+
+  const handleOpsAction = (cta) => {
+    const actionMap = {
+      'Open Creator Pricing': '/creator#pricing',
+      'Open Service Orders': '/services',
+      'View Earnings': '/creator#earnings',
+      'Submit for Review': '/creator#review',
+      'Upgrade to Studio': '/pricing',
+      'Buy Add-on': '/services',
+      'Upload Trailer': '#upload-trailer',
+      'Request featured placement': '/creator#featured',
+    };
+    openModule(actionMap[cta] || '/creator#overview');
+  };
+
 
   const uploadAsset = async (assetType, onDone) => {
     const file = files[assetType];
@@ -108,9 +158,22 @@ export function CreatorDashboardPage({ auth, platform }) {
 
   return (
     <div className="ds-page">
-      <section className="panel ds-section">
-        <h1 className="ds-h1">Creator Studio Workspace</h1>
-        <p className="ds-meta">Use workspace tabs to focus on one task at a time: overview, content, assets, pricing, earnings, and review & publish.</p>
+      <section className="panel ds-section creator-workspace-shell">
+        <p className="kicker">{moduleMeta.crumb}</p>
+        <div className="creator-workspace-head">
+          <div>
+            <h1 className="ds-h1">{moduleMeta.title}</h1>
+            <p className="ds-meta">{moduleMeta.subtitle}</p>
+          </div>
+          <div className="creator-module-state" title={moduleMeta.stateHint}>
+            <span className="creator-module-state-tag">{moduleMeta.stateTag}</span>
+            <span className="creator-module-state-hint">{moduleMeta.stateHint}</span>
+          </div>
+        </div>
+        <div className="row wrap">
+          <button type="button" className="btn btn-primary btn-cta" onClick={() => openModule(moduleMeta.ctaTo)}>{moduleMeta.ctaLabel}</button>
+          <Link to="/creator-guidelines" className="btn btn-ghost btn-cta-secondary">Review Guidelines</Link>
+        </div>
         <div className="ds-tabs">
           {[
             ['overview', 'Overview'],
@@ -126,6 +189,7 @@ export function CreatorDashboardPage({ auth, platform }) {
               className={`ds-tab ${workspace === key ? 'active' : ''}`}
               onClick={() => {
                 setWorkspace(key);
+                setCurrentModule(key);
                 window.history.replaceState({}, '', `/creator#${key}`);
                 if (key === 'content') setStep(0);
                 if (key === 'assets') setStep(1);
@@ -139,7 +203,7 @@ export function CreatorDashboardPage({ auth, platform }) {
         </div>
       </section>
       <OnboardingGuide role="creator" />
-      {workspace === 'overview' ? <QuotaAlertBar alerts={alerts.slice(0, 4)} /> : null}
+      {workspace === 'overview' ? <QuotaAlertBar alerts={alerts.slice(0, 4)} onAction={handleOpsAction} /> : null}
       {workspace === 'overview' ? <PlanHealthCard
         hoverHint="Hover to review entitlement details and renewal dates."
         data={{
@@ -242,7 +306,7 @@ export function CreatorDashboardPage({ auth, platform }) {
       : null}
       {workspace === 'pricing' || workspace === 'earnings' ? <HowPricingWorksPanel viewerSummary={billingSnapshot.viewer} creatorSummary={billingSnapshot.creator} /> : null}
 
-      {workspace === 'overview' ? <CreatorActionCenter actions={actions} /> : null}
+      {workspace === 'overview' ? <CreatorActionCenter actions={actions} onAction={handleOpsAction} /> : null}
       {workspace === 'overview' ? <CreatorPlanCard snapshot={quota} /> : null}
       {workspace === 'overview' ? <section className="grid cards-3">{metrics.map(([label, value]) => <article className="stat-card" key={label}><p className="small-text">{label}</p><h3>{value}</h3></article>)}</section> : null}
 
@@ -260,12 +324,12 @@ export function CreatorDashboardPage({ auth, platform }) {
           <p className="small-text">Assets: {CREATOR_ASSETS.join(' · ')}</p>
           <div className="grid cards-2">{Object.entries(assetEntitlementText).map(([key, [label, desc]]) => <article key={key} className="mini-card"><h4>{key.replace('_', ' ')}</h4><p className="small-text">{label}</p><p className="small-text">{desc}</p></article>)}</div>
           <input className="input" placeholder="Static Poster URL" value={draft.staticPoster} onChange={(e) => setDraft((p) => ({ ...p, staticPoster: e.target.value }))} />
-          <label className="small-text">Static Poster file<input type="file" onChange={(e) => setFiles((p) => ({ ...p, static_poster: e.target.files?.[0] }))} /></label><button className="btn btn-ghost" type="button" disabled={uploading.static_poster} onClick={() => uploadAsset('static_poster', (url) => setDraft((p) => ({ ...p, staticPoster: url })))}>上传 Static Poster</button>
+          <label className="small-text">Static Poster file<input type="file" onChange={(e) => setFiles((p) => ({ ...p, static_poster: e.target.files?.[0] }))} /></label><button className="btn btn-ghost" type="button" disabled={uploading.static_poster} onClick={() => uploadAsset('static_poster', (url) => setDraft((p) => ({ ...p, staticPoster: url })))}>Upload Poster Asset</button>
           <input className="input" placeholder="Trailer Title" value={draft.trailer.title} onChange={(e) => setDraft((p) => ({ ...p, trailer: { ...p.trailer, title: e.target.value } }))} />
           <input className="input" placeholder="Trailer URL" value={draft.trailer.url} onChange={(e) => setDraft((p) => ({ ...p, trailer: { ...p.trailer, url: e.target.value } }))} />
           <input className="input" placeholder="Trailer Cover URL" value={draft.trailer.coverUrl} onChange={(e) => setDraft((p) => ({ ...p, trailer: { ...p.trailer, coverUrl: e.target.value } }))} />
           <input className="input" placeholder="Trailer CTA" value={draft.trailer.cta} onChange={(e) => setDraft((p) => ({ ...p, trailer: { ...p.trailer, cta: e.target.value } }))} />
-          <label className="small-text">Trailer file<input type="file" onChange={(e) => setFiles((p) => ({ ...p, trailer: e.target.files?.[0] }))} /></label><button className="btn btn-ghost" type="button" disabled={uploading.trailer} onClick={() => uploadAsset('trailer', (url) => setDraft((p) => ({ ...p, trailer: { ...p.trailer, url } })))}>上传 Trailer</button>
+          <label className="small-text">Trailer file<input type="file" onChange={(e) => setFiles((p) => ({ ...p, trailer: e.target.files?.[0] }))} /></label><button className="btn btn-ghost" type="button" disabled={uploading.trailer} onClick={() => uploadAsset('trailer', (url) => setDraft((p) => ({ ...p, trailer: { ...p.trailer, url } })))} id="upload-trailer">Upload Trailer</button>
           <div className="grid cards-2">{ADD_ON_SERVICES.map((s) => <article key={s.id} className="mini-card"><h4>{s.name}</h4><p className="small-text">{getServiceEntitlement(s, membership.creatorPlan || 'creator_basic')}</p></article>)}</div>
         </> : null}
 
@@ -286,7 +350,7 @@ export function CreatorDashboardPage({ auth, platform }) {
               <input className="input" placeholder="Aspect Ratio" value={item.aspectRatio} onChange={(e) => updateEpisode(index, { aspectRatio: e.target.value })} />
               <input className="input" placeholder="Resolutions（逗号）" value={item.resolutions.join(',')} onChange={(e) => updateEpisode(index, { resolutions: e.target.value.split(',').map((x) => x.trim()) })} />
               <label className="small-text">Episode video file<input type="file" onChange={(e) => setFiles((p) => ({ ...p, video: e.target.files?.[0] }))} /></label>
-              <button className="btn btn-ghost" type="button" disabled={uploading.video} onClick={() => uploadAsset('video', (url) => updateEpisode(index, { url }))}>上传 Episode</button>
+              <button className="btn btn-ghost" type="button" disabled={uploading.video} onClick={() => uploadAsset('video', (url) => updateEpisode(index, { url }))}>Upload Episode Video</button>
             </article>
           ))}
           <button className="btn btn-ghost" type="button" onClick={addEpisode}>+ 新增分集</button>
@@ -310,7 +374,7 @@ export function CreatorDashboardPage({ auth, platform }) {
           <h2>Step 5: Publishing & Review</h2>
           <SubmissionReadinessChecklist checklist={checklist} />
           <label className="small-text"><input type="checkbox" checked={draft.checklistReady} onChange={(e) => setDraft((p) => ({ ...p, checklistReady: e.target.checked }))} /> 提交审核前检查清单已完成</label>
-          <button className="btn btn-primary" type="button" onClick={async () => {
+          <button id="submit-review" className="btn btn-primary btn-cta" type="button" onClick={async () => {
             const quotaFailures = evaluateQuotaLimits(quota);
             if (quotaFailures.length) return setFeedback({ type: 'error', message: `提交失败：${quotaFailures.join('；')}。` });
             if (!minLength(draft.title, 2) || !minLength(draft.synopsis, 12)) return setFeedback({ type: 'error', message: '请至少完成标题和简介。' });
@@ -349,12 +413,48 @@ export function CreatorDashboardPage({ auth, platform }) {
             }
             await platform.actions.submitForReview(id);
             setDraft(initialDraft); setStep(0); setFeedback({ type: 'success', message: '提交审核成功，内容已进入待审核队列。' });
-          }}>提交审核</button>
+          }}>Submit for Review</button>
         </> : null}
 
         <div className="row wrap">
-          <button className="btn btn-ghost" type="button" onClick={() => setStep((s) => Math.max(s - 1, 0))} disabled={step === 0}>上一步</button>
-          <button className="btn btn-primary" type="button" onClick={() => setStep((s) => Math.min(s + 1, STEPS.length - 1))} disabled={step === STEPS.length - 1}>下一步</button>
+          <button className="btn btn-ghost btn-cta-secondary" type="button" onClick={() => setStep((s) => Math.max(s - 1, 0))} disabled={step === 0}>Back to Previous Step</button>
+          <button className="btn btn-primary btn-cta" type="button" onClick={() => setStep((s) => Math.min(s + 1, STEPS.length - 1))} disabled={step === STEPS.length - 1}>Save & Continue to Next Step</button>
+        </div>
+      </section> : null}
+
+      {currentModule === 'featured' ? <section className="panel stack-md module-panel" title="Featured Placement: Add-on placement inventory for better discoverability.">
+        <h3>Featured Placement · Module <span className="module-badge">Add-on</span></h3>
+        <p className="small-text">Use limited featured slots for launch week or finale pushes. Hover labels explain quota and lock states.</p>
+        <div className="row wrap">
+          <button type="button" className="btn btn-primary btn-cta" onClick={() => openModule('/services')}>Buy Add-on</button>
+          <button type="button" className="btn btn-ghost btn-cta-secondary" title="Ready means requirements are complete for this cycle.">Check Placement Readiness</button>
+        </div>
+      </section> : null}
+
+      {currentModule === 'motion-poster' ? <section className="panel stack-md module-panel" title="Motion Poster: auto-generated loop poster with rendering queue.">
+        <h3>Motion Poster · Module <span className="module-badge">Pro</span></h3>
+        <p className="small-text">Current status: 1 rendering in queue. Upgrade for included rendering quota or buy one-off renders.</p>
+        <div className="row wrap">
+          <button type="button" className="btn btn-primary btn-cta" onClick={() => openModule('/pricing')}>Upgrade to Studio</button>
+          <button type="button" className="btn btn-ghost btn-cta-secondary" title="In Progress means processing is ongoing.">View Rendering Queue</button>
+        </div>
+      </section> : null}
+
+      {currentModule === 'promo-tools' ? <section id="promo-tools" className="panel stack-md module-panel" title="Promo Tools: templates for hooks, ad copy, and social captions.">
+        <h3>Promo Tools · Module <span className="module-badge">Beta</span></h3>
+        <p className="small-text">Ready for launch copy generation. Use this module to export social promo packs without leaving Creator Studio.</p>
+        <div className="row wrap">
+          <button type="button" className="btn btn-primary btn-cta">Generate Promo Pack</button>
+          <button type="button" className="btn btn-ghost btn-cta-secondary" title="Draft means not yet submitted to review.">Open Draft Assets</button>
+        </div>
+      </section> : null}
+
+      {currentModule === 'priority-support' ? <section className="panel stack-md module-panel" title="Priority Support: Studio-only escalation path for critical release issues.">
+        <h3>Priority Support · Module <span className="module-badge">Studio</span></h3>
+        <p className="small-text">Locked for current plan. Upgrade to Studio to unlock SLA-backed creator operations support.</p>
+        <div className="row wrap">
+          <button type="button" className="btn btn-primary btn-cta" onClick={() => openModule('/pricing')}>Upgrade to Studio</button>
+          <button type="button" className="btn btn-ghost btn-cta-secondary" onClick={() => openModule('/support')}>Contact Standard Support</button>
         </div>
       </section> : null}
 
