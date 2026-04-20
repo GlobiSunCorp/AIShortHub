@@ -5,20 +5,7 @@ import { Link, useRouter } from '../lib/router';
 import { getStatusLabel } from '../lib/roleDisplay';
 import { canAccessCreatorStudio, resolveMembership } from '../hooks/usePlanAccess';
 import { MembershipBadge } from './EntitlementBadges';
-
-const CREATOR_HASH_ALIASES = {
-  overview: 'overview',
-  content: 'content',
-  assets: 'assets',
-  episodes: 'content',
-  pricing: 'pricing',
-  earnings: 'earnings',
-  review: 'review',
-  featured: 'review',
-  'motion-poster': 'assets',
-  'promo-tools': 'assets',
-  'priority-support': 'review',
-};
+import { CREATOR_HASH_ALIASES, CREATOR_STUDIO_GROUPS } from '../data/creatorStudio';
 
 export function Header({ auth, platform }) {
   const { pathname } = useRouter();
@@ -43,27 +30,15 @@ export function Header({ auth, platform }) {
   }, []);
 
   const viewerNav = [['/', 'Home'], ['/browse', 'Browse'], ['/pricing', 'Pricing'], ['/services', 'Services']];
-  const creatorStudioItems = useMemo(() => {
-    const base = [
-      ['/creator#overview', 'Dashboard'],
-      ['/creator#content', 'My Series'],
-      ['/creator#assets', 'Upload Assets'],
-      ['/creator#content', 'Episodes'],
-      ['/creator#pricing', 'Pricing & Monetization'],
-      ['/creator#earnings', 'Earnings'],
-      ['/services', 'Service Orders'],
-      ['/creator-guidelines', 'Creator Guidelines'],
-    ];
-    if (membership?.creatorPlan === 'creator_pro' || membership?.creatorPlan === 'studio' || auth.userState === 'admin') {
-      return [
-        ...base,
-        ['/creator#review', 'Featured placement'],
-        ['/creator#assets', 'Motion Poster'],
-        ['/creator#assets', 'Promo tools'],
-        ['/support', 'Priority support'],
-      ];
-    }
-    return base;
+  const creatorStudioGroups = useMemo(() => {
+    const hasHigherPlan = membership?.creatorPlan === 'creator_pro' || membership?.creatorPlan === 'studio' || auth.userState === 'admin';
+    return CREATOR_STUDIO_GROUPS.map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        if (item.id === 'priority-support') return hasHigherPlan;
+        return true;
+      }),
+    })).filter((group) => group.items.length > 0);
   }, [auth.userState, membership?.creatorPlan]);
 
   const safeAvatar = auth.user?.avatar || auth.user?.name?.slice(0, 2)?.toUpperCase() || 'U';
@@ -92,18 +67,32 @@ export function Header({ auth, platform }) {
               </button>
               {creatorMenuOpen ? (
                 <div className="account-menu panel creator-menu">
-                  {creatorStudioItems.map(([to, label]) => {
-                    const targetHash = to.includes('#') ? to.slice(to.indexOf('#') + 1) : '';
-                    const normalizedTargetHash = CREATOR_HASH_ALIASES[targetHash] || targetHash;
-                    const currentHash = (hash || '').replace('#', '');
-                    const normalizedCurrentHash = CREATOR_HASH_ALIASES[currentHash] || currentHash;
-                    const active = to.startsWith('/creator') ? pathname === '/creator' && (!normalizedTargetHash || normalizedCurrentHash === normalizedTargetHash) : pathname === to;
-                    return (
-                      <Link key={`${to}-${label}`} to={to} className={active ? 'nav-link active' : 'nav-link'} onClick={() => setCreatorMenuOpen(false)}>
-                        {label}
-                      </Link>
-                    );
-                  })}
+                  {creatorStudioGroups.map((group) => (
+                    <section key={group.id} className="creator-menu-group">
+                      <p className="creator-menu-group-title">{group.title}</p>
+                      <div className="creator-menu-items">
+                        {group.items.map((item) => {
+                          const targetHash = item.to.includes('#') ? item.to.slice(item.to.indexOf('#') + 1) : '';
+                          const normalizedTargetHash = CREATOR_HASH_ALIASES[targetHash] || targetHash;
+                          const currentHash = (hash || '').replace('#', '');
+                          const normalizedCurrentHash = CREATOR_HASH_ALIASES[currentHash] || currentHash;
+                          const active = item.to.startsWith('/creator')
+                            ? pathname === '/creator' && (!normalizedTargetHash || normalizedCurrentHash === normalizedTargetHash)
+                            : pathname === item.to;
+
+                          return (
+                            <Link key={`${item.to}-${item.label}`} to={item.to} className={`creator-menu-link ${active ? 'active' : ''}`.trim()} onClick={() => setCreatorMenuOpen(false)}>
+                              <span className="creator-menu-link-head">
+                                <span>{item.label}</span>
+                                {item.tag ? <span className="creator-menu-tag">{item.tag}</span> : null}
+                              </span>
+                              <span className="creator-menu-link-meta" title={item.hint}>{item.status}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ))}
                 </div>
               ) : null}
             </div>

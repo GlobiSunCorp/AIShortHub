@@ -1,13 +1,13 @@
 import { UsageQuotaBadge } from './EntitlementBadges';
 
-export function QuotaAlertBar({ alerts = [], compact = false }) {
+export function QuotaAlertBar({ alerts = [], compact = false, onAction }) {
   return (
     <section className={`panel quota-alert-bar ${compact ? 'compact' : ''}`.trim()}>
       <div className="quota-alert-list">
         {alerts.map((alert) => (
           <article key={alert.key} className={`quota-alert-item ${alert.state}`}>
             <p>{alert.message}</p>
-            <button type="button" className="btn btn-ghost">{alert.cta}</button>
+            <button type="button" className="btn btn-ghost btn-cta-secondary" onClick={() => onAction?.(alert.cta)}>{alert.cta}</button>
           </article>
         ))}
       </div>
@@ -43,7 +43,7 @@ export function PlanHealthCard({ data, hoverHint }) {
   );
 }
 
-export function CreatorActionCenter({ actions = [] }) {
+export function CreatorActionCenter({ actions = [], onAction }) {
   const groups = {
     urgent: actions.filter((item) => item.level === 'urgent'),
     recommended: actions.filter((item) => item.level === 'recommended'),
@@ -60,7 +60,7 @@ export function CreatorActionCenter({ actions = [] }) {
           {items.map((item) => (
             <article key={`${level}-${item.title}`} className={`action-item ${level}`}>
               <p>{item.title}</p>
-              <button type="button" className="btn btn-ghost">{item.cta}</button>
+              <button type="button" className="btn btn-ghost btn-cta-secondary" onClick={() => onAction?.(item.cta)}>{item.cta}</button>
             </article>
           ))}
         </div>
