@@ -14,6 +14,8 @@ export function Header({ auth, platform }) {
   const [hash, setHash] = useState(typeof window === 'undefined' ? '' : window.location.hash || '');
   const membership = auth.user ? resolveMembership(auth, platform) : null;
   const showCreatorStudio = canAccessCreatorStudio(auth, platform);
+  const isCreatorMode = auth.isLoggedIn && ['creator', 'admin'].includes(auth.userState);
+  const isViewerMode = !isCreatorMode;
   const statusLabel = useMemo(() => {
     try {
       return getStatusLabel(auth.userState, membership?.tier, auth.user?.tier, membership?.creatorPlan);
@@ -53,16 +55,19 @@ export function Header({ auth, platform }) {
           AIShortHub
         </Link>
         <nav className="row nav-wrap viewer-nav">
-          {viewerNav.map(([to, label]) => (
-            <Link key={to} to={to} className={pathname === to ? 'nav-link active' : 'nav-link'}>
-              {label}
-            </Link>
-          ))}
+          {viewerNav.map(([to, label]) => {
+            const active = pathname === to || (label === 'Browse' && isViewerMode);
+            return (
+              <Link key={to} to={to} className={active ? 'nav-link active' : 'nav-link'}>
+                {label}
+              </Link>
+            );
+          })}
         </nav>
         <nav className="row nav-wrap creator-nav">
           {showCreatorStudio ? (
             <div className="account-wrap">
-              <button type="button" className={`nav-link creator-trigger ${pathname === '/creator' ? 'active' : ''}`} onClick={() => setCreatorMenuOpen((open) => !open)}>
+              <button type="button" className={`nav-link creator-trigger ${pathname === '/creator' || isCreatorMode ? 'active' : ''}`} onClick={() => setCreatorMenuOpen((open) => !open)}>
                 Creator Studio ▾
               </button>
               {creatorMenuOpen ? (
@@ -83,10 +88,13 @@ export function Header({ auth, platform }) {
                           return (
                             <Link key={`${item.to}-${item.label}`} to={item.to} className={`creator-menu-link ${active ? 'active' : ''}`.trim()} onClick={() => setCreatorMenuOpen(false)}>
                               <span className="creator-menu-link-head">
-                                <span>{item.label}</span>
-                                {item.tag ? <span className="creator-menu-tag">{item.tag}</span> : null}
+                                <span className="creator-menu-label">{item.label}</span>
+                                <span className="creator-menu-side">
+                                  {item.tag ? <span className="creator-menu-tag">{item.tag}</span> : null}
+                                  <span className={`creator-menu-status ${active ? 'active' : ''}`} title={item.hint}>{item.status}</span>
+                                </span>
                               </span>
-                              <span className="creator-menu-link-meta" title={item.hint}>{item.status}</span>
+                              <span className="creator-menu-link-meta" title={item.hint}>{item.hint}</span>
                             </Link>
                           );
                         })}
