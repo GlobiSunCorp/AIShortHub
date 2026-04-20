@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import './styles/interaction.css';
 import { AppLayout } from './layouts/AppLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { useAuth } from './hooks/useAuth';
