@@ -4,6 +4,7 @@ import { SeriesCard } from '../components/SeriesCard';
 import { OnboardingGuide } from '../components/OnboardingGuide';
 import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
 import { resolveMembership } from '../hooks/usePlanAccess';
+import { publicHeroPoster } from '../assets/publicHeroPoster';
 
 function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', emptyText }) {
   return (
@@ -30,95 +31,80 @@ function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', e
 }
 
 function PublicHome({ catalog, takeRate }) {
-  const heroTitle = catalog.firstBatch[0] || catalog.trending[0] || catalog.latest[0] || null;
-  const teaserTitles = catalog.trending.slice(0, 3);
+  const featured = catalog.firstBatch[0] || catalog.trending[0] || catalog.latest[0] || null;
 
   return (
     <div className="ds-page home-public">
-      <OnboardingGuide role="viewer" />
-      <section className="home-stage panel">
-        <div className="home-stage-copy">
-          <span className="kicker">Watch first. Create second.</span>
-          <h1>Vertical short dramas that start fast and keep moving.</h1>
-          <p className="ds-meta home-stage-lead">Free previews up front, paid unlocks when viewers want more, and a creator path that stays visible without taking over the first screen.</p>
-          <div className="row wrap home-stage-actions">
-            <Link className="btn btn-primary btn-cta home-stage-primary" to="/browse">Start watching</Link>
-            <Link className="btn btn-ghost btn-cta-secondary home-stage-secondary" to="/pricing">For creators</Link>
-          </div>
-          <div className="home-stage-notes">
-            <span className="meta-pill">Trailers stay visible</span>
-            <span className="meta-pill">Viewer-first layout</span>
-            <span className="meta-pill">Creator take rate starts below market</span>
-          </div>
-        </div>
-        <div className="home-stage-media">
-          <Link className={`home-hero-poster cover-link ${heroTitle ? '' : 'from-fuchsia'}`} to={heroTitle ? `/series/${heroTitle.id}` : '/browse'}>
-            <span className="status ok">Now featured</span>
-            <div>
-              <h2>{heroTitle?.title || 'Launch title waiting for poster'}</h2>
-              <p>{heroTitle?.synopsis || 'Put your strongest trailer here. One clear poster is better than ten paragraphs.'}</p>
+      <section className="public-home-hero panel">
+        <Link
+          className="public-home-poster cover-link"
+          to={featured ? `/series/${featured.id}` : '/browse'}
+          style={{ backgroundImage: `url(${publicHeroPoster})` }}
+        >
+          <div className="public-home-poster-scrim" />
+          <div className="public-home-poster-center">
+            <span className="public-home-kicker">Featured launch title</span>
+            <div className="public-home-play-button" aria-hidden="true">
+              <span className="public-home-play-icon">▶</span>
             </div>
-            <div className="play-overlay">▶ Play trailer</div>
-          </Link>
-          <div className="grid cards-3 home-teaser-grid">
-            {teaserTitles.length ? teaserTitles.map((item) => (
-              <Link key={item.id} className="mini-card home-teaser-card" to={`/series/${item.id}`}>
-                <p className="small-text">{item.tags?.[0] || item.category || 'Featured'}</p>
-                <strong>{item.title}</strong>
-                <span className="ds-caption">{catalog.episodeMap[item.id]?.preview || 1} free preview</span>
-              </Link>
-            )) : (
-              <article className="mini-card home-teaser-card">
-                <p className="small-text">Soft launch</p>
-                <strong>Add 2-3 teaser titles</strong>
-                <span className="ds-caption">Enough for a strong first impression</span>
-              </article>
-            )}
+            <p className="public-home-play-text">Watch trailer</p>
+          </div>
+        </Link>
+
+        <div className="public-home-supporting">
+          <div className="public-home-copy">
+            <span className="kicker">Viewer-first landing</span>
+            <h1>See the drama first, then decide what to do next.</h1>
+            <p className="ds-meta public-home-lead">The first screen should feel like a place to watch, not a place to read instructions. Creator tools stay available, but they no longer interrupt the first impression.</p>
+            <div className="row wrap public-home-actions">
+              <Link className="btn btn-primary btn-cta public-home-primary" to={featured ? `/watch/${featured.id}/1` : '/browse'}>Start watching</Link>
+              <Link className="btn btn-ghost btn-cta-secondary public-home-secondary" to="/browse">Browse all titles</Link>
+              <Link className="btn btn-ghost public-home-tertiary" to="/pricing">For creators</Link>
+            </div>
+          </div>
+          <div className="grid cards-3 public-home-notes">
+            <article className="mini-card public-home-note-card">
+              <h3 className="ds-h3">For viewers</h3>
+              <p className="ds-meta">Click poster → play trailer → sample preview → unlock the rest.</p>
+            </article>
+            <article className="mini-card public-home-note-card">
+              <h3 className="ds-h3">For creators</h3>
+              <p className="ds-meta">Creator Studio is still here, just not yelling over the hero image.</p>
+            </article>
+            <article className="mini-card public-home-note-card">
+              <h3 className="ds-h3">Soft-launch economics</h3>
+              <p className="ds-meta">Platform take rate is {(takeRate * 100).toFixed(0)}% by default and can launch lower by creator tier.</p>
+            </article>
           </div>
         </div>
-      </section>
-
-      <section className="grid cards-3 home-value-grid">
-        <article className="card-primary home-value-card">
-          <h3 className="ds-h3">For viewers</h3>
-          <p className="ds-meta">The first thing people see is what to watch next, not platform logic.</p>
-        </article>
-        <article className="card-secondary home-value-card">
-          <h3 className="ds-h3">For creators</h3>
-          <p className="ds-meta">Upload, review, pricing, motion poster, and promo tools live in Creator Studio.</p>
-        </article>
-        <article className="card-data home-value-card">
-          <h3 className="ds-h3">Soft-launch economics</h3>
-          <p className="ds-meta">Default take rate is {(takeRate * 100).toFixed(0)}%, but launch creator plans can run much lower.</p>
-        </article>
       </section>
 
       <HomeCollection
         title="Start with these"
-        desc="The first row should feel obvious, quick, and clickable."
+        desc="The row right below the hero should feel obvious, fast, and clickable."
         items={catalog.firstBatch}
         episodeMap={catalog.episodeMap}
         columns="cards-2"
-        emptyText="No featured title yet. Put your strongest poster and trailer here first."
+        emptyText="No featured title yet. Use one strong poster, one trailer, and one preview episode first."
       />
 
       <HomeCollection
         title="Free preview lane"
-        desc="Give strangers something to sample before asking them to subscribe."
+        desc="Let strangers sample before asking them to subscribe."
         items={catalog.trending}
         episodeMap={catalog.episodeMap}
-        emptyText="Add more preview-ready episodes so this lane feels alive."
+        emptyText="Add more preview-ready episodes so this row feels alive."
       />
 
       <section className="home-split-callout grid cards-2">
         <article className="panel home-callout-card">
           <h3 className="ds-h2">Viewer path</h3>
-          <p className="ds-meta">Browse → Play trailer → Watch preview → Unlock the rest.</p>
+          <p className="ds-meta">Watch first, read less, decide later.</p>
           <Link className="info-link" to="/browse">Open viewer catalog</Link>
         </article>
         <article className="panel home-callout-card">
           <h3 className="ds-h2">Creator path</h3>
-          <p className="ds-meta">Create series → Upload trailer → Set pricing → Submit for review.</p>
+          <p className="ds-meta">Upload trailer, set monetization, then submit to review.</p>
           <Link className="info-link" to="/pricing">See creator plans</Link>
         </article>
       </section>
@@ -134,6 +120,7 @@ function ViewerHome({ auth, catalog }) {
 
   return (
     <div className="ds-page home-viewer-auth">
+      <OnboardingGuide role="viewer" />
       <section className="panel viewer-hero">
         <div className="viewer-hero-copy">
           <span className="kicker">Welcome back</span>
@@ -190,7 +177,7 @@ function ViewerHome({ auth, catalog }) {
   );
 }
 
-function CreatorHome({ auth, platform, membership, catalog }) {
+function CreatorHome({ auth, membership, catalog }) {
   const planName = membership.creatorPlan || 'creator_basic';
   const creatorSeries = catalog.firstBatch.slice(0, 3);
   const actionCards = [
@@ -207,11 +194,12 @@ function CreatorHome({ auth, platform, membership, catalog }) {
 
   return (
     <div className="ds-page home-creator-auth">
+      <OnboardingGuide role="creator" />
       <section className="panel creator-home-hero">
         <div className="creator-home-copy">
           <span className="kicker">Creator Studio home</span>
-          <h1>Make it clear. Make it launch-ready. Make it a little funny.</h1>
-          <p className="ds-meta">Hi {auth.user?.name || 'Creator'}, this home is built to answer three things fast: what is unfinished, what can be published, and where the money will show up when it starts moving.</p>
+          <h1>Keep the first glance clean. Keep the workbench sharp.</h1>
+          <p className="ds-meta">Hi {auth.user?.name || 'Creator'}, this home answers three things fast: what is unfinished, what can be published, and where your revenue will appear once it starts moving.</p>
           <div className="row wrap home-stage-actions">
             <Link className="btn btn-primary btn-cta" to="/creator#content">Open my workspace</Link>
             <Link className="btn btn-ghost btn-cta-secondary" to="/creator#review">Submit when ready</Link>
@@ -280,7 +268,7 @@ export function HomePage({ auth, platform }) {
   const creatorMode = auth?.isLoggedIn && (['creator', 'admin'].includes(auth.userState) || Boolean(membership.creatorPlan));
   const viewerMode = auth?.isLoggedIn && !creatorMode;
 
-  if (creatorMode) return <CreatorHome auth={auth} platform={platform} membership={membership} catalog={catalog} />;
+  if (creatorMode) return <CreatorHome auth={auth} membership={membership} catalog={catalog} />;
   if (viewerMode) return <ViewerHome auth={auth} catalog={catalog} />;
   return <PublicHome catalog={catalog} takeRate={takeRate} />;
 }
