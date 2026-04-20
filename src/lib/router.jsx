@@ -17,6 +17,12 @@ function notifyRouteChange(to) {
   }
 }
 
+function pulseElement(node) {
+  if (!node || typeof window === 'undefined') return;
+  node.classList.add('press-feedback');
+  window.setTimeout(() => node.classList.remove('press-feedback'), 180);
+}
+
 export function Link({ to, className, children, onClick }) {
   const { navigate } = useRouter();
 
@@ -27,12 +33,13 @@ export function Link({ to, className, children, onClick }) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
     event.preventDefault();
+    pulseElement(event.currentTarget);
     navigate(to);
     notifyRouteChange(to);
   };
 
   return (
-    <a href={to} className={className} onClick={handleClick}>
+    <a href={to} className={[className, 'interactive-link'].filter(Boolean).join(' ')} onClick={handleClick}>
       {children}
     </a>
   );
