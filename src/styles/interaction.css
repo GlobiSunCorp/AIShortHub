@@ -152,3 +152,46 @@ button.press-feedback,
     transform: translate(-50%, -50%) scale(1.7);
   }
 }
+
+.hero-actions-stack {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.2rem;
+}
+
+.hero-primary-actions,
+.hero-audience-switches {
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.hero-action-btn {
+  min-width: 156px;
+  justify-content: center;
+}
+
+.hero-audience-chip {
+  min-width: 128px;
+  justify-content: center;
+}
+
+.hero-mode-copy {
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 760px) {
+  .hero-actions-stack {
+    gap: 0.7rem;
+  }
+
+  .hero-primary-actions,
+  .hero-audience-switches {
+    width: 100%;
+    gap: 0.6rem;
+  }
+
+  .hero-action-btn,
+  .hero-audience-chip {
+    min-width: 0;
+  }
+}
