@@ -6,9 +6,22 @@ import { OnboardingGuide } from '../components/OnboardingGuide';
 import { Link } from '../lib/router';
 import { getOperatorDashboardSnapshot } from '../lib/selectors/getOperatorDashboardSnapshot';
 import { formatUsd } from '../data/monetization';
+import { PLATFORM_CONFIG } from '../data/mockData';
 
 const orderStatuses = ['pending', 'in_progress', 'pending_payment', 'completed', 'cancelled'];
 const reviewStatuses = ['draft', 'pending_review', 'published', 'rejected'];
+
+const defaultHeroDraft = {
+  featuredSeriesId: PLATFORM_CONFIG.homeHero.featuredSeriesId,
+  kicker: PLATFORM_CONFIG.homeHero.kicker,
+  eyebrow: PLATFORM_CONFIG.homeHero.eyebrow,
+  title: PLATFORM_CONFIG.homeHero.title,
+  synopsis: PLATFORM_CONFIG.homeHero.synopsis,
+  posterUrl: PLATFORM_CONFIG.homeHero.posterUrl,
+  primaryCtaLabel: PLATFORM_CONFIG.homeHero.primaryCtaLabel,
+  secondaryCtaLabel: PLATFORM_CONFIG.homeHero.secondaryCtaLabel,
+  creatorCtaLabel: PLATFORM_CONFIG.homeHero.creatorCtaLabel,
+};
 
 export function AdminPage({ platform, auth }) {
   const [reviewNote, setReviewNote] = useState('');
@@ -16,15 +29,15 @@ export function AdminPage({ platform, auth }) {
   const [filterStatus, setFilterStatus] = useState('all');
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [heroDraft, setHeroDraft] = useState(() => ({
-    featuredSeriesId: platform?.platformConfig?.homeHero?.featuredSeriesId || 'hidden-return',
-    kicker: platform?.platformConfig?.homeHero?.kicker || 'Featured launch title',
-    eyebrow: platform?.platformConfig?.homeHero?.eyebrow || 'Viewer-first landing',
-    title: platform?.platformConfig?.homeHero?.title || 'Her Hidden Return',
-    synopsis: platform?.platformConfig?.homeHero?.synopsis || '',
-    posterUrl: platform?.platformConfig?.homeHero?.posterUrl || '',
-    primaryCtaLabel: platform?.platformConfig?.homeHero?.primaryCtaLabel || 'Watch trailer',
-    secondaryCtaLabel: platform?.platformConfig?.homeHero?.secondaryCtaLabel || 'Browse titles',
-    creatorCtaLabel: platform?.platformConfig?.homeHero?.creatorCtaLabel || 'For creators',
+    featuredSeriesId: platform?.platformConfig?.homeHero?.featuredSeriesId || defaultHeroDraft.featuredSeriesId,
+    kicker: platform?.platformConfig?.homeHero?.kicker || defaultHeroDraft.kicker,
+    eyebrow: platform?.platformConfig?.homeHero?.eyebrow || defaultHeroDraft.eyebrow,
+    title: platform?.platformConfig?.homeHero?.title || defaultHeroDraft.title,
+    synopsis: platform?.platformConfig?.homeHero?.synopsis || defaultHeroDraft.synopsis,
+    posterUrl: platform?.platformConfig?.homeHero?.posterUrl || defaultHeroDraft.posterUrl,
+    primaryCtaLabel: platform?.platformConfig?.homeHero?.primaryCtaLabel || defaultHeroDraft.primaryCtaLabel,
+    secondaryCtaLabel: platform?.platformConfig?.homeHero?.secondaryCtaLabel || defaultHeroDraft.secondaryCtaLabel,
+    creatorCtaLabel: platform?.platformConfig?.homeHero?.creatorCtaLabel || defaultHeroDraft.creatorCtaLabel,
   }));
 
   const dashboard = useMemo(() => getOperatorDashboardSnapshot(platform), [platform]);
@@ -57,18 +70,7 @@ export function AdminPage({ platform, auth }) {
 
   const resetHomepageHero = () => {
     platform.actions.resetPlatformConfig();
-    const defaults = platform.platformConfig?.homeHero || {};
-    setHeroDraft({
-      featuredSeriesId: defaults.featuredSeriesId || 'hidden-return',
-      kicker: defaults.kicker || 'Featured launch title',
-      eyebrow: defaults.eyebrow || 'Viewer-first landing',
-      title: defaults.title || 'Her Hidden Return',
-      synopsis: defaults.synopsis || '',
-      posterUrl: defaults.posterUrl || '',
-      primaryCtaLabel: defaults.primaryCtaLabel || 'Watch trailer',
-      secondaryCtaLabel: defaults.secondaryCtaLabel || 'Browse titles',
-      creatorCtaLabel: defaults.creatorCtaLabel || 'For creators',
-    });
+    setHeroDraft(defaultHeroDraft);
     setFeedback({ type: 'success', message: 'Homepage hero reset to default config.' });
   };
 
