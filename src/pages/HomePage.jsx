@@ -30,14 +30,27 @@ function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', e
   );
 }
 
-function PublicHome({ catalog, takeRate }) {
-  const featured = catalog.firstBatch[0] || catalog.trending[0] || catalog.latest[0] || null;
-  const featuredTitle = featured?.title || 'Her Hidden Return';
+function PublicHome({ catalog, takeRate, platformConfig }) {
+  const heroConfig = platformConfig?.homeHero || {};
+  const featured =
+    catalog.series.find((item) => item.id === heroConfig.featuredSeriesId) ||
+    catalog.firstBatch[0] ||
+    catalog.trending[0] ||
+    catalog.latest[0] ||
+    null;
+  const featuredTitle = heroConfig.title || featured?.title || 'Her Hidden Return';
   const featuredSynopsis =
+    heroConfig.synopsis ||
     featured?.synopsis ||
     'A viewer-first launch page: one strong poster, one obvious play button, and just enough context to make the next click easy.';
   const previewCount = catalog.episodeMap[featured?.id]?.preview || 1;
   const totalCount = catalog.episodeMap[featured?.id]?.total || 12;
+  const posterUrl = heroConfig.posterUrl || publicHeroPoster;
+  const primaryCtaLabel = heroConfig.primaryCtaLabel || 'Watch trailer';
+  const secondaryCtaLabel = heroConfig.secondaryCtaLabel || 'Browse titles';
+  const creatorCtaLabel = heroConfig.creatorCtaLabel || 'For creators';
+  const eyebrow = heroConfig.eyebrow || 'Viewer-first landing';
+  const kicker = heroConfig.kicker || 'Featured launch title';
 
   return (
     <div className="ds-page home-public">
@@ -45,11 +58,11 @@ function PublicHome({ catalog, takeRate }) {
         <Link
           className="public-home-poster cover-link"
           to={featured ? `/series/${featured.id}` : '/browse'}
-          style={{ backgroundImage: `url(${publicHeroPoster})` }}
+          style={{ backgroundImage: `url(${posterUrl})` }}
         >
           <div className="public-home-poster-scrim" />
           <div className="public-home-poster-top">
-            <span className="public-home-kicker">Featured launch title</span>
+            <span className="public-home-kicker">{kicker}</span>
           </div>
 
           <div className="public-home-poster-center">
@@ -60,7 +73,7 @@ function PublicHome({ catalog, takeRate }) {
 
           <div className="public-home-poster-bottom">
             <div className="public-home-title-block">
-              <p className="public-home-eyebrow">Viewer-first landing</p>
+              <p className="public-home-eyebrow">{eyebrow}</p>
               <h1>{featuredTitle}</h1>
               <p className="public-home-description">{featuredSynopsis}</p>
             </div>
@@ -72,9 +85,9 @@ function PublicHome({ catalog, takeRate }) {
             </div>
 
             <div className="row wrap public-home-actions">
-              <span className="btn btn-primary btn-cta public-home-primary">Watch trailer</span>
-              <span className="btn btn-ghost btn-cta-secondary public-home-secondary">Browse titles</span>
-              <span className="btn btn-ghost public-home-tertiary">For creators</span>
+              <span className="btn btn-primary btn-cta public-home-primary">{primaryCtaLabel}</span>
+              <span className="btn btn-ghost btn-cta-secondary public-home-secondary">{secondaryCtaLabel}</span>
+              <span className="btn btn-ghost public-home-tertiary">{creatorCtaLabel}</span>
             </div>
           </div>
         </Link>
@@ -286,5 +299,5 @@ export function HomePage({ auth, platform }) {
 
   if (creatorMode) return <CreatorHome auth={auth} membership={membership} catalog={catalog} />;
   if (viewerMode) return <ViewerHome auth={auth} catalog={catalog} />;
-  return <PublicHome catalog={catalog} takeRate={takeRate} />;
+  return <PublicHome catalog={catalog} takeRate={takeRate} platformConfig={platform?.platformConfig} />;
 }
