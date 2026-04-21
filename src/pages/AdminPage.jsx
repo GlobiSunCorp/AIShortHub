@@ -10,6 +10,7 @@ import { PLATFORM_CONFIG } from '../data/mockData';
 
 const orderStatuses = ['pending', 'in_progress', 'pending_payment', 'completed', 'cancelled'];
 const reviewStatuses = ['draft', 'pending_review', 'published', 'rejected'];
+const MAX_HERO_POSTER_BYTES = 5 * 1024 * 1024;
 
 const defaultHeroDraft = {
   featuredSeriesId: PLATFORM_CONFIG.homeHero.featuredSeriesId,
@@ -23,11 +24,35 @@ const defaultHeroDraft = {
   creatorCtaLabel: PLATFORM_CONFIG.homeHero.creatorCtaLabel,
 };
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+    reader.onerror = () => reject(new Error('Failed to read image file.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function verifyImageUrl(url) {
+  return new Promise((resolve, reject) => {
+    if (!url) {
+      resolve(true);
+      return;
+    }
+    const image = new Image();
+    image.onload = () => resolve(true);
+    image.onerror = () => reject(new Error('Image failed to load. Please upload a file or use a direct public image URL.'));
+    image.src = url;
+  });
+}
+
 export function AdminPage({ platform, auth }) {
   const [reviewNote, setReviewNote] = useState('');
   const [orderNote, setOrderNote] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [heroAssetFeedback, setHeroAssetFeedback] = useState({ type: '', message: '' });
+  const [posterPreviewOk, setPosterPreviewOk] = useState(true);
   const [heroDraft, setHeroDraft] = useState(() => ({
     featuredSeriesId: platform?.platformConfig?.homeHero?.featuredSeriesId || defaultHeroDraft.featuredSeriesId,
     kicker: platform?.platformConfig?.homeHero?.kicker || defaultHeroDraft.kicker,
@@ -55,7 +80,39 @@ export function AdminPage({ platform, auth }) {
   const readinessReady = dashboard.launchReadiness.filter((item) => item.ready);
   const readinessPending = dashboard.launchReadiness.filter((item) => !item.ready);
 
-  const saveHomepageHero = () => {
+  const handlePosterUrlChange = (value) => {
+    setHeroDraft((prev) => ({ ...prev, posterUrl: value }));
+    setPosterPreviewOk(true);
+    setHeroAssetFeedback({ type: '', message: '' });
+  };
+
+  const handlePosterFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setHeroAssetFeedback({ type: 'error', message: 'Only image files are supported for the homepage hero poster.' });
+      return;
+    }
+
+    if (file.size > MAX_HERO_POSTER_BYTES) {
+      setHeroAssetFeedback({ type: 'error', message: 'Image is too large. Please keep the homepage poster under 5 MB.' });
+      return;
+    }
+
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      if (!dataUrl) throw new Error('Image file was empty.');
+      setHeroDraft((prev) => ({ ...prev, posterUrl: dataUrl }));
+      setPosterPreviewOk(true);
+      setHeroAssetFeedback({ type: 'success', message: `Poster uploaded: ${file.name}. Save Homepage Hero to publish this poster.` });
+    } catch (error) {
+      setHeroAssetFeedback({ type: 'error', message: error.message || 'Poster upload failed. Please try another file.' });
+    }
+  };
+
+  const saveHomepageHero = async () => {
     if (!minLength(heroDraft.title, 2)) {
       setFeedback({ type: 'error', message: 'Homepage hero title needs at least 2 characters.' });
       return;
@@ -64,13 +121,24 @@ export function AdminPage({ platform, auth }) {
       setFeedback({ type: 'error', message: 'Homepage hero synopsis should be more descriptive.' });
       return;
     }
-    platform.actions.updatePlatformConfig({ homeHero: heroDraft });
-    setFeedback({ type: 'success', message: 'Homepage hero updated. Refresh Home to verify the new poster and copy.' });
+
+    try {
+      await verifyImageUrl(heroDraft.posterUrl);
+      platform.actions.updatePlatformConfig({ homeHero: heroDraft });
+      setFeedback({ type: 'success', message: 'Homepage hero updated. Refresh Home to verify the new poster and copy.' });
+      setHeroAssetFeedback({ type: 'success', message: 'Poster passed validation and is now connected to the homepage hero.' });
+      setPosterPreviewOk(true);
+    } catch (error) {
+      setPosterPreviewOk(false);
+      setFeedback({ type: 'error', message: error.message || 'Poster could not be validated.' });
+    }
   };
 
   const resetHomepageHero = () => {
     platform.actions.resetPlatformConfig();
     setHeroDraft(defaultHeroDraft);
+    setPosterPreviewOk(true);
+    setHeroAssetFeedback({ type: '', message: '' });
     setFeedback({ type: 'success', message: 'Homepage hero reset to default config.' });
   };
 
@@ -94,7 +162,7 @@ export function AdminPage({ platform, auth }) {
         <div className="section-title">
           <div>
             <h2 className="ds-h2">Homepage Hero Control</h2>
-            <p className="ds-meta">This is step one of making the homepage editable in Admin instead of hard-coding every launch change.</p>
+            <p className="ds-meta">Upload a poster directly, preview it before saving, and avoid brittle third-party image links.</p>
           </div>
           <Link className="info-link" to="/">Open Home preview</Link>
         </div>
@@ -115,12 +183,47 @@ export function AdminPage({ platform, auth }) {
               }}
               options={publicSeriesOptions.length ? publicSeriesOptions : [{ value: 'hidden-return', label: 'Her Hidden Return' }]}
             />
-            <input className="input" placeholder="Hero poster URL override" value={heroDraft.posterUrl} onChange={(e) => setHeroDraft((prev) => ({ ...prev, posterUrl: e.target.value }))} />
+            <label className="stack-sm">
+              <span className="ds-caption">Upload homepage poster</span>
+              <input className="input" type="file" accept="image/*" onChange={handlePosterFileChange} />
+            </label>
+            <label className="stack-sm">
+              <span className="ds-caption">Or paste a direct public image URL</span>
+              <input className="input" placeholder="Hero poster URL override" value={heroDraft.posterUrl} onChange={(e) => handlePosterUrlChange(e.target.value)} />
+            </label>
+            <p className="ds-caption">Best results: JPG or PNG, under 5 MB, wide hero composition. Uploaded files stay in this demo browser session.</p>
+            {heroAssetFeedback.message ? <p className={`form-feedback ${heroAssetFeedback.type}`}>{heroAssetFeedback.message}</p> : null}
             <input className="input" placeholder="Top kicker" value={heroDraft.kicker} onChange={(e) => setHeroDraft((prev) => ({ ...prev, kicker: e.target.value }))} />
             <input className="input" placeholder="Eyebrow" value={heroDraft.eyebrow} onChange={(e) => setHeroDraft((prev) => ({ ...prev, eyebrow: e.target.value }))} />
           </article>
           <article className="mini-card stack-md">
             <h3 className="ds-h3">Copy + CTA</h3>
+            <div className="admin-hero-preview">
+              {heroDraft.posterUrl ? (
+                <img
+                  src={heroDraft.posterUrl}
+                  alt="Homepage hero poster preview"
+                  className="admin-hero-preview-image"
+                  onLoad={() => setPosterPreviewOk(true)}
+                  onError={() => {
+                    setPosterPreviewOk(false);
+                    setHeroAssetFeedback({ type: 'error', message: 'Preview failed. Upload a file or replace this URL with a direct image link.' });
+                  }}
+                />
+              ) : (
+                <div className="admin-hero-preview-empty">
+                  <strong>No poster selected yet</strong>
+                  <span>Upload a file or paste a direct image URL to preview the homepage hero.</span>
+                </div>
+              )}
+              <div className="admin-hero-preview-scrim" />
+              <div className="admin-hero-preview-copy">
+                <span className="ds-caption">{heroDraft.kicker || 'Featured launch title'}</span>
+                <strong>{heroDraft.title || 'Hero title preview'}</strong>
+                <span>{heroDraft.synopsis || 'Hero synopsis preview will appear here.'}</span>
+              </div>
+            </div>
+            {!posterPreviewOk && heroDraft.posterUrl ? <p className="form-feedback error">Poster preview is broken. Please replace this image before saving.</p> : null}
             <input className="input" placeholder="Hero title" value={heroDraft.title} onChange={(e) => setHeroDraft((prev) => ({ ...prev, title: e.target.value }))} />
             <textarea className="input" placeholder="Hero synopsis" value={heroDraft.synopsis} onChange={(e) => setHeroDraft((prev) => ({ ...prev, synopsis: e.target.value }))} />
             <input className="input" placeholder="Primary CTA label" value={heroDraft.primaryCtaLabel} onChange={(e) => setHeroDraft((prev) => ({ ...prev, primaryCtaLabel: e.target.value }))} />
@@ -130,6 +233,17 @@ export function AdminPage({ platform, auth }) {
         </div>
         <div className="row wrap">
           <button className="btn btn-primary" type="button" onClick={saveHomepageHero}>Save Homepage Hero</button>
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => {
+              setHeroDraft((prev) => ({ ...prev, posterUrl: '' }));
+              setPosterPreviewOk(true);
+              setHeroAssetFeedback({ type: 'success', message: 'Poster cleared. Save Homepage Hero to publish the empty/default poster state.' });
+            }}
+          >
+            Clear poster
+          </button>
           <button className="btn btn-ghost" type="button" onClick={resetHomepageHero}>Reset to defaults</button>
         </div>
       </section>
