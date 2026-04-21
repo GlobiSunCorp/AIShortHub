@@ -32,8 +32,9 @@ function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', e
 
 function PublicHome({ catalog, takeRate, platformConfig }) {
   const heroConfig = platformConfig?.homeHero || {};
+  const allSeries = catalog.allSeries || [];
   const featured =
-    catalog.series.find((item) => item.id === heroConfig.featuredSeriesId) ||
+    allSeries.find((item) => item.id === heroConfig.featuredSeriesId) ||
     catalog.firstBatch[0] ||
     catalog.trending[0] ||
     catalog.latest[0] ||
