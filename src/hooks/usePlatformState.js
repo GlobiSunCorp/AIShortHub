@@ -10,6 +10,7 @@ import {
   upsertAsset,
   uploadAssetFile,
 } from '../lib/services/platformService';
+import { PLATFORM_CONFIG } from '../data/mockData';
 import { normalizePlatformData } from '../lib/normalizers';
 import { normalizeEpisode } from '../lib/normalizers/episodeNormalizer';
 import { normalizeOrder } from '../lib/normalizers/orderNormalizer';
@@ -141,17 +142,15 @@ export function usePlatformState(auth) {
       });
     },
     resetPlatformConfig() {
-      setState((prev) => {
-        const reloadedConfig = mergePlatformConfig(prev.platformConfig || {}, {});
-        if (typeof window !== 'undefined') {
-          try {
-            window.localStorage.removeItem(PLATFORM_CONFIG_STORAGE_KEY);
-          } catch {
-            // ignore remove errors
-          }
+      const fallbackConfig = mergePlatformConfig(PLATFORM_CONFIG, {});
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.removeItem(PLATFORM_CONFIG_STORAGE_KEY);
+        } catch {
+          // ignore remove errors
         }
-        return { ...prev, platformConfig: reloadedConfig };
-      });
+      }
+      setState((prev) => ({ ...prev, platformConfig: fallbackConfig }));
     },
     setMembershipTier(profileId, tier) {
       setState((prev) => {
