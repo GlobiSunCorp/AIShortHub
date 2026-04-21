@@ -3,6 +3,17 @@ export const PLATFORM_CONFIG = {
   trialSeconds: 45,
   freeEpisodeCount: 1,
   settlementCycle: 'Monthly on the 5th business day (mock)',
+  homeHero: {
+    featuredSeriesId: 'hidden-return',
+    eyebrow: 'Viewer-first landing',
+    kicker: 'Featured launch title',
+    title: 'Her Hidden Return',
+    synopsis: 'A vanished heiress returns under a new identity and rewrites every power game around her.',
+    posterUrl: '',
+    primaryCtaLabel: 'Watch trailer',
+    secondaryCtaLabel: 'Browse titles',
+    creatorCtaLabel: 'For creators',
+  },
 };
 
 export const tags = ['Romance', 'Revenge', 'Mystery', 'Urban', 'Fantasy', 'Workplace', 'Suspense', 'Historical'];
