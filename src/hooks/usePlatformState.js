@@ -15,6 +15,39 @@ import { normalizeEpisode } from '../lib/normalizers/episodeNormalizer';
 import { normalizeOrder } from '../lib/normalizers/orderNormalizer';
 import { normalizeSeries } from '../lib/normalizers/seriesNormalizer';
 
+const PLATFORM_CONFIG_STORAGE_KEY = 'aishorthub.platformConfig';
+
+function mergePlatformConfig(baseConfig = {}, overrideConfig = {}) {
+  return {
+    ...baseConfig,
+    ...overrideConfig,
+    homeHero: {
+      ...(baseConfig.homeHero || {}),
+      ...(overrideConfig.homeHero || {}),
+    },
+  };
+}
+
+function readStoredPlatformConfig() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(PLATFORM_CONFIG_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function persistPlatformConfig(config) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(PLATFORM_CONFIG_STORAGE_KEY, JSON.stringify(config));
+  } catch {
+    // ignore persistence errors in demo mode
+  }
+}
+
 export function usePlatformState(auth) {
   const [state, setState] = useState({
     profiles: [], creators: [], series: [], episodes: [], trailers: [], assets: [], serviceOrders: [], payments: [], payouts: [], creatorEarnings: [], reviewLogs: [], memberships: [],
@@ -25,7 +58,9 @@ export function usePlatformState(auth) {
     let mounted = true;
     loadPlatformData(auth?.session?.access_token).then((data) => {
       if (!mounted) return;
-      setState((prev) => ({ ...prev, ...normalizePlatformData(data), loading: false }));
+      const storedConfig = readStoredPlatformConfig();
+      const nextConfig = mergePlatformConfig(data.platformConfig || {}, storedConfig || {});
+      setState((prev) => ({ ...prev, ...normalizePlatformData(data), platformConfig: nextConfig, loading: false }));
     });
     return () => {
       mounted = false;
@@ -97,6 +132,26 @@ export function usePlatformState(auth) {
       const update = { status, admin_note: note, updated_at: new Date().toISOString() };
       await changeServiceOrderStatus(orderId, update, auth?.session?.access_token);
       setState((prev) => ({ ...prev, serviceOrders: prev.serviceOrders.map((o) => (o.id === orderId ? { ...o, ...update, reviewNote: note, updatedAt: update.updated_at } : o)) }));
+    },
+    updatePlatformConfig(patch) {
+      setState((prev) => {
+        const nextConfig = mergePlatformConfig(prev.platformConfig || {}, patch || {});
+        persistPlatformConfig(nextConfig);
+        return { ...prev, platformConfig: nextConfig };
+      });
+    },
+    resetPlatformConfig() {
+      setState((prev) => {
+        const reloadedConfig = mergePlatformConfig(prev.platformConfig || {}, {});
+        if (typeof window !== 'undefined') {
+          try {
+            window.localStorage.removeItem(PLATFORM_CONFIG_STORAGE_KEY);
+          } catch {
+            // ignore remove errors
+          }
+        }
+        return { ...prev, platformConfig: reloadedConfig };
+      });
     },
     setMembershipTier(profileId, tier) {
       setState((prev) => {
