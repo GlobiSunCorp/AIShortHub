@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
@@ -30,6 +31,23 @@ function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', e
   );
 }
 
+function PublicHeroPoster({ src, alt }) {
+  const [resolvedSrc, setResolvedSrc] = useState(src || publicHeroPoster);
+
+  useEffect(() => {
+    setResolvedSrc(src || publicHeroPoster);
+  }, [src]);
+
+  return (
+    <img
+      className="public-home-poster-image"
+      src={resolvedSrc || publicHeroPoster}
+      alt={alt}
+      onError={() => setResolvedSrc(publicHeroPoster)}
+    />
+  );
+}
+
 function PublicHome({ catalog, takeRate, platformConfig }) {
   const heroConfig = platformConfig?.homeHero || {};
   const allSeries = catalog.allSeries || [];
@@ -56,11 +74,8 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
   return (
     <div className="ds-page home-public">
       <section className="public-home-shell">
-        <Link
-          className="public-home-poster cover-link"
-          to={featured ? `/series/${featured.id}` : '/browse'}
-          style={{ backgroundImage: `url(${posterUrl})` }}
-        >
+        <Link className="public-home-poster cover-link" to={featured ? `/series/${featured.id}` : '/browse'}>
+          <PublicHeroPoster src={posterUrl} alt={featuredTitle} />
           <div className="public-home-poster-scrim" />
           <div className="public-home-poster-top">
             <span className="public-home-kicker">{kicker}</span>
