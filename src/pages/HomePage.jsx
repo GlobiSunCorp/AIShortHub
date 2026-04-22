@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
@@ -6,6 +6,24 @@ import { OnboardingGuide } from '../components/OnboardingGuide';
 import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
 import { resolveMembership } from '../hooks/usePlanAccess';
 import { publicHeroPoster } from '../assets/publicHeroPoster';
+
+function useHeroViewport() {
+  const readViewport = () => {
+    if (typeof window === 'undefined') return { isMobile: false, isTablet: false };
+    const width = window.innerWidth || 1440;
+    return { isMobile: width <= 640, isTablet: width > 640 && width <= 900 };
+  };
+
+  const [viewport, setViewport] = useState(readViewport);
+
+  useEffect(() => {
+    const onResize = () => setViewport(readViewport());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  return viewport;
+}
 
 function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', emptyText }) {
   return (
@@ -31,7 +49,7 @@ function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', e
   );
 }
 
-function PublicHeroPoster({ src, alt }) {
+function PublicHeroPoster({ src, alt, imageStyle }) {
   const [resolvedSrc, setResolvedSrc] = useState(src || publicHeroPoster);
 
   useEffect(() => {
@@ -43,6 +61,7 @@ function PublicHeroPoster({ src, alt }) {
       className="public-home-poster-image"
       src={resolvedSrc || publicHeroPoster}
       alt={alt}
+      style={imageStyle}
       onError={() => setResolvedSrc(publicHeroPoster)}
     />
   );
@@ -50,6 +69,7 @@ function PublicHeroPoster({ src, alt }) {
 
 function PublicHome({ catalog, takeRate, platformConfig }) {
   const heroConfig = platformConfig?.homeHero || {};
+  const { isMobile, isTablet } = useHeroViewport();
   const allSeries = catalog.allSeries || [];
   const featured =
     allSeries.find((item) => item.id === heroConfig.featuredSeriesId) ||
@@ -71,11 +91,22 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
   const eyebrow = heroConfig.eyebrow || 'Viewer-first landing';
   const kicker = heroConfig.kicker || 'Featured launch title';
 
+  const heroFrameStyle = useMemo(() => {
+    if (isMobile) return { aspectRatio: '9 / 16', minHeight: 'clamp(540px, 86vh, 820px)', maxHeight: 'none' };
+    if (isTablet) return { aspectRatio: '4 / 5', minHeight: '0', maxHeight: 'none' };
+    return { aspectRatio: '16 / 9', minHeight: '0', maxHeight: 'min(82vh, 860px)' };
+  }, [isMobile, isTablet]);
+
+  const heroImageStyle = useMemo(
+    () => ({ objectPosition: isMobile ? 'center 24%' : isTablet ? 'center 28%' : 'center 32%' }),
+    [isMobile, isTablet]
+  );
+
   return (
     <div className="ds-page home-public">
       <section className="public-home-shell">
-        <Link className="public-home-poster cover-link" to={featured ? `/series/${featured.id}` : '/browse'}>
-          <PublicHeroPoster src={posterUrl} alt={featuredTitle} />
+        <Link className="public-home-poster cover-link" to={featured ? `/series/${featured.id}` : '/browse'} style={heroFrameStyle}>
+          <PublicHeroPoster src={posterUrl} alt={featuredTitle} imageStyle={heroImageStyle} />
           <div className="public-home-poster-scrim" />
           <div className="public-home-poster-top">
             <span className="public-home-kicker">{kicker}</span>
@@ -124,22 +155,8 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
         </section>
       </section>
 
-      <HomeCollection
-        title="Start with these"
-        desc="The first row below the hero should feel immediate, clean, and easy to choose from."
-        items={catalog.firstBatch}
-        episodeMap={catalog.episodeMap}
-        columns="cards-2"
-        emptyText="No featured title yet. Start with one strong poster, one trailer, and one preview-ready episode."
-      />
-
-      <HomeCollection
-        title="Free preview lane"
-        desc="Let strangers sample first before asking them to pay."
-        items={catalog.trending}
-        episodeMap={catalog.episodeMap}
-        emptyText="Add more preview-ready episodes so the preview lane feels alive."
-      />
+      <HomeCollection title="Start with these" desc="The first row below the hero should feel immediate, clean, and easy to choose from." items={catalog.firstBatch} episodeMap={catalog.episodeMap} columns="cards-2" emptyText="No featured title yet. Start with one strong poster, one trailer, and one preview-ready episode." />
+      <HomeCollection title="Free preview lane" desc="Let strangers sample first before asking them to pay." items={catalog.trending} episodeMap={catalog.episodeMap} emptyText="Add more preview-ready episodes so the preview lane feels alive." />
 
       <section className="home-split-callout grid cards-2">
         <article className="panel home-callout-card">
@@ -195,29 +212,9 @@ function ViewerHome({ auth, catalog }) {
         ))}
       </section>
 
-      <HomeCollection
-        title="Free previews"
-        desc="Low-friction entries for people who just want to click and sample."
-        items={freePreview}
-        episodeMap={catalog.episodeMap}
-        emptyText="No preview lane yet. Flag at least one preview episode per launch series."
-      />
-
-      <HomeCollection
-        title="Trending now"
-        desc="The row that should always feel alive after login."
-        items={catalog.latest}
-        episodeMap={catalog.episodeMap}
-        emptyText="Trending will show here after you have a few active titles and fresh updates."
-      />
-
-      <HomeCollection
-        title="Because you like dramatic chaos"
-        desc="A more playful recommendation lane for signed-in viewers."
-        items={romanceLane}
-        episodeMap={catalog.episodeMap}
-        emptyText="Add more genres and tags so this lane can feel personal."
-      />
+      <HomeCollection title="Free previews" desc="Low-friction entries for people who just want to click and sample." items={freePreview} episodeMap={catalog.episodeMap} emptyText="No preview lane yet. Flag at least one preview episode per launch series." />
+      <HomeCollection title="Trending now" desc="The row that should always feel alive after login." items={catalog.latest} episodeMap={catalog.episodeMap} emptyText="Trending will show here after you have a few active titles and fresh updates." />
+      <HomeCollection title="Because you like dramatic chaos" desc="A more playful recommendation lane for signed-in viewers." items={romanceLane} episodeMap={catalog.episodeMap} emptyText="Add more genres and tags so this lane can feel personal." />
     </div>
   );
 }
@@ -251,18 +248,9 @@ function CreatorHome({ auth, membership, catalog }) {
           </div>
         </div>
         <div className="grid cards-3 creator-home-metrics">
-          <article className="card-primary home-metric-card">
-            <p className="small-text">Creator plan</p>
-            <strong>{planName}</strong>
-          </article>
-          <article className="card-secondary home-metric-card">
-            <p className="small-text">Series in motion</p>
-            <strong>{creatorSeries.length}</strong>
-          </article>
-          <article className="card-data home-metric-card">
-            <p className="small-text">Main objective</p>
-            <strong>Launch faster</strong>
-          </article>
+          <article className="card-primary home-metric-card"><p className="small-text">Creator plan</p><strong>{planName}</strong></article>
+          <article className="card-secondary home-metric-card"><p className="small-text">Series in motion</p><strong>{creatorSeries.length}</strong></article>
+          <article className="card-data home-metric-card"><p className="small-text">Main objective</p><strong>Launch faster</strong></article>
         </div>
       </section>
 
@@ -294,14 +282,7 @@ function CreatorHome({ auth, membership, catalog }) {
         </div>
       </section>
 
-      <HomeCollection
-        title="Your launch candidates"
-        desc="The titles that should be pushed into review, promo, or publish next."
-        items={creatorSeries}
-        episodeMap={catalog.episodeMap}
-        columns="cards-3"
-        emptyText="No series yet. Create one strong pilot, one trailer, and one clear poster first."
-      />
+      <HomeCollection title="Your launch candidates" desc="The titles that should be pushed into review, promo, or publish next." items={creatorSeries} episodeMap={catalog.episodeMap} columns="cards-3" emptyText="No series yet. Create one strong pilot, one trailer, and one clear poster first." />
     </div>
   );
 }
