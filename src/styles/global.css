@@ -47,6 +47,16 @@ a { color: inherit; text-decoration: none; }
   font-weight: 800;
   letter-spacing: -0.04em;
 }
+.brand-link {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 42px;
+  padding-right: 0.4rem;
+  cursor: pointer;
+}
 .nav-wrap { gap: 0.75rem; flex-wrap: wrap; }
 .viewer-nav { justify-content: center; }
 .creator-nav { justify-content: flex-end; }
@@ -1059,4 +1069,171 @@ textarea::placeholder {
 }
 .admin-hero-preview-empty strong {
   font-size: 1rem;
+}
+
+.public-home-shell {
+  display: grid;
+  gap: 1rem;
+}
+.public-home-poster {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(430px, 66vw, 760px);
+  border-radius: 30px;
+  border: 1px solid rgba(178, 191, 255, 0.18);
+  background: linear-gradient(140deg, rgba(14, 18, 34, 0.96), rgba(5, 7, 16, 0.98));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+  transform: none;
+}
+.public-home-poster:hover {
+  transform: translateY(-2px);
+}
+.public-home-poster-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 220ms ease, filter 220ms ease, opacity 220ms ease;
+}
+.public-home-poster:hover .public-home-poster-image {
+  transform: scale(1.02);
+  filter: grayscale(0.12) brightness(0.72);
+}
+.public-home-poster-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(4, 6, 14, 0.22) 0%, rgba(4, 6, 14, 0.3) 28%, rgba(4, 6, 14, 0.74) 70%, rgba(4, 6, 14, 0.96) 100%),
+    linear-gradient(90deg, rgba(4, 6, 14, 0.78) 0%, rgba(4, 6, 14, 0.2) 45%, rgba(4, 6, 14, 0.7) 100%);
+}
+.public-home-poster-top,
+.public-home-poster-center,
+.public-home-poster-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+}
+.public-home-poster-top {
+  top: 0;
+  padding: 1.1rem 1.2rem 0;
+}
+.public-home-poster-center {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.public-home-poster-bottom {
+  bottom: 0;
+  padding: clamp(1.2rem, 3vw, 2rem);
+  display: grid;
+  gap: 1rem;
+}
+.public-home-kicker {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(214, 224, 255, 0.26);
+  background: rgba(8, 12, 24, 0.34);
+  padding: 0.4rem 0.78rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #eef2ff;
+}
+.public-home-play-button {
+  width: clamp(88px, 9vw, 110px);
+  height: clamp(88px, 9vw, 110px);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(6, 10, 22, 0.36);
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  transition: transform 180ms ease, background 180ms ease;
+}
+.public-home-poster:hover .public-home-play-button {
+  transform: scale(1.06);
+  background: rgba(12, 18, 36, 0.54);
+}
+.public-home-play-icon {
+  font-size: clamp(1.7rem, 2.2vw, 2rem);
+  margin-left: 0.18rem;
+  color: #f8fbff;
+}
+.public-home-title-block {
+  max-width: min(720px, 100%);
+  display: grid;
+  gap: 0.55rem;
+}
+.public-home-eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(237, 242, 255, 0.88);
+}
+.public-home-title-block h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 6vw, 5.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  text-shadow: 0 10px 32px rgba(0, 0, 0, 0.34);
+}
+.public-home-description {
+  margin: 0;
+  max-width: 58ch;
+  font-size: clamp(0.98rem, 1.8vw, 1.16rem);
+  line-height: 1.55;
+  color: rgba(221, 229, 255, 0.92);
+}
+.public-home-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+.public-home-actions {
+  align-items: center;
+}
+.public-home-primary,
+.public-home-secondary,
+.public-home-tertiary {
+  width: auto;
+}
+.public-home-note-grid {
+  align-items: stretch;
+}
+.public-home-note-card {
+  min-height: 100%;
+  background: linear-gradient(150deg, rgba(18, 24, 46, 0.9), rgba(8, 10, 20, 0.96));
+}
+.home-callout-card {
+  min-height: 100%;
+}
+
+@media (max-width: 900px) {
+  .public-home-poster {
+    min-height: 500px;
+  }
+  .public-home-title-block h1 {
+    font-size: clamp(2.2rem, 9vw, 4rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .public-home-poster {
+    min-height: 430px;
+    border-radius: 24px;
+  }
+  .public-home-poster-bottom {
+    padding: 1rem;
+  }
+  .public-home-play-button {
+    width: 76px;
+    height: 76px;
+  }
 }
