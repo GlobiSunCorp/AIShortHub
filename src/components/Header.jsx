@@ -31,6 +31,11 @@ export function Header({ auth, platform }) {
     return () => window.removeEventListener('hashchange', update);
   }, []);
 
+  useEffect(() => {
+    setMenuOpen(false);
+    setCreatorMenuOpen(false);
+  }, [pathname, hash]);
+
   const viewerNav = [['/', 'Home'], ['/browse', 'Browse'], ['/pricing', 'Pricing'], ['/services', 'Services']];
   const creatorStudioGroups = useMemo(() => {
     const hasHigherPlan = membership?.creatorPlan === 'creator_pro' || membership?.creatorPlan === 'studio' || auth.userState === 'admin';
@@ -51,7 +56,7 @@ export function Header({ auth, platform }) {
   return (
     <header className="site-header">
       <div className="container row split center">
-        <Link to="/" className="brand">
+        <Link to="/" className="brand brand-link" aria-label="Go to homepage" title="AIShortHub home">
           AIShortHub
         </Link>
         <nav className="row nav-wrap viewer-nav">
@@ -67,7 +72,7 @@ export function Header({ auth, platform }) {
         <nav className="row nav-wrap creator-nav">
           {showCreatorStudio ? (
             <div className="account-wrap">
-              <button type="button" className={`nav-link creator-trigger ${pathname === '/creator' || isCreatorMode ? 'active' : ''}`} onClick={() => setCreatorMenuOpen((open) => !open)}>
+              <button type="button" className={`nav-link creator-trigger ${pathname === '/creator' || isCreatorMode ? 'active' : ''}`} onClick={() => setCreatorMenuOpen((open) => !open)} aria-expanded={creatorMenuOpen} aria-haspopup="menu">
                 Creator Studio ▾
               </button>
               {creatorMenuOpen ? (
@@ -118,7 +123,7 @@ export function Header({ auth, platform }) {
           ) : null}
           {auth.isLoggedIn ? (
             <div className="account-wrap">
-              <button className="avatar" onClick={() => setMenuOpen((open) => !open)}>
+              <button className="avatar" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-haspopup="menu">
                 {safeAvatar}
               </button>
               {menuOpen ? (
@@ -127,8 +132,8 @@ export function Header({ auth, platform }) {
                   <small>
                     {safeEmail} · {safeRole}
                   </small>
-                  <Link to="/profile">My Profile</Link>
-                  {showCreatorStudio ? <Link to="/creator#overview">Creator Studio</Link> : null}
+                  <Link to="/profile" onClick={() => setMenuOpen(false)}>My Profile</Link>
+                  {showCreatorStudio ? <Link to="/creator#overview" onClick={() => setMenuOpen(false)}>Creator Studio</Link> : null}
                   <DemoRoleSwitcher auth={auth} compact />
                   <button className="btn btn-ghost" onClick={auth.logout}>
                     Logout
