@@ -15,9 +15,39 @@ function FeatureCell({ value }) {
   return <span>{value === true ? '✅' : value === false ? '—' : value}</span>;
 }
 
+const BASE_PRICING_CARD_STYLE = {
+  transition: 'transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease',
+  transform: 'translateY(0) scale(1)',
+  boxShadow: '0 0 0 rgba(0,0,0,0)',
+};
+
+function getPricingCardStyle({ hovered, current }) {
+  if (hovered) {
+    return {
+      ...BASE_PRICING_CARD_STYLE,
+      transform: 'translateY(-4px) scale(1.02)',
+      borderColor: 'rgba(176, 188, 255, 0.48)',
+      background: 'linear-gradient(155deg, rgba(27, 35, 66, 0.86), rgba(11, 14, 28, 0.96))',
+      boxShadow: '0 24px 48px rgba(8, 10, 24, 0.42)',
+    };
+  }
+
+  if (current) {
+    return {
+      ...BASE_PRICING_CARD_STYLE,
+      borderColor: 'rgba(145, 163, 255, 0.42)',
+      background: 'linear-gradient(155deg, rgba(25, 32, 60, 0.82), rgba(10, 13, 25, 0.94))',
+      boxShadow: '0 12px 28px rgba(10, 12, 28, 0.22)',
+    };
+  }
+
+  return BASE_PRICING_CARD_STYLE;
+}
+
 export function PricingPage({ auth, platform }) {
   const [notice, setNotice] = useState({ type: '', text: '' });
   const [loadingKey, setLoadingKey] = useState('');
+  const [hoveredCard, setHoveredCard] = useState('');
   const membership = auth.user ? resolveMembership(auth, platform) : { tier: 'free', creatorPlan: null };
   const activeCreator = getCreatorPlan(membership.creatorPlan || 'creator_basic');
   const creatorProfile = platform.creators.find((item) => item.profileId === auth?.user?.id) || platform.creators[0];
@@ -82,25 +112,35 @@ export function PricingPage({ auth, platform }) {
       <section className="panel stack-md">
         <h2>For Viewers <GlossaryTerm id="viewer_subscription" /></h2>
         <div className="grid cards-3">
-          {VIEWER_SUBSCRIPTIONS.map((plan) => (
-            <article className={`pricing-card ${membership.tier === plan.id ? 'active-card' : ''}`} key={plan.id}>
-              <p className="kicker">{plan.badge}</p>
-              {membership.tier === plan.id ? <span className="status ok">Current Plan</span> : null}
-              <h3><PlanIdentityBadge badgeKey={plan.id === 'free' ? 'free_viewer' : plan.id} subtle /> </h3>
-              <p className="price">{formatUsd(plan.monthlyPrice)}<small className="small-text"> /month</small></p>
-              <p className="small-text">{plan.accessNote}</p>
-              <ul>
-                <li>完整剧集：<FeatureCell value={plan.fullSeriesAccess} /></li>
-                <li>清晰度：<FeatureCell value={plan.quality} /></li>
-                <li>抢先看 <GlossaryTerm id="early_access" />：<FeatureCell value={plan.earlyAccess} /></li>
-                <li>会员专属内容 <GlossaryTerm id="exclusive_content" />：<FeatureCell value={plan.exclusiveContent} /></li>
-                <li>继续观看/收藏/历史：<FeatureCell value={plan.watchTools} /></li>
-              </ul>
-              <button type="button" className="btn btn-primary" disabled={loadingKey === `viewer-${plan.id}`} onClick={() => handleViewerCheckout(plan)}>
-                {loadingKey === `viewer-${plan.id}` ? '跳转支付中...' : membership.tier === plan.id ? 'Current Plan' : `升级到 ${plan.name}`}
-              </button>
-            </article>
-          ))}
+          {VIEWER_SUBSCRIPTIONS.map((plan) => {
+            const isCurrent = membership.tier === plan.id;
+            const cardKey = `viewer-${plan.id}`;
+            return (
+              <article
+                className="pricing-card"
+                key={plan.id}
+                style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent })}
+                onMouseEnter={() => setHoveredCard(cardKey)}
+                onMouseLeave={() => setHoveredCard('')}
+              >
+                <p className="kicker">{plan.badge}</p>
+                {isCurrent ? <span className="status">Current Plan</span> : null}
+                <h3><PlanIdentityBadge badgeKey={plan.id === 'free' ? 'free_viewer' : plan.id} subtle /> </h3>
+                <p className="price">{formatUsd(plan.monthlyPrice)}<small className="small-text"> /month</small></p>
+                <p className="small-text">{plan.accessNote}</p>
+                <ul>
+                  <li>完整剧集：<FeatureCell value={plan.fullSeriesAccess} /></li>
+                  <li>清晰度：<FeatureCell value={plan.quality} /></li>
+                  <li>抢先看 <GlossaryTerm id="early_access" />：<FeatureCell value={plan.earlyAccess} /></li>
+                  <li>会员专属内容 <GlossaryTerm id="exclusive_content" />：<FeatureCell value={plan.exclusiveContent} /></li>
+                  <li>继续观看/收藏/历史：<FeatureCell value={plan.watchTools} /></li>
+                </ul>
+                <button type="button" className="btn btn-primary" disabled={loadingKey === `viewer-${plan.id}`} onClick={() => handleViewerCheckout(plan)}>
+                  {loadingKey === `viewer-${plan.id}` ? '跳转支付中...' : isCurrent ? 'Current Plan' : `升级到 ${plan.name}`}
+                </button>
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -108,27 +148,37 @@ export function PricingPage({ auth, platform }) {
         <h2>For Creators <GlossaryTerm id="creator_plan" /></h2>
         <p className="small-text">月费是 Creator 工具/额度/优先服务费；平台抽成 <GlossaryTerm id="platform_commission" /> 仅在你真正赚到收入后才发生。</p>
         <div className="grid cards-3">
-          {CREATOR_PLANS.map((plan) => (
-            <article className={`pricing-card ${membership.creatorPlan === plan.id ? 'active-card' : ''}`} key={plan.id}>
-              {membership.creatorPlan === plan.id ? <span className="status ok">Current Plan</span> : null}
-              <h3><PlanIdentityBadge badgeKey={plan.id} subtle /></h3>
-              <p className="price">{formatUsd(plan.monthlyPrice)}<small className="small-text"> /month</small></p>
-              <p className="small-text">Platform Commission: {formatCommission(plan.commissionRate)} · {plan.commissionPolicy}</p>
-              <ul>
-                <li>审核优先级：{plan.reviewPriority}</li>
-                <li>活跃剧集上限：{plan.maxActiveSeries}</li>
-                <li>分集总上限：{plan.maxTotalEpisodes}</li>
-                <li>月素材存储：{formatStorageGb(plan.monthlyAssetStorageLimitGb)}</li>
-                <li>广告分成资格 <GlossaryTerm id="ad_revenue_share" />：{plan.adRevenueShareEligible ? 'Included' : '—'}</li>
-                <li>Motion Poster <GlossaryTerm id="motion_poster" />：<FeatureCell value={plan.motionPoster} /></li>
-                <li>推荐位资格 <GlossaryTerm id="featured_placement" />：<FeatureCell value={plan.featuredPlacementEligibility} /></li>
-              </ul>
-              {plan.id !== activeCreator.id ? <p className="small-text">增量权益：+{plan.maxActiveSeries - activeCreator.maxActiveSeries} series · +{plan.monthlyAssetStorageLimitGb - activeCreator.monthlyAssetStorageLimitGb}GB · 佣金降低 {Math.max(Math.round((activeCreator.commissionRate - plan.commissionRate) * 100), 0)}%。</p> : null}
-              <button type="button" className="btn btn-ghost" disabled={loadingKey === `creator-${plan.id}`} onClick={() => handleCreatorPlan(plan)}>
-                {loadingKey === `creator-${plan.id}` ? '跳转支付中...' : membership.creatorPlan === plan.id ? 'Current Plan' : `升级到 ${plan.name}`}
-              </button>
-            </article>
-          ))}
+          {CREATOR_PLANS.map((plan) => {
+            const isCurrent = membership.creatorPlan === plan.id;
+            const cardKey = `creator-${plan.id}`;
+            return (
+              <article
+                className="pricing-card"
+                key={plan.id}
+                style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent })}
+                onMouseEnter={() => setHoveredCard(cardKey)}
+                onMouseLeave={() => setHoveredCard('')}
+              >
+                {isCurrent ? <span className="status">Current Plan</span> : null}
+                <h3><PlanIdentityBadge badgeKey={plan.id} subtle /></h3>
+                <p className="price">{formatUsd(plan.monthlyPrice)}<small className="small-text"> /month</small></p>
+                <p className="small-text">Platform Commission: {formatCommission(plan.commissionRate)} · {plan.commissionPolicy}</p>
+                <ul>
+                  <li>审核优先级：{plan.reviewPriority}</li>
+                  <li>活跃剧集上限：{plan.maxActiveSeries}</li>
+                  <li>分集总上限：{plan.maxTotalEpisodes}</li>
+                  <li>月素材存储：{formatStorageGb(plan.monthlyAssetStorageLimitGb)}</li>
+                  <li>广告分成资格 <GlossaryTerm id="ad_revenue_share" />：{plan.adRevenueShareEligible ? 'Included' : '—'}</li>
+                  <li>Motion Poster <GlossaryTerm id="motion_poster" />：<FeatureCell value={plan.motionPoster} /></li>
+                  <li>推荐位资格 <GlossaryTerm id="featured_placement" />：<FeatureCell value={plan.featuredPlacementEligibility} /></li>
+                </ul>
+                {plan.id !== activeCreator.id ? <p className="small-text">增量权益：+{plan.maxActiveSeries - activeCreator.maxActiveSeries} series · +{plan.monthlyAssetStorageLimitGb - activeCreator.monthlyAssetStorageLimitGb}GB · 佣金降低 {Math.max(Math.round((activeCreator.commissionRate - plan.commissionRate) * 100), 0)}%。</p> : null}
+                <button type="button" className="btn btn-ghost" disabled={loadingKey === `creator-${plan.id}`} onClick={() => handleCreatorPlan(plan)}>
+                  {loadingKey === `creator-${plan.id}` ? '跳转支付中...' : isCurrent ? 'Current Plan' : `升级到 ${plan.name}`}
+                </button>
+              </article>
+            );
+          })}
         </div>
       </section>
 
