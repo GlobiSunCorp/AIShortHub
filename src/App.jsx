@@ -24,9 +24,9 @@ import { FAQPage } from './pages/FAQPage';
 import { ContactSupportPage } from './pages/ContactSupportPage';
 import { CheckoutResultPage } from './pages/CheckoutResultPage';
 
-function getPathname() {
+function getCurrentUrl() {
   if (typeof window === 'undefined') return '/';
-  return window.location.pathname || '/';
+  return `${window.location.pathname || '/'}${window.location.search || ''}${window.location.hash || ''}`;
 }
 
 function normalizePathname(pathname) {
@@ -38,10 +38,10 @@ function resolveRoute(pathname) {
   if (normalized === '/') return { name: 'home' };
   if (normalized === '/browse') return { name: 'browse' };
   if (normalized === '/submit') return { name: 'submit' };
-  if (normalized === '/creator') return { name: 'creator' };
+  if (normalized === '/creator' || normalized === '/creator-studio') return { name: 'creator' };
   if (normalized === '/pricing') return { name: 'pricing' };
   if (normalized === '/admin') return { name: 'admin' };
-  if (normalized === '/services') return { name: 'services' };
+  if (normalized === '/services' || normalized === '/services/orders') return { name: 'services' };
   if (normalized === '/profile') return { name: 'profile' };
   if (normalized === '/login') return { name: 'login' };
   if (normalized === '/signup') return { name: 'signup' };
@@ -72,32 +72,35 @@ function resolveRoute(pathname) {
 export default function App() {
   const auth = useAuth();
   const platform = usePlatformState(auth);
-  const [pathname, setPathname] = useState(getPathname);
+  const [fullPath, setFullPath] = useState(getCurrentUrl);
 
   useEffect(() => {
-    const updatePath = () => setPathname(getPathname());
+    const updatePath = () => setFullPath(getCurrentUrl());
     window.addEventListener('popstate', updatePath);
     window.addEventListener('hashchange', updatePath);
+    window.addEventListener('app:navigation', updatePath);
     return () => {
       window.removeEventListener('popstate', updatePath);
       window.removeEventListener('hashchange', updatePath);
+      window.removeEventListener('app:navigation', updatePath);
     };
   }, []);
 
   const router = useMemo(
     () => ({
-      pathname: normalizePathname(pathname),
-      fullPath: pathname,
+      pathname: normalizePathname(fullPath),
+      fullPath,
       navigate: (to, options = {}) => {
         const method = options.replace ? 'replaceState' : 'pushState';
         window.history[method]({}, '', to);
-        setPathname(getPathname());
+        setFullPath(getCurrentUrl());
+        window.dispatchEvent(new Event('app:navigation'));
       },
     }),
-    [pathname]
+    [fullPath]
   );
 
-  const route = resolveRoute(pathname);
+  const route = resolveRoute(fullPath);
 
   return (
     <RouterContext.Provider value={router}>
