@@ -21,33 +21,117 @@ const BASE_PRICING_CARD_STYLE = {
   boxShadow: '0 0 0 rgba(0,0,0,0)',
 };
 
-function getPricingCardStyle({ hovered, current }) {
+const BASE_BUTTON_STYLE = {
+  transition: 'transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease, filter 150ms ease',
+};
+
+function getPricingCardStyle({ hovered, current, featured }) {
   if (hovered) {
     return {
       ...BASE_PRICING_CARD_STYLE,
       transform: 'translateY(-4px) scale(1.02)',
-      borderColor: 'rgba(176, 188, 255, 0.48)',
-      background: 'linear-gradient(155deg, rgba(27, 35, 66, 0.86), rgba(11, 14, 28, 0.96))',
-      boxShadow: '0 24px 48px rgba(8, 10, 24, 0.42)',
+      borderColor: featured ? 'rgba(214, 174, 255, 0.56)' : 'rgba(176, 188, 255, 0.48)',
+      background: featured
+        ? 'linear-gradient(155deg, rgba(42, 28, 68, 0.9), rgba(12, 14, 30, 0.97))'
+        : 'linear-gradient(155deg, rgba(27, 35, 66, 0.86), rgba(11, 14, 28, 0.96))',
+      boxShadow: featured
+        ? '0 28px 56px rgba(28, 14, 48, 0.42)'
+        : '0 24px 48px rgba(8, 10, 24, 0.42)',
     };
   }
 
   if (current) {
     return {
       ...BASE_PRICING_CARD_STYLE,
-      borderColor: 'rgba(145, 163, 255, 0.42)',
-      background: 'linear-gradient(155deg, rgba(25, 32, 60, 0.82), rgba(10, 13, 25, 0.94))',
-      boxShadow: '0 12px 28px rgba(10, 12, 28, 0.22)',
+      borderColor: featured ? 'rgba(194, 156, 255, 0.44)' : 'rgba(145, 163, 255, 0.42)',
+      background: featured
+        ? 'linear-gradient(155deg, rgba(36, 24, 58, 0.84), rgba(10, 13, 25, 0.95))'
+        : 'linear-gradient(155deg, rgba(25, 32, 60, 0.82), rgba(10, 13, 25, 0.94))',
+      boxShadow: featured
+        ? '0 16px 34px rgba(28, 16, 50, 0.24)'
+        : '0 12px 28px rgba(10, 12, 28, 0.22)',
+    };
+  }
+
+  if (featured) {
+    return {
+      ...BASE_PRICING_CARD_STYLE,
+      borderColor: 'rgba(191, 144, 255, 0.34)',
+      background: 'linear-gradient(155deg, rgba(28, 22, 50, 0.78), rgba(10, 13, 25, 0.94))',
+      boxShadow: '0 10px 24px rgba(25, 15, 42, 0.14)',
     };
   }
 
   return BASE_PRICING_CARD_STYLE;
 }
 
+function getButtonStyle({ hovered, primary }) {
+  if (hovered) {
+    return {
+      ...BASE_BUTTON_STYLE,
+      transform: 'translateY(-1px) scale(1.01)',
+      boxShadow: primary ? '0 16px 32px rgba(123, 92, 255, 0.34)' : '0 12px 24px rgba(10, 12, 28, 0.22)',
+      borderColor: primary ? 'transparent' : 'rgba(176, 188, 255, 0.4)',
+      filter: 'brightness(1.04)',
+    };
+  }
+
+  return BASE_BUTTON_STYLE;
+}
+
+function getCurrentPlanBadgeStyle({ featured }) {
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.38rem',
+    width: 'fit-content',
+    borderRadius: '999px',
+    padding: '0.35rem 0.72rem',
+    fontSize: '0.74rem',
+    fontWeight: 700,
+    letterSpacing: '0.01em',
+    color: '#f6f8ff',
+    border: featured ? '1px solid rgba(209, 163, 255, 0.4)' : '1px solid rgba(160, 177, 255, 0.34)',
+    background: featured
+      ? 'linear-gradient(135deg, rgba(122, 61, 199, 0.34), rgba(25, 18, 42, 0.78))'
+      : 'linear-gradient(135deg, rgba(83, 101, 194, 0.28), rgba(18, 24, 43, 0.8))',
+    boxShadow: featured ? '0 10px 24px rgba(88, 46, 142, 0.18)' : '0 10px 22px rgba(34, 47, 92, 0.14)',
+  };
+}
+
+function getFeaturedPillStyle(kind) {
+  const featured = kind === 'viewer-premium' || kind === 'creator-studio';
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+    width: 'fit-content',
+    borderRadius: '999px',
+    padding: '0.32rem 0.68rem',
+    fontSize: '0.72rem',
+    fontWeight: 700,
+    letterSpacing: '0.03em',
+    color: '#f5f8ff',
+    border: featured ? '1px solid rgba(255, 215, 123, 0.34)' : '1px solid rgba(196, 159, 255, 0.34)',
+    background: featured
+      ? 'linear-gradient(135deg, rgba(125, 87, 20, 0.38), rgba(33, 25, 12, 0.72))'
+      : 'linear-gradient(135deg, rgba(121, 83, 222, 0.3), rgba(28, 22, 50, 0.72))',
+  };
+}
+
+function isViewerFeatured(plan) {
+  return plan.id === 'pro' || plan.id === 'premium';
+}
+
+function isCreatorFeatured(plan) {
+  return plan.id === 'creator_pro' || plan.id === 'studio';
+}
+
 export function PricingPage({ auth, platform }) {
   const [notice, setNotice] = useState({ type: '', text: '' });
   const [loadingKey, setLoadingKey] = useState('');
   const [hoveredCard, setHoveredCard] = useState('');
+  const [hoveredButton, setHoveredButton] = useState('');
   const membership = auth.user ? resolveMembership(auth, platform) : { tier: 'free', creatorPlan: null };
   const activeCreator = getCreatorPlan(membership.creatorPlan || 'creator_basic');
   const creatorProfile = platform.creators.find((item) => item.profileId === auth?.user?.id) || platform.creators[0];
@@ -114,17 +198,23 @@ export function PricingPage({ auth, platform }) {
         <div className="grid cards-3">
           {VIEWER_SUBSCRIPTIONS.map((plan) => {
             const isCurrent = membership.tier === plan.id;
+            const isFeatured = isViewerFeatured(plan);
             const cardKey = `viewer-${plan.id}`;
+            const buttonKey = `viewer-btn-${plan.id}`;
+            const pillKind = plan.id === 'premium' ? 'viewer-premium' : 'viewer-pro';
             return (
               <article
                 className="pricing-card"
                 key={plan.id}
-                style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent })}
+                style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent, featured: isFeatured })}
                 onMouseEnter={() => setHoveredCard(cardKey)}
                 onMouseLeave={() => setHoveredCard('')}
               >
-                <p className="kicker">{plan.badge}</p>
-                {isCurrent ? <span className="status">Current Plan</span> : null}
+                <div className="row wrap center" style={{ justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                  <p className="kicker" style={{ margin: 0 }}>{plan.badge}</p>
+                  {isFeatured ? <span style={getFeaturedPillStyle(pillKind)}>{plan.id === 'premium' ? 'Best value' : 'Most popular'}</span> : null}
+                </div>
+                {isCurrent ? <span style={getCurrentPlanBadgeStyle({ featured: isFeatured })}>● Current Plan</span> : null}
                 <h3><PlanIdentityBadge badgeKey={plan.id === 'free' ? 'free_viewer' : plan.id} subtle /> </h3>
                 <p className="price">{formatUsd(plan.monthlyPrice)}<small className="small-text"> /month</small></p>
                 <p className="small-text">{plan.accessNote}</p>
@@ -135,7 +225,15 @@ export function PricingPage({ auth, platform }) {
                   <li>会员专属内容 <GlossaryTerm id="exclusive_content" />：<FeatureCell value={plan.exclusiveContent} /></li>
                   <li>继续观看/收藏/历史：<FeatureCell value={plan.watchTools} /></li>
                 </ul>
-                <button type="button" className="btn btn-primary" disabled={loadingKey === `viewer-${plan.id}`} onClick={() => handleViewerCheckout(plan)}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={getButtonStyle({ hovered: hoveredButton === buttonKey, primary: true })}
+                  disabled={loadingKey === `viewer-${plan.id}`}
+                  onMouseEnter={() => setHoveredButton(buttonKey)}
+                  onMouseLeave={() => setHoveredButton('')}
+                  onClick={() => handleViewerCheckout(plan)}
+                >
                   {loadingKey === `viewer-${plan.id}` ? '跳转支付中...' : isCurrent ? 'Current Plan' : `升级到 ${plan.name}`}
                 </button>
               </article>
@@ -150,16 +248,23 @@ export function PricingPage({ auth, platform }) {
         <div className="grid cards-3">
           {CREATOR_PLANS.map((plan) => {
             const isCurrent = membership.creatorPlan === plan.id;
+            const isFeatured = isCreatorFeatured(plan);
             const cardKey = `creator-${plan.id}`;
+            const buttonKey = `creator-btn-${plan.id}`;
+            const pillKind = plan.id === 'studio' ? 'creator-studio' : 'creator-pro';
             return (
               <article
                 className="pricing-card"
                 key={plan.id}
-                style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent })}
+                style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent, featured: isFeatured })}
                 onMouseEnter={() => setHoveredCard(cardKey)}
                 onMouseLeave={() => setHoveredCard('')}
               >
-                {isCurrent ? <span className="status">Current Plan</span> : null}
+                <div className="row wrap center" style={{ justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                  <div />
+                  {isFeatured ? <span style={getFeaturedPillStyle(pillKind)}>{plan.id === 'studio' ? 'Top creator tier' : 'Best launch tier'}</span> : null}
+                </div>
+                {isCurrent ? <span style={getCurrentPlanBadgeStyle({ featured: isFeatured })}>● Current Plan</span> : null}
                 <h3><PlanIdentityBadge badgeKey={plan.id} subtle /></h3>
                 <p className="price">{formatUsd(plan.monthlyPrice)}<small className="small-text"> /month</small></p>
                 <p className="small-text">Platform Commission: {formatCommission(plan.commissionRate)} · {plan.commissionPolicy}</p>
@@ -173,7 +278,15 @@ export function PricingPage({ auth, platform }) {
                   <li>推荐位资格 <GlossaryTerm id="featured_placement" />：<FeatureCell value={plan.featuredPlacementEligibility} /></li>
                 </ul>
                 {plan.id !== activeCreator.id ? <p className="small-text">增量权益：+{plan.maxActiveSeries - activeCreator.maxActiveSeries} series · +{plan.monthlyAssetStorageLimitGb - activeCreator.monthlyAssetStorageLimitGb}GB · 佣金降低 {Math.max(Math.round((activeCreator.commissionRate - plan.commissionRate) * 100), 0)}%。</p> : null}
-                <button type="button" className="btn btn-ghost" disabled={loadingKey === `creator-${plan.id}`} onClick={() => handleCreatorPlan(plan)}>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  style={getButtonStyle({ hovered: hoveredButton === buttonKey, primary: false })}
+                  disabled={loadingKey === `creator-${plan.id}`}
+                  onMouseEnter={() => setHoveredButton(buttonKey)}
+                  onMouseLeave={() => setHoveredButton('')}
+                  onClick={() => handleCreatorPlan(plan)}
+                >
                   {loadingKey === `creator-${plan.id}` ? '跳转支付中...' : isCurrent ? 'Current Plan' : `升级到 ${plan.name}`}
                 </button>
               </article>
