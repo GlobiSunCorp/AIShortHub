@@ -123,8 +123,8 @@ export default function App() {
             {route.name === 'forgot' ? <ForgotPasswordPage auth={auth} /> : null}
             {route.name === 'faq' ? <FAQPage /> : null}
             {route.name === 'support' ? <ContactSupportPage /> : null}
-            {route.name === 'checkoutSuccess' ? <CheckoutResultPage type="success" /> : null}
-            {route.name === 'checkoutCancel' ? <CheckoutResultPage type="cancel" /> : null}
+            {route.name === 'checkoutSuccess' ? <CheckoutResultPage type="success" auth={auth} platform={platform} /> : null}
+            {route.name === 'checkoutCancel' ? <CheckoutResultPage type="cancel" auth={auth} platform={platform} /> : null}
             {route.name === 'terms' ? <PolicyPage type="terms" /> : null}
             {route.name === 'privacy' ? <PolicyPage type="privacy" /> : null}
             {route.name === 'refund' ? <PolicyPage type="refund" /> : null}
