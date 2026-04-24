@@ -96,9 +96,10 @@ export function useAuth() {
       saveSession(result.data);
       setSession(result.data);
       const ensured = await ensureProfile(result.data);
-      setUser(ensured.user || sessionToFallbackUser(result.data));
+      const syncedUser = ensured.user || sessionToFallbackUser(result.data);
+      setUser(syncedUser);
       setNotice(ensured.error ? `Profile sync warning: ${ensured.error}` : '');
-      return { ok: true, message: '登录成功。' };
+      return { ok: true, message: '登录成功。', user: syncedUser };
     } catch (error) {
       saveSession(null);
       setSession(null);
@@ -112,14 +113,16 @@ export function useAuth() {
     try {
       const result = await authRequest('signup', { email, password, data: { role } });
       if (result.error) return { ok: false, message: result.error };
+      let syncedUser = null;
       if (result.data?.access_token) {
         saveSession(result.data);
         setSession(result.data);
         const ensured = await ensureProfile(result.data, role);
-        setUser(ensured.user || sessionToFallbackUser(result.data, role));
+        syncedUser = ensured.user || sessionToFallbackUser(result.data, role);
+        setUser(syncedUser);
         setNotice(ensured.error ? `Profile sync warning: ${ensured.error}` : '');
       }
-      return { ok: true, message: '注册成功，请检查邮箱验证状态。' };
+      return { ok: true, message: '注册成功，请检查邮箱验证状态。', user: syncedUser };
     } catch (error) {
       return { ok: false, message: error?.message || '注册失败，请稍后再试。' };
     }
