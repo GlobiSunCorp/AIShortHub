@@ -12,6 +12,22 @@ import { getAccountCenterSnapshot } from '../lib/selectors/getAccountCenterSnaps
 import { HowPricingWorksPanel } from '../components/billing/HowPricingWorksPanel';
 import { RevenueFlowDiagram } from '../components/billing/RevenueFlowDiagram';
 
+function PlanSummaryCard({ title, badgeKey, name, priceLabel, summary, ctaLabel, ctaTo, tone = 'data' }) {
+  const className = tone === 'status' ? 'card-status' : tone === 'secondary' ? 'card-secondary' : 'card-data';
+  return (
+    <article className={className}>
+      <p className="ds-caption">{title}</p>
+      <div className="stack-sm">
+        <PlanIdentityBadge badgeKey={badgeKey} subtle />
+        <p className="stat-value" style={{ fontSize: '1.45rem' }}>{name}</p>
+        <p className="ds-meta">{priceLabel}</p>
+        <p className="ds-meta">{summary}</p>
+        <Link className="btn btn-ghost" to={ctaTo}>{ctaLabel}</Link>
+      </div>
+    </article>
+  );
+}
+
 export function ProfilePage({ auth, platform }) {
   if (!auth.isLoggedIn) {
     return (
@@ -24,11 +40,18 @@ export function ProfilePage({ auth, platform }) {
   }
 
   const snapshot = getAccountCenterSnapshot({ auth, platform });
-  const { membership, viewerPlan, creatorPlan, cycle, quota, creator, uploads, serviceOrders, earnings, commissionRate, billing } = snapshot;
+  const { membership, viewerPlan, creatorPlan, cycle, quota, uploads, serviceOrders, earnings, commissionRate, billing } = snapshot;
   const statusLabel = getStatusLabel(auth.userState, membership.tier, auth.user?.tier, membership.creatorPlan);
   const audienceGroup = getAudienceGroup({ auth, membership });
   const latestSeries = uploads[0];
   const monetization = latestSeries?.monetization;
+  const creatorPlanLabel = creatorPlan ? `${creatorPlan.name} · ${formatUsd(creatorPlan.monthlyPrice)}/month` : 'No creator plan yet';
+  const viewerSummary = viewerPlan.id === 'free'
+    ? 'Free access, previews first, upgrade any time for more full episodes and higher quality.'
+    : 'Paid viewer access is active. Browse and Profile now reflect your upgraded viewing tier.';
+  const creatorSummary = creatorPlan
+    ? `Creator tools, quota, and monetization controls are active for ${creatorPlan.name}.`
+    : 'Creator tools are not active yet. Upgrade when you want uploads, review, quota, and earnings controls.';
 
   return (
     <div className="ds-page">
@@ -46,15 +69,46 @@ export function ProfilePage({ auth, platform }) {
           <span className="meta-pill">Renewal: {cycle.renewalDate}</span>
         </div>
         <div className="grid cards-3">
-          <article className="card-data"><p className="ds-caption">Viewer plan</p><PlanIdentityBadge badgeKey={membership.tier === 'free' ? 'free_viewer' : membership.tier} subtle /><p className="ds-meta">{viewerPlan.name} · {formatUsd(viewerPlan.monthlyPrice)}/month</p></article>
-          <article className="card-data"><p className="ds-caption">Creator plan</p>{creatorPlan ? <><PlanIdentityBadge badgeKey={creatorPlan.id} subtle /><p className="ds-meta">{creatorPlan.name} · {formatUsd(creatorPlan.monthlyPrice)}/month</p></> : <p className="ds-meta">No creator plan yet.</p>}</article>
-          <article className="card-status"><p className="ds-caption">Platform commission <GlossaryTerm id="platform_commission" tier="learn_more" /></p><p className="ds-meta">{creatorPlan ? `${formatCommission(commissionRate)} · applies only after creator revenue exists` : 'Not applicable for viewer-only account'}</p></article>
+          <PlanSummaryCard
+            title="Viewer plan"
+            badgeKey={membership.tier === 'free' ? 'free_viewer' : membership.tier}
+            name={viewerPlan.name}
+            priceLabel={`${formatUsd(viewerPlan.monthlyPrice)}/month`}
+            summary={viewerSummary}
+            ctaLabel="Manage viewer plan"
+            ctaTo="/pricing?intent=viewer&plan=pro_viewer"
+          />
+          <PlanSummaryCard
+            title="Creator plan"
+            badgeKey={creatorPlan?.id || 'creator_basic'}
+            name={creatorPlan?.name || 'Not active'}
+            priceLabel={creatorPlan ? `${formatUsd(creatorPlan.monthlyPrice)}/month` : '$0/month'}
+            summary={creatorSummary}
+            ctaLabel={creatorPlan ? 'Open creator pricing' : 'Activate creator tools'}
+            ctaTo="/pricing?intent=creator&plan=creator_pro"
+            tone="secondary"
+          />
+          <PlanSummaryCard
+            title="Platform commission"
+            badgeKey={creatorPlan?.id || 'free_viewer'}
+            name={creatorPlan ? formatCommission(commissionRate) : 'Not active'}
+            priceLabel={creatorPlan ? 'Applies only after creator revenue exists' : 'Viewer-only account'}
+            summary={creatorPlan ? 'Commission is tied to your current creator plan and only activates after real revenue starts.' : 'Upgrade to a creator plan to unlock creator-side monetization and payout controls.'}
+            ctaLabel={creatorPlan ? 'Review creator earnings' : 'See creator plan differences'}
+            ctaTo={creatorPlan ? '/creator#earnings' : '/pricing?intent=creator&plan=creator_basic'}
+            tone="status"
+          />
         </div>
       </section>
 
       <section className="panel ds-section">
         <h2 className="ds-h2">Plans & Billing</h2>
         <HowPricingWorksPanel viewerSummary={billing.viewer} creatorSummary={billing.creator} />
+        <div className="row wrap">
+          <Link className="btn btn-ghost" to="/pricing?intent=viewer&plan=pro_viewer">Change viewer plan</Link>
+          <Link className="btn btn-ghost" to="/pricing?intent=creator&plan=creator_pro">Change creator plan</Link>
+          <Link className="btn btn-ghost" to="/refund">Open refund matrix</Link>
+        </div>
         <p className="ds-caption">Refund policy: Viewer {REFUND_POLICY_CONFIG.viewer.short} · Creator {REFUND_POLICY_CONFIG.creator.short} · Add-on {REFUND_POLICY_CONFIG.addon.short}. <Link className="info-link" to="/refund">Open full refund matrix</Link></p>
       </section>
 
@@ -76,6 +130,10 @@ export function ProfilePage({ auth, platform }) {
           <h2 className="ds-h2">Orders & Uploads</h2>
           <p className="ds-caption">Recent uploads</p>
           {uploads.length ? uploads.map((item) => <p className="ds-meta" key={item.id}>{item.title} · {item.status}</p>) : <p className="ds-meta">No uploads yet.</p>}
+          <div className="row wrap">
+            <Link className="info-link" to="/creator#content">Open Creator Studio</Link>
+            <Link className="info-link" to="/services">Open Services</Link>
+          </div>
           <p className="ds-caption">Recent service orders</p>
           {serviceOrders.length ? serviceOrders.map((item) => <p className="ds-meta" key={item.id}>{item.projectTitle || item.id} · {item.status}</p>) : <p className="ds-meta">No service order yet.</p>}
         </article>
@@ -92,7 +150,7 @@ export function ProfilePage({ auth, platform }) {
         <p className="ds-meta">Revenue model: {REVENUE_MODEL.platform.map((item) => item.label).join(' · ')}</p>
         <p className="ds-meta">Audience mode: {audienceGroup}. Demo role switcher only affects mock mode.</p>
         <div className="row wrap">
-          <Link className="info-link" to="/pricing">Plan guide</Link>
+          <Link className="info-link" to="/pricing?intent=viewer&plan=pro_viewer">Plan guide</Link>
           <Link className="info-link" to="/refund">Refund policy</Link>
           <Link className="info-link" to="/services">Support and services</Link>
         </div>
