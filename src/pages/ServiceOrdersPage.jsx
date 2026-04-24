@@ -32,6 +32,11 @@ export function ServiceOrdersPage({ auth, platform }) {
     return Object.keys(next).length === 0;
   };
 
+  const redirectToLogin = () => {
+    const target = `/services?service=${selectedService.id}`;
+    navigate(`/login?redirectTo=${encodeURIComponent(target)}`);
+  };
+
   return (
     <div className="stack-lg">
       <section className="panel">
@@ -51,7 +56,6 @@ export function ServiceOrdersPage({ auth, platform }) {
           onChange={setSelectedServiceId}
           options={ADD_ON_SERVICES.map((item) => ({ value: item.id, label: `${item.name} · ${getServiceEntitlement(item, creatorPlanId)}` }))}
         />
-
       </section>
 
       <section className="grid cards-3">
@@ -94,6 +98,10 @@ export function ServiceOrdersPage({ auth, platform }) {
               setFeedback({ type: 'error', message: '提交失败，请修正错误后重试。' });
               return;
             }
+            if (!auth.isLoggedIn) {
+              redirectToLogin();
+              return;
+            }
             setIsSubmitting(true);
             setFeedback({ type: '', message: '' });
             try {
@@ -109,7 +117,7 @@ export function ServiceOrdersPage({ auth, platform }) {
                 nextStep: entitlement === 'Included' ? '服务团队将在 24h 内回传项目排期。' : '请完成支付后进入服务排期。',
                 status: entitlement === 'Included' ? 'pending' : 'pending_payment',
               });
-              if (entitlement !== 'Included' && auth.isLoggedIn) {
+              if (entitlement !== 'Included') {
                 const session = await startAddonCheckout({ service: selectedService, user: auth.user, orderId: created.id });
                 if (session.url) {
                   window.location.href = session.url;
