@@ -28,10 +28,40 @@ const PAGE_SUBTITLES = {
   '/profile': 'Check plans, billing, payouts, and account preferences.',
 };
 
+const GLOBAL_FLASH_KEY = 'aishorthub.globalFlash';
+
+function GlobalFlash({ flash, onClose }) {
+  if (!flash?.message) return null;
+  const isError = flash.type === 'error';
+  return (
+    <div className="container" style={{ marginTop: '0.75rem' }}>
+      <div
+        className="panel row wrap center"
+        style={{
+          justifyContent: 'space-between',
+          gap: '0.8rem',
+          borderColor: isError ? 'rgba(255, 142, 162, 0.42)' : 'rgba(139, 225, 172, 0.32)',
+          background: isError
+            ? 'linear-gradient(135deg, rgba(68, 24, 38, 0.92), rgba(16, 13, 24, 0.96))'
+            : 'linear-gradient(135deg, rgba(23, 56, 45, 0.92), rgba(13, 16, 29, 0.96))',
+          boxShadow: isError ? '0 14px 34px rgba(64, 12, 28, 0.22)' : '0 14px 34px rgba(16, 44, 34, 0.16)',
+        }}
+      >
+        <div style={{ display: 'grid', gap: '0.2rem' }}>
+          <strong>{flash.title || (isError ? 'Update needed' : 'Updated ✨')}</strong>
+          <span className="small-text" style={{ color: '#eef3ff' }}>{flash.message}</span>
+        </div>
+        <button type="button" className="btn btn-ghost" onClick={onClose}>关闭</button>
+      </div>
+    </div>
+  );
+}
+
 export function AppLayout({ auth, platform, children }) {
   const { pathname } = useRouter();
   const [routing, setRouting] = useState(false);
   const [hash, setHash] = useState(typeof window === 'undefined' ? '' : window.location.hash || '');
+  const [flash, setFlash] = useState(null);
 
   useEffect(() => {
     setRouting(true);
@@ -45,6 +75,25 @@ export function AppLayout({ auth, platform, children }) {
     window.addEventListener('hashchange', syncHash);
     return () => window.removeEventListener('hashchange', syncHash);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.sessionStorage.getItem(GLOBAL_FLASH_KEY);
+      if (!raw) return;
+      const next = JSON.parse(raw);
+      if (next?.message) setFlash(next);
+      window.sessionStorage.removeItem(GLOBAL_FLASH_KEY);
+    } catch {
+      // ignore invalid flash payloads
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!flash?.message) return undefined;
+    const timer = window.setTimeout(() => setFlash(null), 4200);
+    return () => window.clearTimeout(timer);
+  }, [flash]);
 
   const title = useMemo(() => PAGE_TITLES[pathname] || 'Workspace', [pathname]);
   const subtitle = useMemo(() => {
@@ -69,6 +118,7 @@ export function AppLayout({ auth, platform, children }) {
       <ErrorBoundary>
         <Header auth={auth} platform={platform} />
       </ErrorBoundary>
+      <GlobalFlash flash={flash} onClose={() => setFlash(null)} />
       <div className={`container page-context-bar ${routing ? 'is-routing' : ''}`}>
         <p className="kicker">Current Page</p>
         <div className="page-context-copy">
