@@ -6,6 +6,28 @@ import { getStatusLabel } from '../lib/roleDisplay';
 import { canAccessCreatorStudio, resolveMembership } from '../hooks/usePlanAccess';
 import { MembershipBadge } from './EntitlementBadges';
 import { CREATOR_HASH_ALIASES, CREATOR_STUDIO_GROUPS } from '../data/creatorStudio';
+import { getCreatorPlan, getViewerPlan } from '../data/monetization';
+
+function HeaderQuickPill({ label, value, to, active = false }) {
+  return (
+    <Link
+      to={to}
+      className={`meta-pill ${active ? 'active' : ''}`.trim()}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.38rem',
+        textDecoration: 'none',
+        borderColor: active ? 'rgba(193, 159, 255, 0.42)' : undefined,
+        boxShadow: active ? '0 8px 18px rgba(88, 52, 148, 0.18)' : 'none',
+      }}
+      title={`${label}: ${value}`}
+    >
+      <span style={{ opacity: 0.72 }}>{label}</span>
+      <strong style={{ color: '#f7f8ff', fontWeight: 700 }}>{value}</strong>
+    </Link>
+  );
+}
 
 export function Header({ auth, platform }) {
   const { pathname } = useRouter();
@@ -16,6 +38,12 @@ export function Header({ auth, platform }) {
   const showCreatorStudio = canAccessCreatorStudio(auth, platform);
   const isCreatorMode = auth.isLoggedIn && ['creator', 'admin'].includes(auth.userState);
   const isViewerMode = !isCreatorMode;
+  const viewerPlanName = membership ? getViewerPlan(membership.tier || 'free').name : 'Free Viewer';
+  const creatorPlanName = membership?.creatorPlan ? getCreatorPlan(membership.creatorPlan).name : null;
+  const accountPlanLabel = auth.userState === 'admin' ? 'Admin Access' : creatorPlanName || viewerPlanName;
+  const statusTarget = auth.userState === 'admin' ? '/admin' : auth.userState === 'creator' ? '/creator#overview' : '/browse';
+  const statusActive = auth.userState === 'admin' ? pathname === '/admin' : auth.userState === 'creator' ? pathname === '/creator' : pathname === '/browse';
+
   const statusLabel = useMemo(() => {
     try {
       return getStatusLabel(auth.userState, membership?.tier, auth.user?.tier, membership?.creatorPlan);
@@ -61,7 +89,7 @@ export function Header({ auth, platform }) {
         </Link>
         <nav className="row nav-wrap viewer-nav">
           {viewerNav.map(([to, label]) => {
-            const active = pathname === to || (label === 'Browse' && isViewerMode);
+            const active = pathname === to || (label === 'Browse' && isViewerMode && pathname === '/browse');
             return (
               <Link key={to} to={to} className={active ? 'nav-link active' : 'nav-link'}>
                 {label}
@@ -110,12 +138,13 @@ export function Header({ auth, platform }) {
               ) : null}
             </div>
           ) : (
-            <Link to="/pricing" className="nav-link locked-link">Upgrade for Creator Studio</Link>
+            <Link to="/pricing?intent=creator&plan=creator_pro" className="nav-link locked-link">Upgrade for Creator Studio</Link>
           )}
           <Link to="/admin" className={pathname === '/admin' ? 'nav-link active' : 'nav-link'}>Admin</Link>
         </nav>
         <div className="row center header-actions">
-          <span className="meta-pill">{statusLabel}</span>
+          <HeaderQuickPill label="Status" value={statusLabel.replace('Status: ', '')} to={statusTarget} active={statusActive} />
+          {auth.isLoggedIn ? <HeaderQuickPill label="Plan" value={accountPlanLabel} to="/profile" active={pathname === '/profile' || pathname === '/pricing'} /> : null}
           {auth.isLoggedIn && membership ? (
             <ErrorBoundary fallback={null}>
               <MembershipBadge auth={auth} membership={membership} />
@@ -133,6 +162,7 @@ export function Header({ auth, platform }) {
                     {safeEmail} · {safeRole}
                   </small>
                   <Link to="/profile" onClick={() => setMenuOpen(false)}>My Profile</Link>
+                  <Link to="/pricing" onClick={() => setMenuOpen(false)}>Plans & Billing</Link>
                   {showCreatorStudio ? <Link to="/creator#overview" onClick={() => setMenuOpen(false)}>Creator Studio</Link> : null}
                   <DemoRoleSwitcher auth={auth} compact />
                   <button className="btn btn-ghost" onClick={auth.logout}>
