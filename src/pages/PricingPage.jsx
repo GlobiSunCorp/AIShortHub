@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useRouter } from '../lib/router';
 import { startCreatorPlanCheckout, startViewerCheckout } from '../lib/services/billingService';
 import { ADD_ON_SERVICES, CREATOR_PLANS, REFUND_POLICY_CONFIG, REVENUE_MODEL, VIEWER_SUBSCRIPTIONS, formatCommission, formatStorageGb, formatUsd, getCreatorPlan, getViewerPlan } from '../data/monetization';
@@ -13,6 +13,42 @@ import { RevenueFlowDiagram } from '../components/billing/RevenueFlowDiagram';
 
 function FeatureCell({ value }) {
   return <span>{value === true ? '✅' : value === false ? '—' : value}</span>;
+}
+
+function FloatingNotice({ notice, onClose }) {
+  if (!notice?.text) return null;
+  const isError = notice.type === 'error';
+  return (
+    <div
+      style={{
+        position: 'sticky',
+        top: 82,
+        zIndex: 25,
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        className="panel row wrap center"
+        style={{
+          width: 'min(820px, calc(100% - 12px))',
+          justifyContent: 'space-between',
+          gap: '0.8rem',
+          borderColor: isError ? 'rgba(255, 142, 162, 0.4)' : 'rgba(139, 225, 172, 0.3)',
+          background: isError
+            ? 'linear-gradient(135deg, rgba(68, 24, 38, 0.92), rgba(16, 13, 24, 0.96))'
+            : 'linear-gradient(135deg, rgba(25, 54, 44, 0.9), rgba(13, 16, 29, 0.96))',
+          boxShadow: isError ? '0 14px 34px rgba(64, 12, 28, 0.24)' : '0 14px 34px rgba(16, 44, 34, 0.18)',
+        }}
+      >
+        <div style={{ display: 'grid', gap: '0.2rem' }}>
+          <strong>{isError ? 'Action needed' : 'Done ✨'}</strong>
+          <span className="small-text" style={{ color: '#eef3ff' }}>{notice.text}</span>
+        </div>
+        <button type="button" className="btn btn-ghost" onClick={onClose}>关闭</button>
+      </div>
+    </div>
+  );
 }
 
 function PlanChangeModal({ open, title, description, confirmLabel, cancelLabel = '再想想', onConfirm, onCancel }) {
@@ -41,7 +77,17 @@ const BASE_BUTTON_STYLE = {
   transition: 'transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease, filter 150ms ease',
 };
 
-function getPricingCardStyle({ hovered, current, featured }) {
+function getPricingCardStyle({ hovered, current, featured, highlighted }) {
+  if (highlighted) {
+    return {
+      ...BASE_PRICING_CARD_STYLE,
+      transform: 'translateY(-3px) scale(1.018)',
+      borderColor: 'rgba(255, 224, 148, 0.58)',
+      background: 'linear-gradient(155deg, rgba(52, 38, 16, 0.42), rgba(14, 16, 30, 0.97))',
+      boxShadow: '0 24px 48px rgba(78, 58, 10, 0.22)',
+    };
+  }
+
   if (hovered) {
     return {
       ...BASE_PRICING_CARD_STYLE,
@@ -152,16 +198,58 @@ function getCreatorPlanIndex(planId) {
 }
 
 export function PricingPage({ auth, platform }) {
-  const { navigate } = useRouter();
+  const { navigate, fullPath } = useRouter();
   const [notice, setNotice] = useState({ type: '', text: '' });
   const [loadingKey, setLoadingKey] = useState('');
   const [hoveredCard, setHoveredCard] = useState('');
   const [hoveredButton, setHoveredButton] = useState('');
   const [confirmState, setConfirmState] = useState(null);
+  const [highlightedPlanKey, setHighlightedPlanKey] = useState('');
   const membership = auth.user ? resolveMembership(auth, platform) : { tier: 'free', creatorPlan: null };
   const activeCreator = getCreatorPlan(membership.creatorPlan || 'creator_basic');
   const creatorProfile = platform.creators.find((item) => item.profileId === auth?.user?.id) || platform.creators[0];
   const billingSnapshot = getBillingSummarySnapshot({ platform, creatorId: creatorProfile?.id, membership });
+
+  const searchParams = useMemo(() => {
+    if (typeof window === 'undefined') return new URLSearchParams();
+    return new URLSearchParams(window.location.search);
+  }, [fullPath]);
+
+  useEffect(() => {
+    const intent = searchParams.get('intent');
+    const plan = searchParams.get('plan');
+    if (!intent || !plan) return;
+
+    const nextKey = `${intent}-${plan}`;
+    setHighlightedPlanKey(nextKey);
+
+    const timer = window.setTimeout(() => {
+      const node = document.getElementById(`pricing-card-${nextKey}`);
+      if (node) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 120);
+
+    const clearTimer = window.setTimeout(() => setHighlightedPlanKey(''), 4200);
+
+    if (auth.isLoggedIn) {
+      const label = intent === 'creator'
+        ? getCreatorPlan(plan)?.name || 'selected creator plan'
+        : getViewerPlan(plan)?.name || 'selected viewer plan';
+      setNotice({ type: 'success', text: `已回到 Pricing，继续完成 ${label} 的选择。` });
+    } else {
+      setNotice({ type: 'success', text: '登录后会回到这里，继续完成你刚才的方案选择。' });
+    }
+
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [auth.isLoggedIn, searchParams]);
+
+  useEffect(() => {
+    if (!notice?.text) return undefined;
+    const timer = window.setTimeout(() => setNotice({ type: '', text: '' }), 4200);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   const goToLoginFor = (target) => {
     navigate(`/login?redirectTo=${encodeURIComponent(target)}`);
@@ -290,6 +378,7 @@ export function PricingPage({ auth, platform }) {
         }}
         onCancel={closeConfirm}
       />
+      <FloatingNotice notice={notice} onClose={() => setNotice({ type: '', text: '' })} />
       <div className="stack-lg">
         <OnboardingGuide role="viewer" />
         <section className="panel">
@@ -308,11 +397,13 @@ export function PricingPage({ auth, platform }) {
               const cardKey = `viewer-${plan.id}`;
               const buttonKey = `viewer-btn-${plan.id}`;
               const pillKind = plan.id === 'premium_viewer' ? 'viewer-premium' : 'viewer-pro';
+              const isHighlighted = highlightedPlanKey === cardKey;
               return (
                 <article
+                  id={`pricing-card-${cardKey}`}
                   className="pricing-card"
                   key={plan.id}
-                  style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent, featured: isFeatured })}
+                  style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent, featured: isFeatured, highlighted: isHighlighted })}
                   onMouseEnter={() => setHoveredCard(cardKey)}
                   onMouseLeave={() => setHoveredCard('')}
                 >
@@ -358,11 +449,13 @@ export function PricingPage({ auth, platform }) {
               const cardKey = `creator-${plan.id}`;
               const buttonKey = `creator-btn-${plan.id}`;
               const pillKind = plan.id === 'studio' ? 'creator-studio' : 'creator-pro';
+              const isHighlighted = highlightedPlanKey === cardKey;
               return (
                 <article
+                  id={`pricing-card-${cardKey}`}
                   className="pricing-card"
                   key={plan.id}
-                  style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent, featured: isFeatured })}
+                  style={getPricingCardStyle({ hovered: hoveredCard === cardKey, current: isCurrent, featured: isFeatured, highlighted: isHighlighted })}
                   onMouseEnter={() => setHoveredCard(cardKey)}
                   onMouseLeave={() => setHoveredCard('')}
                 >
@@ -450,7 +543,6 @@ export function PricingPage({ auth, platform }) {
               </article>
             ))}
           </div>
-          {notice.text ? <p className={`form-feedback ${notice.type || 'success'}`}>{notice.text}</p> : null}
         </section>
       </div>
     </>
