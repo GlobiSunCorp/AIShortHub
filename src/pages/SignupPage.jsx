@@ -1,16 +1,30 @@
 import { AuthFormCard } from '../components/AuthFormCard';
 import { Link, useRouter } from '../lib/router';
 
+function getPostSignupDestination(result) {
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const redirectTo = params.get('redirectTo');
+  if (redirectTo) return decodeURIComponent(redirectTo);
+
+  const role = result?.user?.role || 'member';
+  if (role === 'admin') return '/admin';
+  if (role === 'creator') return '/creator#overview';
+  return '/profile';
+}
+
 export function SignupPage({ auth }) {
   const { navigate } = useRouter();
 
   const submit = async (form) => {
-    const result = auth.signup(form);
+    const result = await auth.signup(form);
     if (result.ok) {
-      navigate('/profile');
+      navigate(getPostSignupDestination(result));
     }
     return result;
   };
+
+  const currentParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const redirectSuffix = currentParams.get('redirectTo') ? `?redirectTo=${encodeURIComponent(currentParams.get('redirectTo'))}` : '';
 
   return (
     <div className="auth-page">
@@ -22,7 +36,7 @@ export function SignupPage({ auth }) {
         onSubmit={submit}
         footer={
           <>
-            <Link to="/login">Already have account?</Link>
+            <Link to={`/login${redirectSuffix}`}>Already have account?</Link>
             <Link to="/pricing">Compare plans</Link>
           </>
         }
