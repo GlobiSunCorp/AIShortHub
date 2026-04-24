@@ -28,6 +28,32 @@ function PlanSummaryCard({ title, badgeKey, name, priceLabel, summary, ctaLabel,
   );
 }
 
+function ActivityCard({ item }) {
+  return (
+    <article className="mini-card" style={{ borderRadius: '24px' }}>
+      <div className="row wrap center" style={{ justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+        <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span aria-hidden="true">{item.icon}</span>
+          {item.title}
+        </strong>
+        <span className="meta-pill">{item.time}</span>
+      </div>
+      <p className="ds-meta">{item.description}</p>
+      {item.ctaLabel ? <Link className="info-link" to={item.ctaTo}>{item.ctaLabel} →</Link> : null}
+    </article>
+  );
+}
+
+function ChangeCard({ item }) {
+  return (
+    <article className="mini-card" style={{ borderRadius: '24px' }}>
+      <p className="ds-caption">{item.label}</p>
+      <p className="stat-value" style={{ fontSize: '1.2rem' }}>{item.value}</p>
+      <p className="ds-meta">{item.note}</p>
+    </article>
+  );
+}
+
 export function ProfilePage({ auth, platform }) {
   if (!auth.isLoggedIn) {
     return (
@@ -40,12 +66,24 @@ export function ProfilePage({ auth, platform }) {
   }
 
   const snapshot = getAccountCenterSnapshot({ auth, platform });
-  const { membership, viewerPlan, creatorPlan, cycle, quota, uploads, serviceOrders, earnings, commissionRate, billing } = snapshot;
+  const {
+    membership,
+    viewerPlan,
+    creatorPlan,
+    cycle,
+    quota,
+    uploads,
+    serviceOrders,
+    earnings,
+    commissionRate,
+    billing,
+    recentActivity,
+    recentChanges,
+  } = snapshot;
   const statusLabel = getStatusLabel(auth.userState, membership.tier, auth.user?.tier, membership.creatorPlan);
   const audienceGroup = getAudienceGroup({ auth, membership });
   const latestSeries = uploads[0];
   const monetization = latestSeries?.monetization;
-  const creatorPlanLabel = creatorPlan ? `${creatorPlan.name} · ${formatUsd(creatorPlan.monthlyPrice)}/month` : 'No creator plan yet';
   const viewerSummary = viewerPlan.id === 'free'
     ? 'Free access, previews first, upgrade any time for more full episodes and higher quality.'
     : 'Paid viewer access is active. Browse and Profile now reflect your upgraded viewing tier.';
@@ -101,6 +139,27 @@ export function ProfilePage({ auth, platform }) {
         </div>
       </section>
 
+      <section className="grid cards-2">
+        <article className="panel ds-section">
+          <div className="ds-section-heading">
+            <h2 className="ds-h2">Recent Activity</h2>
+            <p className="ds-meta">Your latest plan, billing, order, and upload updates.</p>
+          </div>
+          <div className="stack-md">
+            {(recentActivity || []).map((item) => <ActivityCard key={item.id} item={item} />)}
+          </div>
+        </article>
+        <article className="panel ds-section">
+          <div className="ds-section-heading">
+            <h2 className="ds-h2">Recent Changes</h2>
+            <p className="ds-meta">What changed in access, quota, billing, and creator controls.</p>
+          </div>
+          <div className="stack-md">
+            {(recentChanges || []).map((item) => <ChangeCard key={item.id} item={item} />)}
+          </div>
+        </article>
+      </section>
+
       <section className="panel ds-section">
         <h2 className="ds-h2">Plans & Billing</h2>
         <HowPricingWorksPanel viewerSummary={billing.viewer} creatorSummary={billing.creator} />
@@ -118,7 +177,7 @@ export function ProfilePage({ auth, platform }) {
           <div className="row wrap">
             <UsageQuotaBadge label="Series" value={`${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`} tone={quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok'} details={[["Used", quota.usage.activeSeries], ["Remaining", quota.remaining.seriesLeft]]} cta={quota.upgradeHint} />
             <UsageQuotaBadge label="Episodes" value={`${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes}`} details={[["Used", quota.usage.totalEpisodes], ["Remaining", quota.remaining.episodesLeft]]} />
-            <UsageQuotaBadge label="Storage" value={`${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`} tone={quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok'} details={[["Used", `${quota.usage.usedStorageGb.toFixed(1)}GB`], ["Remaining", `${quota.remaining.storageGbLeft.toFixed(1)}GB`]]} />
+            <UsageQuotaBadge label="Storage" value={`${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`} tone={quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok'} details={[["Used", `${quota.usage.usedStorageGb.toFixed(1)}GB`], ["Remaining", `${quota.remaining.storageGbLeft.toFixed(1)}GB`]]} cta={quota.upgradeHint} />
           </div>
           <CreatorPlanCard snapshot={quota} />
           <PlanHealthCard data={{ healthStatus: getHealthStatus(quota), cycleLabel: quota.cycleLabel, metrics: [{ label: 'Series', value: `${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}` }, { label: 'Storage', value: `${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB` }], summary: [['Quota reset', cycle.quotaResetDate], ['Review priority', quota.plan.reviewPriority]] }} />
@@ -139,11 +198,34 @@ export function ProfilePage({ auth, platform }) {
         </article>
         <article className="panel ds-section">
           <h2 className="ds-h2">Revenue Summary</h2>
-          {earnings ? <><p className="ds-meta">Ad revenue <GlossaryTerm id="ad_revenue_share" /> {formatUsd(earnings.advertisingRevenue)}</p><p className="ds-meta">Subscription pool <GlossaryTerm id="subscription_pool_share" /> {formatUsd(earnings.subscriptionShare)}</p><p className="ds-meta">Pending payout <GlossaryTerm id="pending_payout" tier="learn_more" /> {formatUsd(earnings.pendingPayout)}</p><p className="stat-value">Net earnings {formatUsd(earnings.netEarnings)}</p><RevenueFlowDiagram lines={billing.creator.lines} netPayout={billing.creator.netPayout} /></> : <p className="ds-meta">Revenue data appears after creator activity starts.</p>}
+          {earnings ? (
+            <>
+              <p className="ds-meta">Ad revenue <GlossaryTerm id="ad_revenue_share" /> {formatUsd(earnings.advertisingRevenue)}</p>
+              <p className="ds-meta">Subscription pool <GlossaryTerm id="subscription_pool_share" /> {formatUsd(earnings.subscriptionShare)}</p>
+              <p className="ds-meta">Pending payout <GlossaryTerm id="pending_payout" tier="learn_more" /> {formatUsd(earnings.pendingPayout)}</p>
+              <p className="stat-value">Net earnings {formatUsd(earnings.netEarnings)}</p>
+              <RevenueFlowDiagram lines={billing.creator.lines} netPayout={billing.creator.netPayout} />
+            </>
+          ) : <p className="ds-meta">Revenue data appears after creator activity starts.</p>}
         </article>
       </section>
 
-      {monetization ? <section className="panel ds-section"><h2 className="ds-h2">Creator-set pricing (latest title)</h2><p className="ds-meta">{latestSeries.title}</p><div className="grid cards-2"><article className="card-secondary"><p className="ds-caption">Title pricing <GlossaryTerm id="title_pricing" /></p><p className="stat-value">{formatUsd(monetization.titlePriceUsd)}</p></article><article className="card-secondary"><p className="ds-caption">Episode unlock <GlossaryTerm id="episode_unlock_price" /></p><p className="stat-value">{formatUsd(monetization.episodeUnlockPriceUsd)}</p></article></div></section> : null}
+      {monetization ? (
+        <section className="panel ds-section">
+          <h2 className="ds-h2">Creator-set pricing (latest title)</h2>
+          <p className="ds-meta">{latestSeries.title}</p>
+          <div className="grid cards-2">
+            <article className="card-secondary">
+              <p className="ds-caption">Title pricing <GlossaryTerm id="title_pricing" /></p>
+              <p className="stat-value">{formatUsd(monetization.titlePriceUsd)}</p>
+            </article>
+            <article className="card-secondary">
+              <p className="ds-caption">Episode unlock <GlossaryTerm id="episode_unlock_price" /></p>
+              <p className="stat-value">{formatUsd(monetization.episodeUnlockPriceUsd)}</p>
+            </article>
+          </div>
+        </section>
+      ) : null}
 
       <section className="panel ds-section">
         <h2 className="ds-h2">Help, Policies, Learn More</h2>
