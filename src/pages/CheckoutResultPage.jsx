@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from '../lib/router';
 
 const TYPE_LABELS = {
@@ -5,6 +6,17 @@ const TYPE_LABELS = {
   creator_plan: 'Creator Plan',
   addon_purchase: 'Add-on Service Order',
 };
+
+const GLOBAL_FLASH_KEY = 'aishorthub.globalFlash';
+
+function writeGlobalFlash(payload) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(GLOBAL_FLASH_KEY, JSON.stringify(payload));
+  } catch {
+    // ignore storage issues in demo mode
+  }
+}
 
 function CelebrationBurst() {
   return (
@@ -32,6 +44,8 @@ function getContextCopy({ checkoutType, planId, orderId, isSuccess }) {
       primaryTo: isSuccess ? '/profile' : '/pricing',
       secondaryLabel: 'Open Browse',
       secondaryTo: '/browse',
+      flashTitle: 'Viewer plan updated',
+      flashMessage: isSuccess ? `${planId || 'Viewer plan'} is now active on your account.` : 'Viewer checkout was cancelled.',
     };
   }
 
@@ -45,6 +59,8 @@ function getContextCopy({ checkoutType, planId, orderId, isSuccess }) {
       primaryTo: isSuccess ? '/creator#overview' : '/pricing',
       secondaryLabel: 'View creator pricing',
       secondaryTo: '/pricing',
+      flashTitle: 'Creator plan updated',
+      flashMessage: isSuccess ? `${planId || 'Creator plan'} is now active for your workspace.` : 'Creator checkout was cancelled.',
     };
   }
 
@@ -58,6 +74,8 @@ function getContextCopy({ checkoutType, planId, orderId, isSuccess }) {
       primaryTo: isSuccess && orderId ? `/services/${orderId}` : '/services',
       secondaryLabel: 'Open Services',
       secondaryTo: '/services',
+      flashTitle: 'Service order updated',
+      flashMessage: isSuccess ? `Payment for order ${orderId || ''} was recorded.` : 'Service checkout was cancelled.',
     };
   }
 
@@ -70,10 +88,12 @@ function getContextCopy({ checkoutType, planId, orderId, isSuccess }) {
     primaryTo: isSuccess ? '/profile' : '/pricing',
     secondaryLabel: 'Back to Home',
     secondaryTo: '/',
+    flashTitle: isSuccess ? 'Payment recorded' : 'Checkout cancelled',
+    flashMessage: isSuccess ? 'Your purchase was recorded successfully.' : 'No payment was completed.',
   };
 }
 
-export function CheckoutResultPage({ type }) {
+export function CheckoutResultPage({ type, auth, platform }) {
   const isSuccess = type === 'success';
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const checkoutType = params.get('type') || 'unknown';
@@ -83,6 +103,33 @@ export function CheckoutResultPage({ type }) {
   const target = params.get('target') || '';
   const context = getContextCopy({ checkoutType, planId, orderId, isSuccess });
   const quickReturnTo = isSuccess && target ? target : context.primaryTo;
+
+  useEffect(() => {
+    if (!isSuccess || !auth?.isLoggedIn) return;
+
+    if (checkoutType === 'viewer_subscription' && planId && auth.user?.id) {
+      platform?.actions?.setMembershipTier?.(auth.user.id, planId);
+    }
+
+    if (checkoutType === 'creator_plan' && planId && auth.user?.id) {
+      platform?.actions?.setCreatorPlan?.(auth.user.id, planId);
+    }
+
+    if (checkoutType === 'addon_purchase' && orderId) {
+      platform?.actions?.updateServiceOrderStatus?.(orderId, 'pending', 'Payment recorded from checkout result page');
+    }
+
+    writeGlobalFlash({
+      type: 'success',
+      title: context.flashTitle,
+      message: context.flashMessage,
+    });
+  }, [auth?.isLoggedIn, auth?.user?.id, checkoutType, context.flashMessage, context.flashTitle, isSuccess, orderId, planId, platform]);
+
+  useEffect(() => {
+    if (isSuccess || !context.flashMessage) return;
+    writeGlobalFlash({ type: 'error', title: context.flashTitle, message: context.flashMessage });
+  }, [context.flashMessage, context.flashTitle, isSuccess]);
 
   return (
     <section className={`panel stack-md checkout-result ${isSuccess ? 'success' : 'cancel'}`}>
