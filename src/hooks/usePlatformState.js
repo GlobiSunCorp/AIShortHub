@@ -15,6 +15,7 @@ import { normalizePlatformData } from '../lib/normalizers';
 import { normalizeEpisode } from '../lib/normalizers/episodeNormalizer';
 import { normalizeOrder } from '../lib/normalizers/orderNormalizer';
 import { normalizeSeries } from '../lib/normalizers/seriesNormalizer';
+import { getCreatorPlan, getViewerPlan } from '../data/monetization';
 
 const PLATFORM_CONFIG_STORAGE_KEY = 'aishorthub.platformConfig';
 
@@ -47,6 +48,25 @@ function persistPlatformConfig(config) {
   } catch {
     // ignore persistence errors in demo mode
   }
+}
+
+function makeAccountEvent({ type, profileId, icon = '✨', tone = 'neutral', title, description, impact, ctaLabel, ctaTo, orderId }) {
+  const now = new Date().toISOString();
+  return {
+    id: `evt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    type,
+    profileId,
+    orderId,
+    icon,
+    tone,
+    title,
+    description,
+    impact,
+    ctaLabel,
+    ctaTo,
+    created_at: now,
+    createdAt: now,
+  };
 }
 
 export function usePlatformState(auth) {
@@ -126,13 +146,44 @@ export function usePlatformState(auth) {
       const createdOrder = { id: `so_${Math.random().toString(36).slice(2, 8)}`, created_at: new Date().toISOString(), status: payload.status || 'pending', ...payload };
       await createServiceOrderData(createdOrder, auth?.session?.access_token);
       const normalized = normalizeOrder(createdOrder);
-      setState((prev) => ({ ...prev, serviceOrders: normalized ? [normalized, ...prev.serviceOrders] : prev.serviceOrders }));
+      const event = makeAccountEvent({
+        type: 'service_order_created',
+        profileId: createdOrder.requesterId,
+        orderId: createdOrder.id,
+        icon: '🧾',
+        tone: createdOrder.status === 'pending_payment' ? 'warn' : 'upgrade',
+        title: `Service order created: ${createdOrder.serviceType}`,
+        description: `${createdOrder.projectTitle || createdOrder.id} entered the service workflow.`,
+        impact: createdOrder.addOnPrice || createdOrder.budget || 'Service queue updated',
+        ctaLabel: 'Open order',
+        ctaTo: `/services/${createdOrder.id}`,
+      });
+      setState((prev) => ({ ...prev, serviceOrders: normalized ? [normalized, ...prev.serviceOrders] : prev.serviceOrders, ordersHistory: [event, ...(prev.ordersHistory || [])].slice(0, 30) }));
       return normalized || createdOrder;
     },
     async updateServiceOrderStatus(orderId, status, note = '') {
       const update = { status, admin_note: note, updated_at: new Date().toISOString() };
       await changeServiceOrderStatus(orderId, update, auth?.session?.access_token);
-      setState((prev) => ({ ...prev, serviceOrders: prev.serviceOrders.map((o) => (o.id === orderId ? { ...o, ...update, reviewNote: note, updatedAt: update.updated_at } : o)) }));
+      setState((prev) => {
+        const order = prev.serviceOrders.find((o) => o.id === orderId);
+        const event = makeAccountEvent({
+          type: 'service_order_status_changed',
+          profileId: order?.requesterId || auth?.user?.id || 'guest',
+          orderId,
+          icon: status === 'completed' ? '✅' : status === 'in_progress' ? '🛠️' : '🧾',
+          tone: status === 'completed' ? 'ok' : status === 'in_progress' ? 'upgrade' : 'neutral',
+          title: `Service order moved to ${status}`,
+          description: note || `${order?.projectTitle || orderId} status has been updated.`,
+          impact: order?.serviceType || 'Service workflow updated',
+          ctaLabel: 'Open order',
+          ctaTo: `/services/${orderId}`,
+        });
+        return {
+          ...prev,
+          serviceOrders: prev.serviceOrders.map((o) => (o.id === orderId ? { ...o, ...update, reviewNote: note, updatedAt: update.updated_at } : o)),
+          ordersHistory: [event, ...(prev.ordersHistory || [])].slice(0, 30),
+        };
+      });
     },
     updatePlatformConfig(patch) {
       setState((prev) => {
@@ -155,19 +206,45 @@ export function usePlatformState(auth) {
     setMembershipTier(profileId, tier) {
       setState((prev) => {
         const found = prev.memberships.find((m) => m.profileId === profileId);
+        const previousTier = found?.tier || 'free';
+        const plan = getViewerPlan(tier || 'free');
+        const event = previousTier === tier ? null : makeAccountEvent({
+          type: 'viewer_plan_changed',
+          profileId,
+          icon: tier === 'premium_viewer' ? '✦' : tier === 'pro_viewer' ? '⬆' : '▷',
+          tone: tier === 'premium_viewer' ? 'premium' : tier === 'free' ? 'neutral' : 'upgrade',
+          title: `Viewer plan changed to ${plan.name}`,
+          description: `Viewer access changed from ${getViewerPlan(previousTier).name} to ${plan.name}.`,
+          impact: `${plan.quality} · ${plan.fullSeriesAccess ? 'Full episodes unlocked' : 'Preview access'}`,
+          ctaLabel: 'View profile',
+          ctaTo: '/profile',
+        });
         const nextMemberships = found
-          ? prev.memberships.map((m) => (m.profileId === profileId ? { ...m, tier } : m))
-          : [{ profileId, tier, creatorPlan: null, status: 'active', renewAt: null }, ...prev.memberships];
-        return { ...prev, memberships: nextMemberships };
+          ? prev.memberships.map((m) => (m.profileId === profileId ? { ...m, tier, updatedAt: new Date().toISOString() } : m))
+          : [{ profileId, tier, creatorPlan: null, status: 'active', renewAt: null, updatedAt: new Date().toISOString() }, ...prev.memberships];
+        return { ...prev, memberships: nextMemberships, ordersHistory: event ? [event, ...(prev.ordersHistory || [])].slice(0, 30) : prev.ordersHistory };
       });
     },
     setCreatorPlan(profileId, creatorPlan) {
       setState((prev) => {
         const found = prev.memberships.find((m) => m.profileId === profileId);
+        const previousPlan = found?.creatorPlan || 'creator_basic';
+        const plan = getCreatorPlan(creatorPlan || 'creator_basic');
+        const event = previousPlan === creatorPlan ? null : makeAccountEvent({
+          type: 'creator_plan_changed',
+          profileId,
+          icon: creatorPlan === 'studio' ? '👑' : creatorPlan === 'creator_pro' ? '⚡' : '▦',
+          tone: creatorPlan === 'studio' ? 'premium' : creatorPlan === 'creator_pro' ? 'upgrade' : 'neutral',
+          title: `Creator plan changed to ${plan.name}`,
+          description: `Creator tools changed from ${getCreatorPlan(previousPlan).name} to ${plan.name}.`,
+          impact: `${plan.reviewPriority} · ${plan.monthlyAssetStorageLimitGb}GB storage · ${Math.round(plan.commissionRate * 100)}% commission`,
+          ctaLabel: 'Open Creator Studio',
+          ctaTo: '/creator#overview',
+        });
         const nextMemberships = found
-          ? prev.memberships.map((m) => (m.profileId === profileId ? { ...m, creatorPlan } : m))
-          : [{ profileId, tier: 'free', creatorPlan, status: 'active', renewAt: null }, ...prev.memberships];
-        return { ...prev, memberships: nextMemberships };
+          ? prev.memberships.map((m) => (m.profileId === profileId ? { ...m, creatorPlan, updatedAt: new Date().toISOString() } : m))
+          : [{ profileId, tier: 'free', creatorPlan, status: 'active', renewAt: null, updatedAt: new Date().toISOString() }, ...prev.memberships];
+        return { ...prev, memberships: nextMemberships, ordersHistory: event ? [event, ...(prev.ordersHistory || [])].slice(0, 30) : prev.ordersHistory };
       });
     },
   };
