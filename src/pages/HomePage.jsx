@@ -7,6 +7,17 @@ import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
 import { resolveMembership } from '../hooks/usePlanAccess';
 import { publicHeroPoster } from '../assets/publicHeroPoster';
 
+const PUBLIC_HERO_DEFAULTS = {
+  title: 'The Hub for AI-Powered Short Videos',
+  synopsis:
+    'Discover cinematic AI shorts, vertical videos, trailers, music videos, animations, commercials, and experimental stories from creators around the world.',
+  primaryCtaLabel: 'Explore AI Shorts',
+  secondaryCtaLabel: 'Submit Your Work',
+  creatorCtaLabel: 'For Creators',
+  eyebrow: 'AI shorts discovery',
+  kicker: 'Global creator showcase',
+};
+
 function useHeroViewport() {
   const readViewport = () => {
     if (typeof window === 'undefined') return { isMobile: false, isTablet: false };
@@ -77,19 +88,16 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
     catalog.trending[0] ||
     catalog.latest[0] ||
     null;
-  const featuredTitle = heroConfig.title || featured?.title || 'Her Hidden Return';
-  const featuredSynopsis =
-    heroConfig.synopsis ||
-    featured?.synopsis ||
-    'A viewer-first launch page: one strong poster, one obvious play button, and just enough context to make the next click easy.';
+  const featuredTitle = heroConfig.title || PUBLIC_HERO_DEFAULTS.title;
+  const featuredSynopsis = heroConfig.synopsis || PUBLIC_HERO_DEFAULTS.synopsis;
   const previewCount = catalog.episodeMap[featured?.id]?.preview || 1;
   const totalCount = catalog.episodeMap[featured?.id]?.total || 12;
   const posterUrl = heroConfig.posterUrl || publicHeroPoster;
-  const primaryCtaLabel = heroConfig.primaryCtaLabel || 'Explore AI Shorts';
-  const secondaryCtaLabel = heroConfig.secondaryCtaLabel || 'Submit Your Work';
-  const creatorCtaLabel = heroConfig.creatorCtaLabel || 'For Creators';
-  const eyebrow = heroConfig.eyebrow || 'Global AI shorts spotlight';
-  const kicker = heroConfig.kicker || 'Featured creator release';
+  const primaryCtaLabel = heroConfig.primaryCtaLabel || PUBLIC_HERO_DEFAULTS.primaryCtaLabel;
+  const secondaryCtaLabel = heroConfig.secondaryCtaLabel || PUBLIC_HERO_DEFAULTS.secondaryCtaLabel;
+  const creatorCtaLabel = heroConfig.creatorCtaLabel || PUBLIC_HERO_DEFAULTS.creatorCtaLabel;
+  const eyebrow = heroConfig.eyebrow || PUBLIC_HERO_DEFAULTS.eyebrow;
+  const kicker = heroConfig.kicker || PUBLIC_HERO_DEFAULTS.kicker;
 
   const heroFrameStyle = useMemo(() => {
     if (isMobile) return { aspectRatio: '9 / 16', minHeight: 'clamp(540px, 86vh, 820px)', maxHeight: 'none' };
@@ -126,8 +134,8 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
             </div>
 
             <div className="public-home-hero-meta">
-              <span className="meta-pill">{previewCount} free preview</span>
-              <span className="meta-pill">{totalCount} episodes</span>
+              <span className="meta-pill">AI shorts</span>
+              <span className="meta-pill">Trailers · music videos · animation</span>
               <span className="meta-pill">Creator take rate starts low</span>
             </div>
 
@@ -142,11 +150,11 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
         <section className="grid cards-3 public-home-note-grid">
           <article className="mini-card public-home-note-card">
             <h3 className="ds-h3">For viewers</h3>
-            <p className="ds-meta">See the poster, hit play, then decide whether to keep watching.</p>
+            <p className="ds-meta">Discover AI shorts across cinematic stories, trailers, animation, music videos, commercials, and experiments.</p>
           </article>
           <article className="mini-card public-home-note-card">
             <h3 className="ds-h3">For creators</h3>
-            <p className="ds-meta">Creator Studio still exists, but it no longer hijacks the first impression.</p>
+            <p className="ds-meta">Showcase AI-powered short videos without letting creator tools hijack the first viewer impression.</p>
           </article>
           <article className="mini-card public-home-note-card">
             <h3 className="ds-h3">Soft-launch economics</h3>
@@ -155,19 +163,19 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
         </section>
       </section>
 
-      <HomeCollection title="Start with these" desc="The first row below the hero should feel immediate, clean, and easy to choose from." items={catalog.firstBatch} episodeMap={catalog.episodeMap} columns="cards-2" emptyText="No featured title yet. Start with one strong poster, one trailer, and one preview-ready episode." />
-      <HomeCollection title="Free preview lane" desc="Let strangers sample first before asking them to pay." items={catalog.trending} episodeMap={catalog.episodeMap} emptyText="Add more preview-ready episodes so the preview lane feels alive." />
+      <HomeCollection title="Start with these" desc="The first row below the hero should feel immediate, clean, and easy to choose from." items={catalog.firstBatch} episodeMap={catalog.episodeMap} columns="cards-2" emptyText="No featured AI short yet. Start with one strong poster, one trailer, and one preview-ready video." />
+      <HomeCollection title="Free preview lane" desc="Let strangers sample first before asking them to pay." items={catalog.trending} episodeMap={catalog.episodeMap} emptyText="Add more preview-ready AI shorts so the preview lane feels alive." />
 
       <section className="home-split-callout grid cards-2">
         <article className="panel home-callout-card">
           <h3 className="ds-h2">Viewer path</h3>
-          <p className="ds-meta">Poster → trailer → preview → unlock the rest.</p>
-          <Link className="info-link" to="/browse">Open viewer catalog</Link>
+          <p className="ds-meta">Poster → trailer → preview → follow the creator or unlock more.</p>
+          <Link className="info-link" to="/browse">Open AI shorts catalog</Link>
         </article>
         <article className="panel home-callout-card">
           <h3 className="ds-h2">Creator path</h3>
-          <p className="ds-meta">Upload trailer, set monetization, then submit to review.</p>
-          <Link className="info-link" to="/pricing">See creator plans</Link>
+          <p className="ds-meta">Submit work, upload assets, set monetization, then request review.</p>
+          <Link className="info-link" to="/submit">Submit your work</Link>
         </article>
       </section>
     </div>
@@ -187,7 +195,7 @@ function ViewerHome({ auth, catalog }) {
         <div className="viewer-hero-copy">
           <span className="kicker">Welcome back</span>
           <h1>Press play fast.</h1>
-          <p className="ds-meta">Hi {auth.user?.name || 'Viewer'}, your signed-in home is now all about content: continue watching, free previews, trending picks, and one obvious next tap.</p>
+          <p className="ds-meta">Hi {auth.user?.name || 'Viewer'}, your signed-in home is now all about AI shorts: continue watching, free previews, trending picks, and one obvious next tap.</p>
           <div className="row wrap home-stage-actions">
             <Link className="btn btn-primary btn-cta" to={heroTitle ? `/watch/${heroTitle.id}/1` : '/browse'}>Continue watching</Link>
             <Link className="btn btn-ghost btn-cta-secondary" to="/browse">Open all titles</Link>
@@ -195,8 +203,8 @@ function ViewerHome({ auth, catalog }) {
         </div>
         <Link className="viewer-feature-frame cover-link from-purple" to={heroTitle ? `/series/${heroTitle.id}` : '/browse'}>
           <span className="status ok">Featured tonight</span>
-          <h2>{heroTitle?.title || 'Add a featured series'}</h2>
-          <p>{heroTitle?.synopsis || 'Your signed-in viewer home should always open with a strong title.'}</p>
+          <h2>{heroTitle?.title || 'Add a featured AI short'}</h2>
+          <p>{heroTitle?.synopsis || 'Your signed-in viewer home should always open with a strong AI short.'}</p>
           <div className="play-overlay">▶ Resume</div>
         </Link>
       </section>
@@ -212,9 +220,9 @@ function ViewerHome({ auth, catalog }) {
         ))}
       </section>
 
-      <HomeCollection title="Free previews" desc="Low-friction entries for people who just want to click and sample." items={freePreview} episodeMap={catalog.episodeMap} emptyText="No preview lane yet. Flag at least one preview episode per launch series." />
+      <HomeCollection title="Free previews" desc="Low-friction entries for people who just want to click and sample." items={freePreview} episodeMap={catalog.episodeMap} emptyText="No preview lane yet. Flag at least one preview episode per launch title." />
       <HomeCollection title="Trending now" desc="The row that should always feel alive after login." items={catalog.latest} episodeMap={catalog.episodeMap} emptyText="Trending will show here after you have a few active titles and fresh updates." />
-      <HomeCollection title="Because you like dramatic chaos" desc="A more playful recommendation lane for signed-in viewers." items={romanceLane} episodeMap={catalog.episodeMap} emptyText="Add more genres and tags so this lane can feel personal." />
+      <HomeCollection title="Because you like bold AI shorts" desc="A more playful recommendation lane for signed-in viewers." items={romanceLane} episodeMap={catalog.episodeMap} emptyText="Add more genres and tags so this lane can feel personal." />
     </div>
   );
 }
@@ -241,7 +249,7 @@ function CreatorHome({ auth, membership, catalog }) {
         <div className="creator-home-copy">
           <span className="kicker">Creator Studio home</span>
           <h1>Keep the first glance clean. Keep the workbench sharp.</h1>
-          <p className="ds-meta">Hi {auth.user?.name || 'Creator'}, this home answers three things fast: what is unfinished, what can be published, and where your revenue will appear once it starts moving.</p>
+          <p className="ds-meta">Hi {auth.user?.name || 'Creator'}, this home answers three things fast: what AI short is unfinished, what can be published, and where your revenue will appear once it starts moving.</p>
           <div className="row wrap home-stage-actions">
             <Link className="btn btn-primary btn-cta" to="/creator#content">Open my workspace</Link>
             <Link className="btn btn-ghost btn-cta-secondary" to="/creator#review">Submit when ready</Link>
@@ -249,7 +257,7 @@ function CreatorHome({ auth, membership, catalog }) {
         </div>
         <div className="grid cards-3 creator-home-metrics">
           <article className="card-primary home-metric-card"><p className="small-text">Creator plan</p><strong>{planName}</strong></article>
-          <article className="card-secondary home-metric-card"><p className="small-text">Series in motion</p><strong>{creatorSeries.length}</strong></article>
+          <article className="card-secondary home-metric-card"><p className="small-text">Titles in motion</p><strong>{creatorSeries.length}</strong></article>
           <article className="card-data home-metric-card"><p className="small-text">Main objective</p><strong>Launch faster</strong></article>
         </div>
       </section>
@@ -282,7 +290,7 @@ function CreatorHome({ auth, membership, catalog }) {
         </div>
       </section>
 
-      <HomeCollection title="Your launch candidates" desc="The titles that should be pushed into review, promo, or publish next." items={creatorSeries} episodeMap={catalog.episodeMap} columns="cards-3" emptyText="No series yet. Create one strong pilot, one trailer, and one clear poster first." />
+      <HomeCollection title="Your launch candidates" desc="The titles that should be pushed into review, promo, or publish next." items={creatorSeries} episodeMap={catalog.episodeMap} columns="cards-3" emptyText="No title yet. Create one strong pilot, one trailer, and one clear poster first." />
     </div>
   );
 }
