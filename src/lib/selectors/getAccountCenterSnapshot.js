@@ -16,8 +16,32 @@ function formatTimeLabel(value) {
   return date.toLocaleDateString();
 }
 
-function buildRecentActivity({ viewerPlan, creatorPlan, uploads, serviceOrders, cycle, quota, earnings }) {
-  const activity = [];
+function sortByTime(items) {
+  return [...items].sort((a, b) => {
+    const aTime = new Date(a.createdAt || a.created_at || 0).getTime() || 0;
+    const bTime = new Date(b.createdAt || b.created_at || 0).getTime() || 0;
+    return bTime - aTime;
+  });
+}
+
+function normalizeAccountEvent(event) {
+  return {
+    id: event.id,
+    icon: event.icon || '✨',
+    tone: event.tone || 'neutral',
+    title: event.title || 'Account updated',
+    description: event.description || 'Your account state changed.',
+    impact: event.impact || '',
+    time: formatTimeLabel(event.createdAt || event.created_at),
+    ctaLabel: event.ctaLabel || 'View details',
+    ctaTo: event.ctaTo || '/profile',
+    createdAt: event.createdAt || event.created_at,
+  };
+}
+
+function buildRecentActivity({ viewerPlan, creatorPlan, uploads, serviceOrders, cycle, quota, earnings, accountEvents }) {
+  const activity = sortByTime(accountEvents || []).map(normalizeAccountEvent);
+
   activity.push({
     id: `viewer-${viewerPlan.id}`,
     icon: viewerPlan.id === 'premium_viewer' ? '✦' : viewerPlan.id === 'pro_viewer' ? '⬆' : '▷',
@@ -100,7 +124,15 @@ function buildRecentActivity({ viewerPlan, creatorPlan, uploads, serviceOrders, 
     });
   }
 
-  return activity.slice(0, 6);
+  const deduped = [];
+  const seen = new Set();
+  activity.forEach((item) => {
+    if (seen.has(item.id)) return;
+    seen.add(item.id);
+    deduped.push(item);
+  });
+
+  return deduped.slice(0, 6);
 }
 
 function buildRecentChanges({ viewerPlan, creatorPlan, quota, commissionRate, serviceOrders, uploads, earnings }) {
@@ -177,6 +209,7 @@ export function getAccountCenterSnapshot({ auth, platform }) {
   const creator = (platform.creators || []).find((item) => item.profileId === auth?.user?.id) || null;
   const uploads = creator ? (platform.series || []).filter((item) => item.creatorId === creator.id).slice(0, 5) : [];
   const serviceOrders = (platform.serviceOrders || []).filter((item) => item.requesterId === auth?.user?.id).slice(0, 5);
+  const accountEvents = (platform.ordersHistory || []).filter((item) => item.profileId === auth?.user?.id).slice(0, 10);
   const cycle = getCycleDates((platform.memberships || []).find((m) => m.profileId === auth?.user?.id)?.renewAt);
   const quota = creatorPlan && creator ? getCreatorQuotaSnapshot({ creatorPlanId: creatorPlan.id, creatorId: creator.id, profileId: auth.user.id, platform }) : null;
   const earnings = creator ? getCreatorEarningsSnapshot({ platform, creatorId: creator.id }) : null;
@@ -190,12 +223,13 @@ export function getAccountCenterSnapshot({ auth, platform }) {
     creator,
     uploads,
     serviceOrders,
+    accountEvents,
     cycle,
     quota,
     earnings,
     commissionRate,
     billing,
-    recentActivity: buildRecentActivity({ viewerPlan, creatorPlan, uploads, serviceOrders, cycle, quota, earnings }),
+    recentActivity: buildRecentActivity({ viewerPlan, creatorPlan, uploads, serviceOrders, cycle, quota, earnings, accountEvents }),
     recentChanges: buildRecentChanges({ viewerPlan, creatorPlan, quota, commissionRate, serviceOrders, uploads, earnings }),
   };
 }
