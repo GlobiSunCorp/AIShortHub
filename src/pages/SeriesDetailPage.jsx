@@ -14,6 +14,7 @@ export function SeriesDetailPage({ id, platform, auth }) {
 
   const membership = resolveMembership(auth, platform);
   const isMember = membership.tier !== 'free' || Boolean(membership.creatorPlan) || auth.userState === 'admin';
+  const videoUnitLabel = episodes.length === 1 ? 'Video' : 'Videos';
 
   return (
     <div className="ds-page">
@@ -31,7 +32,8 @@ export function SeriesDetailPage({ id, platform, auth }) {
           <div className="meta-row">
             {(series.tags || []).map((tag) => <span className="meta-pill" key={tag}>{tag}</span>)}
             <span className="meta-pill">Creator: {creator?.studioName || 'Unknown'}</span>
-            <span className="meta-pill">Trailer: {trailer?.title || 'Available in episode 1 slot'}</span>
+            <span className="meta-pill">Trailer: {trailer?.title || 'Available in video 1 slot'}</span>
+            <span className="meta-pill">{episodes.length} {videoUnitLabel}</span>
           </div>
 
           <div className="row wrap detail-actions">
@@ -41,17 +43,17 @@ export function SeriesDetailPage({ id, platform, auth }) {
 
           <article className="card-secondary">
             <h4 className="ds-h3">Access map</h4>
-            <p className="ds-caption">Trailer: always open. Preview episodes: {freePreview.join(', ')}. Main episodes: require subscription or purchase.</p>
-            <p className="ds-caption">Title price: {formatUsd(pricing.titlePriceUsd)} · Episode unlock: {formatUsd(pricing.episodeUnlockPriceUsd)}</p>
+            <p className="ds-caption">Trailer: always open. Preview videos: {freePreview.join(', ')}. Main videos: require subscription or purchase.</p>
+            <p className="ds-caption">Title price: {formatUsd(pricing.titlePriceUsd)} · Single-video unlock: {formatUsd(pricing.episodeUnlockPriceUsd)}</p>
             <p className="ds-caption">Finale unlock: {pricing.finaleUnlockEnabled ? formatUsd(pricing.finaleUnlockPriceUsd) : 'Not enabled'}</p>
           </article>
 
-          {!isMember ? <article className="watch-lock"><h3 className="ds-h3">Need full access?</h3><p className="ds-caption">Free users can watch trailer + preview episodes. Upgrade or unlock by title/episode when ready.</p><Link className="info-link" to="/pricing">View viewer plans</Link></article> : null}
+          {!isMember ? <article className="watch-lock"><h3 className="ds-h3">Need full access?</h3><p className="ds-caption">Free users can watch trailer + preview videos. Upgrade or unlock by title/video when ready.</p><Link className="info-link" to="/pricing">View viewer plans</Link></article> : null}
         </div>
       </section>
 
       <section className="panel ds-section">
-        <h2 className="ds-h2">Episodes</h2>
+        <h2 className="ds-h2">Videos</h2>
         <EpisodeList
           episodes={episodes}
           currentEpisodeNumber={1}
