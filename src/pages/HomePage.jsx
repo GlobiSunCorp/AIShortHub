@@ -85,11 +85,11 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
   const previewCount = catalog.episodeMap[featured?.id]?.preview || 1;
   const totalCount = catalog.episodeMap[featured?.id]?.total || 12;
   const posterUrl = heroConfig.posterUrl || publicHeroPoster;
-  const primaryCtaLabel = heroConfig.primaryCtaLabel || 'Watch trailer';
-  const secondaryCtaLabel = heroConfig.secondaryCtaLabel || 'Browse titles';
-  const creatorCtaLabel = heroConfig.creatorCtaLabel || 'For creators';
-  const eyebrow = heroConfig.eyebrow || 'Viewer-first landing';
-  const kicker = heroConfig.kicker || 'Featured launch title';
+  const primaryCtaLabel = heroConfig.primaryCtaLabel || 'Explore AI Shorts';
+  const secondaryCtaLabel = heroConfig.secondaryCtaLabel || 'Submit Your Work';
+  const creatorCtaLabel = heroConfig.creatorCtaLabel || 'For Creators';
+  const eyebrow = heroConfig.eyebrow || 'Global AI shorts spotlight';
+  const kicker = heroConfig.kicker || 'Featured creator release';
 
   const heroFrameStyle = useMemo(() => {
     if (isMobile) return { aspectRatio: '9 / 16', minHeight: 'clamp(540px, 86vh, 820px)', maxHeight: 'none' };

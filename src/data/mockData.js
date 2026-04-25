@@ -5,18 +5,32 @@ export const PLATFORM_CONFIG = {
   settlementCycle: 'Monthly on the 5th business day (mock)',
   homeHero: {
     featuredSeriesId: 'hidden-return',
-    eyebrow: 'Viewer-first landing',
-    kicker: 'Featured launch title',
-    title: 'Her Hidden Return',
-    synopsis: 'A vanished heiress returns under a new identity and rewrites every power game around her.',
+    eyebrow: 'Global AI shorts spotlight',
+    kicker: 'Featured creator release',
+    title: 'The Hub for AI-Powered Short Videos',
+    synopsis:
+      'Discover cinematic AI shorts, vertical videos, trailers, music videos, animations, commercials, and experimental stories from creators around the world.',
     posterUrl: '',
-    primaryCtaLabel: 'Watch trailer',
-    secondaryCtaLabel: 'Browse titles',
-    creatorCtaLabel: 'For creators',
+    primaryCtaLabel: 'Explore AI Shorts',
+    secondaryCtaLabel: 'Submit Your Work',
+    creatorCtaLabel: 'For Creators',
   },
 };
 
-export const tags = ['Romance', 'Revenge', 'Mystery', 'Urban', 'Fantasy', 'Workplace', 'Suspense', 'Historical'];
+export const tags = [
+  'Cinematic',
+  'Vertical',
+  'Animation',
+  'Music Video',
+  'Trailer',
+  'Commercial',
+  'Experimental',
+  'Sci-Fi',
+  'Horror',
+  'Comedy',
+  'Drama',
+  'Product Video',
+];
 
 export const profiles = [
   { id: 'u_viewer', name: 'Mia Member', email: 'mia@example.com', role: 'member', viewerPlan: 'free', creatorPlan: null },
@@ -31,7 +45,7 @@ export const memberships = [
 ];
 
 export const creators = [
-  { id: 'c_luma', profileId: 'u_creator', studioName: 'Luma Vertical Drama', bio: 'TikTok first AI short drama studio.', revenueShare: 0.9 },
+  { id: 'c_luma', profileId: 'u_creator', studioName: 'Luma Vertical Studio', bio: 'TikTok-first AI-powered short video studio.', revenueShare: 0.9 },
   { id: 'c_midnight', profileId: 'u_creator', studioName: 'Midnight Plot Lab', bio: 'Urban revenge mini-series.', revenueShare: 0.9 },
 ];
 

@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
 
 const CATEGORY_TAXONOMY = [
+  'Cinematic', 'Vertical', 'Animation', 'Music Video', 'Trailer', 'Commercial', 'Experimental',
+  'Sci-Fi', 'Horror', 'Comedy', 'Drama', 'Product Video',
   'Romance', 'Revenge', 'Mystery', 'Urban', 'Fantasy', 'Workplace', 'Suspense', 'Historical',
-  'CEO / Billionaire', 'Marriage Contract', 'Rebirth / Return', 'Palace / Period',
-  'Campus / Youth', 'Thriller', 'Family Drama',
+  'CEO / Billionaire', 'Marriage Contract', 'Rebirth / Return', 'Palace / Period', 'Campus / Youth', 'Thriller',
 ];
 
 const SORT_OPTIONS = [
@@ -13,7 +14,7 @@ const SORT_OPTIONS = [
 ];
 
 const QUICK_FILTERS = ['Free Preview', 'Full Access', 'Paid Unlock', 'Trending', 'New This Week'];
-const HOT_KEYWORDS = ['contract marriage', 'billionaire revenge', 'palace thriller', 'rebirth heiress', 'office romance'];
+const HOT_KEYWORDS = ['cinematic ai short', 'vertical trailer', 'ai music video', 'experimental short', 'product video'];
 
 function textIncludes(text, query) {
   return (text || '').toLowerCase().includes(query);
