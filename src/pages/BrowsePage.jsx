@@ -17,8 +17,8 @@ export function BrowsePage({ platform }) {
   return (
     <div className="ds-page">
       <section className="panel ds-section">
-        <SectionTitle title="Browse" desc="Discover short dramas by category, mood, monetization mode, and creator profile." />
-        <p className="ds-meta">Smart discovery supports title/tag/creator/synopsis/theme/payment keywords with guided suggestions.</p>
+        <SectionTitle title="Browse" desc="Discover AI-powered short videos by format, genre, style, monetization mode, and creator profile." />
+        <p className="ds-meta">Smart discovery supports title/tag/creator/synopsis/style/format/payment keywords with guided suggestions.</p>
         <div className="browse-filters">
           <label>
             Smart Search
