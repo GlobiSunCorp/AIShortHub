@@ -4,12 +4,13 @@ export function SeriesCard({ series, episodeCount = 0, previewCount = 0 }) {
   const monetization = series?.monetization || {};
   const accessLabel = previewCount > 0 ? 'Free Preview' : monetization.subscriptionAccess ? 'Included with Subscription' : 'Paid Unlock';
   const reviewLabel = series.status === 'pending_review' ? 'In Review' : series.status;
+  const unitLabel = episodeCount === 1 ? 'Video' : 'Videos';
 
   return (
     <article className="series-card">
       <Link className="cover from-purple cover-link" to={`/watch/${series.id}/1`}>
         <span>{reviewLabel}</span>
-        <div className="play-overlay" aria-label="Play series trailer">
+        <div className="play-overlay" aria-label="Play AI short">
           ▶ Play
         </div>
       </Link>
@@ -27,7 +28,7 @@ export function SeriesCard({ series, episodeCount = 0, previewCount = 0 }) {
           ))}
         </div>
         <div className="row split small-text series-card-foot">
-          <span>{episodeCount} Episodes</span>
+          <span>{episodeCount} {unitLabel}</span>
           <span>{previewCount} Preview</span>
         </div>
         <div className="row split center">
@@ -35,7 +36,7 @@ export function SeriesCard({ series, episodeCount = 0, previewCount = 0 }) {
             Play now →
           </Link>
           <Link className="text-link" to={`/series/${series.id}`}>
-            View detail →
+            View details →
           </Link>
         </div>
       </div>
