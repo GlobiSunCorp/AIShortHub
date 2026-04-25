@@ -12,6 +12,35 @@ import { getAccountCenterSnapshot } from '../lib/selectors/getAccountCenterSnaps
 import { HowPricingWorksPanel } from '../components/billing/HowPricingWorksPanel';
 import { RevenueFlowDiagram } from '../components/billing/RevenueFlowDiagram';
 
+const TONE_STYLES = {
+  premium: {
+    borderColor: 'rgba(244, 193, 109, 0.36)',
+    background: 'linear-gradient(145deg, rgba(70, 44, 14, 0.36), rgba(13, 16, 30, 0.94))',
+    boxShadow: '0 18px 36px rgba(67, 42, 12, 0.14)',
+  },
+  upgrade: {
+    borderColor: 'rgba(181, 139, 255, 0.36)',
+    background: 'linear-gradient(145deg, rgba(43, 30, 73, 0.42), rgba(13, 16, 30, 0.94))',
+    boxShadow: '0 16px 34px rgba(48, 28, 92, 0.16)',
+  },
+  ok: {
+    borderColor: 'rgba(139, 225, 172, 0.28)',
+    background: 'linear-gradient(145deg, rgba(23, 56, 45, 0.3), rgba(13, 16, 30, 0.94))',
+  },
+  warn: {
+    borderColor: 'rgba(255, 193, 104, 0.35)',
+    background: 'linear-gradient(145deg, rgba(72, 47, 15, 0.32), rgba(13, 16, 30, 0.94))',
+  },
+  neutral: {
+    borderColor: 'rgba(144, 161, 255, 0.2)',
+    background: 'linear-gradient(145deg, rgba(24, 31, 58, 0.36), rgba(13, 16, 30, 0.94))',
+  },
+};
+
+function toneStyle(tone) {
+  return TONE_STYLES[tone] || TONE_STYLES.neutral;
+}
+
 function PlanSummaryCard({ title, badgeKey, name, priceLabel, summary, ctaLabel, ctaTo, tone = 'data' }) {
   const className = tone === 'status' ? 'card-status' : tone === 'secondary' ? 'card-secondary' : 'card-data';
   return (
@@ -30,15 +59,16 @@ function PlanSummaryCard({ title, badgeKey, name, priceLabel, summary, ctaLabel,
 
 function ActivityCard({ item }) {
   return (
-    <article className="mini-card" style={{ borderRadius: '24px' }}>
+    <article className="mini-card" style={{ borderRadius: '24px', ...toneStyle(item.tone) }}>
       <div className="row wrap center" style={{ justifyContent: 'space-between', marginBottom: '0.45rem' }}>
         <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span aria-hidden="true">{item.icon}</span>
+          <span aria-hidden="true" style={{ fontSize: '1.15rem' }}>{item.icon}</span>
           {item.title}
         </strong>
         <span className="meta-pill">{item.time}</span>
       </div>
       <p className="ds-meta">{item.description}</p>
+      {item.impact ? <span className="meta-pill" style={{ width: 'fit-content', marginTop: '0.35rem' }}>{item.impact}</span> : null}
       {item.ctaLabel ? <Link className="info-link" to={item.ctaTo}>{item.ctaLabel} →</Link> : null}
     </article>
   );
@@ -46,7 +76,7 @@ function ActivityCard({ item }) {
 
 function ChangeCard({ item }) {
   return (
-    <article className="mini-card" style={{ borderRadius: '24px' }}>
+    <article className="mini-card" style={{ borderRadius: '24px', ...toneStyle(item.tone) }}>
       <p className="ds-caption">{item.label}</p>
       <p className="stat-value" style={{ fontSize: '1.2rem' }}>{item.value}</p>
       <p className="ds-meta">{item.note}</p>
