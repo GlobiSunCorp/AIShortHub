@@ -53,9 +53,9 @@ export function getCreatorQuotaSnapshot({ creatorPlanId, creatorId, platform, pr
   };
 
   const warning = [];
-  if (remaining.seriesLeft <= 1) warning.push(`${remaining.seriesLeft} series slot left`);
+  if (remaining.seriesLeft <= 1) warning.push(`${remaining.seriesLeft} active project slot left`);
   if (remaining.storageGbLeft <= 2) warning.push(`${remaining.storageGbLeft.toFixed(1)}GB storage remaining`);
-  if (remaining.episodesLeft <= 10) warning.push(`${remaining.episodesLeft} episode slots left`);
+  if (remaining.episodesLeft <= 10) warning.push(`${remaining.episodesLeft} video slots left`);
 
   return {
     plan,
@@ -64,15 +64,15 @@ export function getCreatorQuotaSnapshot({ creatorPlanId, creatorId, platform, pr
     remaining,
     warning,
     cycleLabel: 'Current billing cycle · renew placeholder: 2026-05-01',
-    upgradeHint: warning.length ? 'You are close to plan limits. Upgrade to unlock more slots and storage.' : 'Plan utilization is healthy.',
+    upgradeHint: warning.length ? 'You are close to plan limits. Upgrade to unlock more project, video, and storage capacity.' : 'Plan utilization is healthy.',
   };
 }
 
 export function evaluateQuotaLimits(snapshot) {
   const failures = [];
   const { usage, limits } = snapshot;
-  if (usage.activeSeries >= limits.maxActiveSeries) failures.push(`超过可激活剧集上限（${limits.maxActiveSeries}）`);
-  if (usage.totalEpisodes >= limits.maxTotalEpisodes) failures.push(`超过分集总上限（${limits.maxTotalEpisodes}）`);
+  if (usage.activeSeries >= limits.maxActiveSeries) failures.push(`超过可激活项目上限（${limits.maxActiveSeries}）`);
+  if (usage.totalEpisodes >= limits.maxTotalEpisodes) failures.push(`超过视频总上限（${limits.maxTotalEpisodes}）`);
   if (usage.monthlyUploads >= limits.monthlyUploadLimit) failures.push(`超过月上传次数上限（${limits.monthlyUploadLimit}）`);
   if (usage.usedStorageGb >= limits.monthlyAssetStorageLimitGb) failures.push(`超过月素材存储上限（${limits.monthlyAssetStorageLimitGb}GB）`);
   return failures;
