@@ -11,7 +11,7 @@ export const VIEWER_PLANS = [
     exclusiveContent: false,
     watchTools: false,
     recommendationPriority: 'Standard',
-    accessNote: '仅可试看与预告',
+    accessNote: 'Trailers and preview AI shorts only',
     stripePriceKey: 'STRIPE_PRICE_VIEWER_FREE',
   },
   {
@@ -26,7 +26,7 @@ export const VIEWER_PLANS = [
     exclusiveContent: false,
     watchTools: true,
     recommendationPriority: 'High',
-    accessNote: '可观看完整剧集',
+    accessNote: 'Full AI short video access across eligible titles',
     stripePriceKey: 'STRIPE_PRICE_VIEWER_PRO',
   },
   {
@@ -41,7 +41,7 @@ export const VIEWER_PLANS = [
     exclusiveContent: true,
     watchTools: true,
     recommendationPriority: 'Priority Plus',
-    accessNote: '更高画质、抢先看与专属内容',
+    accessNote: 'Higher quality, early access, and exclusive AI shorts',
     stripePriceKey: 'STRIPE_PRICE_VIEWER_PREMIUM',
   },
 ];
@@ -125,11 +125,11 @@ export const CREATOR_PLANS = [
 ];
 
 export const ADD_ON_SERVICES = [
-  { id: 'motion_poster_addon', name: 'Motion Poster Add-on', description: '5-10s animated poster loops for storefront conversion.', amountUsd: 15, price: '+$15', pricingMode: 'addon', includedIn: ['studio'], discountedIn: ['creator_pro'] },
-  { id: 'trailer_editing', name: 'Trailer Editing', description: 'Trailer narrative pacing and hook optimization.', amountUsd: 29, price: '$29+', pricingMode: 'starting', includedIn: [], discountedIn: ['creator_pro', 'studio'] },
-  { id: 'tiktok_promo_pack', name: 'TikTok Promo Pack', description: 'Hook cuts, captions and launch script set.', amountUsd: 49, price: '$49+', pricingMode: 'starting', includedIn: ['studio'], discountedIn: ['creator_pro'] },
-  { id: 'subtitle_localization', name: 'Subtitle / Localization', description: 'Multilingual subtitles and tone localization.', amountUsd: 19, price: '$19+', pricingMode: 'starting', includedIn: [], discountedIn: ['creator_pro', 'studio'] },
-  { id: 'listing_packaging', name: 'Listing Packaging', description: 'Metadata pack, tags and storefront listing improvements.', amountUsd: 39, price: '$39+', pricingMode: 'starting', includedIn: [], discountedIn: ['creator_pro', 'studio'] },
+  { id: 'motion_poster_addon', name: 'Motion Poster Add-on', description: '5-10s animated poster loops for AI short cards, trailers, and storefront conversion.', amountUsd: 15, price: '+$15', pricingMode: 'addon', includedIn: ['studio'], discountedIn: ['creator_pro'] },
+  { id: 'trailer_editing', name: 'Trailer Editing', description: 'Trailer, teaser, or hook-cut pacing for AI-powered short videos.', amountUsd: 29, price: '$29+', pricingMode: 'starting', includedIn: [], discountedIn: ['creator_pro', 'studio'] },
+  { id: 'tiktok_promo_pack', name: 'TikTok Promo Pack', description: 'Vertical hooks, captions and launch script set for TikTok/Reels/Shorts.', amountUsd: 49, price: '$49+', pricingMode: 'starting', includedIn: ['studio'], discountedIn: ['creator_pro'] },
+  { id: 'subtitle_localization', name: 'Subtitle / Localization', description: 'Multilingual subtitles and tone localization for global AI shorts.', amountUsd: 19, price: '$19+', pricingMode: 'starting', includedIn: [], discountedIn: ['creator_pro', 'studio'] },
+  { id: 'listing_packaging', name: 'Listing Packaging', description: 'Metadata pack, tags and showcase listing improvements.', amountUsd: 39, price: '$39+', pricingMode: 'starting', includedIn: [], discountedIn: ['creator_pro', 'studio'] },
 ];
 
 export const REVENUE_MODEL = {
@@ -137,14 +137,14 @@ export const REVENUE_MODEL = {
     { key: 'advertising', label: 'Advertising revenue', detail: 'Primary launch-stage revenue source from feed / mid-roll inventory and brand placement.' },
     { key: 'services', label: 'Service revenue', detail: 'Creator support services like trailer editing, promo packs, localization and packaging.' },
     { key: 'viewer_subscription', label: 'Viewer subscriptions', detail: 'Recurring viewer membership helps finance platform operations and payout pool.' },
-    { key: 'single_unlocks', label: 'Single-title / single-episode unlocks', detail: 'One-time unlock purchases by non-subscribers.' },
+    { key: 'single_unlocks', label: 'Single-title / single-video unlocks', detail: 'One-time unlock purchases by non-subscribers.' },
     { key: 'low_commission', label: 'Low platform commission', detail: 'Low launch-stage commission only after creators generate revenue.' },
   ],
   creator: [
     'Ad revenue share',
     'Subscription pool share',
     'Single-title sales',
-    'Single-episode sales',
+    'Single-video sales',
     'Net payout after low commission',
   ],
 };
@@ -152,33 +152,33 @@ export const REVENUE_MODEL = {
 export const REFUND_POLICY_CONFIG = {
   viewer: {
     title: 'Viewer Subscription Refund Policy',
-    short: '支持随时取消续费；已开始计费周期默认不按比例退款。',
+    short: 'Cancel renewal anytime; started billing cycles are usually not prorated.',
     points: [
-      '可随时取消自动续费，取消后在当前计费周期结束时生效。',
-      '已开始的计费周期默认不按比例退款。',
-      '重复扣费、支付异常或平台重大服务故障可提交人工审核。',
-      '若通过 App Store/第三方平台购买，按对应平台规则处理。',
+      'You can cancel auto-renewal anytime; cancellation takes effect after the current billing cycle.',
+      'Started billing cycles are usually not prorated.',
+      'Duplicate charges, payment errors, or major platform outages can be reviewed manually.',
+      'If purchased through an app store or third-party platform, that platform’s rules apply.',
     ],
   },
   creator: {
     title: 'Creator Plan Refund Policy',
-    short: 'Creator Plan 独立退款；上传/审核/权益消耗后不可退款。',
+    short: 'Creator Plan refunds are separate; used upload/review/entitlement benefits are not refundable.',
     reviewWindowDays: 7,
     points: [
-      'Creator Plan 与 Viewer Subscription 独立结算、独立审核。',
-      '首次购买可在审核窗口内申请退款（默认 7 天 mock 规则）。',
-      '一旦上传内容、提交审核、使用方案权益或消耗优先审核/推荐位资格，则不可退款。',
-      '特殊争议可转人工评估，并保留转平台 credit 的处理方式。',
+      'Creator Plan and Viewer Subscription are billed and reviewed separately.',
+      'First purchases can request review within the default 7-day mock review window.',
+      'Once content is uploaded, submitted for review, or plan benefits are used, the plan is generally not refundable.',
+      'Special disputes may be manually reviewed and converted to platform credit where appropriate.',
     ],
   },
   addon: {
     title: 'Add-on Services Refund Policy',
-    short: '未开工可退款；排期或制作开始后默认不退款。',
+    short: 'Refundable before work starts; generally not refundable after scheduling or production begins.',
     points: [
-      '服务未开工前支持退款。',
-      '进入排期/制作后默认不可退款。',
-      '特殊情况可转平台 credit 或调整服务范围。',
-      '平台未能开工或明显履约失败，可人工处理退款。',
+      'Services can be refunded before work begins.',
+      'After scheduling or production begins, add-on services are generally not refundable.',
+      'Special cases can be converted to platform credit or adjusted service scope.',
+      'If the platform cannot start work or materially fails to deliver, manual refund handling may apply.',
     ],
   },
 };
@@ -202,8 +202,8 @@ export const CREATOR_ASSETS = [
   'Motion Poster',
   'Vertical Cover',
   'Square Thumbnail',
-  'Trailer',
-  'Main Episode',
+  'Trailer / Teaser',
+  'Main Video',
   'Subtitle files',
   'Caption pack',
   'Promo pack',
