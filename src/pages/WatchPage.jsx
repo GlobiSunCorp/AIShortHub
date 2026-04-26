@@ -19,7 +19,7 @@ export function WatchPage({ auth, id, episode, platform }) {
 
   const moreLikeThis = useMemo(() => (platform.series || []).filter((item) => item.id !== series.id && item.status === 'published').slice(0, 3), [platform.series, series.id]);
 
-  if (!current) return <section className="empty-state">This title has no playable episode yet.</section>;
+  if (!current) return <section className="empty-state">This AI short has no playable video yet.</section>;
 
   return (
     <div className="ds-page">
@@ -27,23 +27,23 @@ export function WatchPage({ auth, id, episode, platform }) {
         <div className="stack-md">
           <VideoPlayerPlaceholder
             title={series.title}
-            subtitle={`Episode ${current.number}: ${current.title}`}
+            subtitle={`Video ${current.number}: ${current.title}`}
             canWatch={canWatch}
             helper={canWatch
               ? `Playable window: ${watchSeconds}s · Source URL: ${current.videoUrl}`
-              : `Locked main episode. Unlock this episode for ${formatUsd(current.unlockPriceUsd || monetization.episodeUnlockPriceUsd)} or full title for ${formatUsd(monetization.titlePriceUsd)}.`}
+              : `Locked main video. Unlock this video for ${formatUsd(current.unlockPriceUsd || monetization.episodeUnlockPriceUsd)} or full title for ${formatUsd(monetization.titlePriceUsd)}.`}
           />
 
           <article className="panel ds-section">
             <h3 className="ds-h3">Playback context</h3>
-            <p className="ds-caption">Trailer and preview episodes are free. Main episodes require subscription or unlock purchase.</p>
+            <p className="ds-caption">Trailer and preview videos are free. Main videos require subscription or unlock purchase.</p>
             <p className="ds-caption">Finale unlock: {monetization.finaleUnlockEnabled ? 'Enabled on this title' : 'Not enabled on this title'}.</p>
             <Link className="info-link" to={`/series/${series.id}`}>Back to title details</Link>
           </article>
 
           {!canWatch ? (
             <article className="watch-lock">
-              <h3 className="ds-h3">Episode locked</h3>
+              <h3 className="ds-h3">Video locked</h3>
               <p className="ds-caption">Choose a plan for full access, or unlock only what you want to watch.</p>
               <div className="row wrap">
                 <Link className="btn btn-primary" to="/pricing">Upgrade plan</Link>
@@ -55,7 +55,7 @@ export function WatchPage({ auth, id, episode, platform }) {
 
         <aside className="panel stack-md watch-rail">
           <h3 className="ds-h3">{series.title}</h3>
-          <p className="ds-caption">Preview episodes: {freePreviewEpisodes.join(', ')}.</p>
+          <p className="ds-caption">Preview videos: {freePreviewEpisodes.join(', ')}.</p>
           <EpisodeList
             episodes={episodes}
             currentEpisodeNumber={current.number}
@@ -66,7 +66,7 @@ export function WatchPage({ auth, id, episode, platform }) {
       </section>
 
       <section className="ds-section">
-        <h2 className="ds-h2">More titles</h2>
+        <h2 className="ds-h2">More AI shorts</h2>
         <div className="row wrap">
           {moreLikeThis.map((item) => <Link key={item.id} className="meta-pill" to={`/series/${item.id}`}>{item.title}</Link>)}
         </div>
