@@ -92,12 +92,12 @@ export function AdminPage({ platform, auth }) {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setHeroAssetFeedback({ type: 'error', message: 'Only image files are supported for the homepage hero poster.' });
+      setHeroAssetFeedback({ type: 'error', message: 'Only image files are supported for the AI shorts hero poster.' });
       return;
     }
 
     if (file.size > MAX_HERO_POSTER_BYTES) {
-      setHeroAssetFeedback({ type: 'error', message: 'Image is too large. Please keep the homepage poster under 5 MB.' });
+      setHeroAssetFeedback({ type: 'error', message: 'Image is too large. Please keep the AI shorts hero poster under 5 MB.' });
       return;
     }
 
@@ -106,7 +106,7 @@ export function AdminPage({ platform, auth }) {
       if (!dataUrl) throw new Error('Image file was empty.');
       setHeroDraft((prev) => ({ ...prev, posterUrl: dataUrl }));
       setPosterPreviewOk(true);
-      setHeroAssetFeedback({ type: 'success', message: `Poster uploaded: ${file.name}. Save Homepage Hero to publish this poster.` });
+      setHeroAssetFeedback({ type: 'success', message: `Poster uploaded: ${file.name}. Save AI Shorts Hero to publish this poster.` });
     } catch (error) {
       setHeroAssetFeedback({ type: 'error', message: error.message || 'Poster upload failed. Please try another file.' });
     }
@@ -114,19 +114,19 @@ export function AdminPage({ platform, auth }) {
 
   const saveHomepageHero = async () => {
     if (!minLength(heroDraft.title, 2)) {
-      setFeedback({ type: 'error', message: 'Homepage hero title needs at least 2 characters.' });
+      setFeedback({ type: 'error', message: 'AI shorts hero title needs at least 2 characters.' });
       return;
     }
     if (!minLength(heroDraft.synopsis, 12)) {
-      setFeedback({ type: 'error', message: 'Homepage hero synopsis should be more descriptive.' });
+      setFeedback({ type: 'error', message: 'AI shorts hero synopsis should be more descriptive.' });
       return;
     }
 
     try {
       await verifyImageUrl(heroDraft.posterUrl);
       platform.actions.updatePlatformConfig({ homeHero: heroDraft });
-      setFeedback({ type: 'success', message: 'Homepage hero updated. Refresh Home to verify the new poster and copy.' });
-      setHeroAssetFeedback({ type: 'success', message: 'Poster passed validation and is now connected to the homepage hero.' });
+      setFeedback({ type: 'success', message: 'AI Shorts Hero updated. Refresh Home to verify the new poster and copy.' });
+      setHeroAssetFeedback({ type: 'success', message: 'Poster passed validation and is now connected to the public AI shorts hero.' });
       setPosterPreviewOk(true);
     } catch (error) {
       setPosterPreviewOk(false);
@@ -139,7 +139,7 @@ export function AdminPage({ platform, auth }) {
     setHeroDraft(defaultHeroDraft);
     setPosterPreviewOk(true);
     setHeroAssetFeedback({ type: '', message: '' });
-    setFeedback({ type: 'success', message: 'Homepage hero reset to default config.' });
+    setFeedback({ type: 'success', message: 'AI Shorts Hero reset to default config.' });
   };
 
   return (
@@ -147,7 +147,7 @@ export function AdminPage({ platform, auth }) {
       <OnboardingGuide role="admin" />
       <section className="panel ds-section">
         <h1 className="ds-h1">Founder / Operator Console</h1>
-        <p className="ds-meta">Run launch readiness, moderation, billing checks, support follow-up, and homepage merchandising from one workspace.</p>
+        <p className="ds-meta">Run launch readiness, moderation, billing checks, support follow-up, and AI shorts homepage merchandising from one workspace.</p>
       </section>
       {feedback.message ? <section className="panel"><p className={`form-feedback ${feedback.type}`}>{feedback.message}</p></section> : null}
 
@@ -161,8 +161,8 @@ export function AdminPage({ platform, auth }) {
       <section className="panel ds-section stack-md">
         <div className="section-title">
           <div>
-            <h2 className="ds-h2">Homepage Hero Control</h2>
-            <p className="ds-meta">Upload a poster directly, preview it before saving, and avoid brittle third-party image links.</p>
+            <h2 className="ds-h2">AI Shorts Hero Control</h2>
+            <p className="ds-meta">Upload a poster directly, preview it before saving, and merchandise the public AI-powered short video showcase.</p>
           </div>
           <Link className="info-link" to="/">Open Home preview</Link>
         </div>
@@ -184,14 +184,14 @@ export function AdminPage({ platform, auth }) {
               options={publicSeriesOptions.length ? publicSeriesOptions : [{ value: 'hidden-return', label: 'Her Hidden Return' }]}
             />
             <label className="stack-sm">
-              <span className="ds-caption">Upload homepage poster</span>
+              <span className="ds-caption">Upload AI shorts hero poster</span>
               <input className="input" type="file" accept="image/*" onChange={handlePosterFileChange} />
             </label>
             <label className="stack-sm">
               <span className="ds-caption">Or paste a direct public image URL</span>
               <input className="input" placeholder="Hero poster URL override" value={heroDraft.posterUrl} onChange={(e) => handlePosterUrlChange(e.target.value)} />
             </label>
-            <p className="ds-caption">Best results: JPG or PNG, under 5 MB, wide hero composition. Uploaded files stay in this demo browser session.</p>
+            <p className="ds-caption">Best results: JPG or PNG, under 5 MB, cinematic or vertical-friendly composition. Uploaded files stay in this demo browser session.</p>
             {heroAssetFeedback.message ? <p className={`form-feedback ${heroAssetFeedback.type}`}>{heroAssetFeedback.message}</p> : null}
             <input className="input" placeholder="Top kicker" value={heroDraft.kicker} onChange={(e) => setHeroDraft((prev) => ({ ...prev, kicker: e.target.value }))} />
             <input className="input" placeholder="Eyebrow" value={heroDraft.eyebrow} onChange={(e) => setHeroDraft((prev) => ({ ...prev, eyebrow: e.target.value }))} />
@@ -202,7 +202,7 @@ export function AdminPage({ platform, auth }) {
               {heroDraft.posterUrl ? (
                 <img
                   src={heroDraft.posterUrl}
-                  alt="Homepage hero poster preview"
+                  alt="AI shorts hero poster preview"
                   className="admin-hero-preview-image"
                   onLoad={() => setPosterPreviewOk(true)}
                   onError={() => {
@@ -213,13 +213,13 @@ export function AdminPage({ platform, auth }) {
               ) : (
                 <div className="admin-hero-preview-empty">
                   <strong>No poster selected yet</strong>
-                  <span>Upload a file or paste a direct image URL to preview the homepage hero.</span>
+                  <span>Upload a file or paste a direct image URL to preview the AI shorts hero.</span>
                 </div>
               )}
               <div className="admin-hero-preview-scrim" />
               <div className="admin-hero-preview-copy">
-                <span className="ds-caption">{heroDraft.kicker || 'Featured launch title'}</span>
-                <strong>{heroDraft.title || 'Hero title preview'}</strong>
+                <span className="ds-caption">{heroDraft.kicker || 'Featured AI short'}</span>
+                <strong>{heroDraft.title || 'AI shorts hero title preview'}</strong>
                 <span>{heroDraft.synopsis || 'Hero synopsis preview will appear here.'}</span>
               </div>
             </div>
@@ -232,14 +232,14 @@ export function AdminPage({ platform, auth }) {
           </article>
         </div>
         <div className="row wrap">
-          <button className="btn btn-primary" type="button" onClick={saveHomepageHero}>Save Homepage Hero</button>
+          <button className="btn btn-primary" type="button" onClick={saveHomepageHero}>Save AI Shorts Hero</button>
           <button
             className="btn btn-ghost"
             type="button"
             onClick={() => {
               setHeroDraft((prev) => ({ ...prev, posterUrl: '' }));
               setPosterPreviewOk(true);
-              setHeroAssetFeedback({ type: 'success', message: 'Poster cleared. Save Homepage Hero to publish the empty/default poster state.' });
+              setHeroAssetFeedback({ type: 'success', message: 'Poster cleared. Save AI Shorts Hero to publish the empty/default poster state.' });
             }}
           >
             Clear poster
@@ -252,8 +252,8 @@ export function AdminPage({ platform, auth }) {
         <article className="card-action ds-section">
           <h2 className="ds-h2">Founder Quick Actions</h2>
           <div className="grid">
-            <Link className="btn btn-ghost" to="/creator">Upload first content</Link>
-            <button className="btn btn-ghost" type="button" onClick={() => setFilterStatus('pending_review')}>Review pending series</button>
+            <Link className="btn btn-ghost" to="/submit">Review submission landing</Link>
+            <button className="btn btn-ghost" type="button" onClick={() => setFilterStatus('pending_review')}>Review pending AI shorts</button>
             <Link className="btn btn-ghost" to="/pricing">Check payment flow and billing logic</Link>
             <Link className="btn btn-ghost" to="/services">Open support and service page</Link>
             <Link className="btn btn-ghost" to="/creator">Test creator workflow</Link>
@@ -266,7 +266,7 @@ export function AdminPage({ platform, auth }) {
           <p className="ds-meta">Ready now: {readinessReady.length}/{dashboard.launchReadiness.length}</p>
           {readinessReady.map((item) => <p key={item.key} className="ds-caption">✅ {item.label}</p>)}
           {readinessPending.length ? readinessPending.map((item) => <p key={item.key} className="ds-caption">🟡 Setup needed: {item.label}</p>) : <p className="ds-caption">No blocking setup left.</p>}
-          <p className="ds-caption">Before public launch, confirm billing, creator upload, moderation queue, support entry points, and homepage merchandising are live.</p>
+          <p className="ds-caption">Before public launch, confirm billing, creator upload, moderation queue, support entry points, and AI shorts homepage merchandising are live.</p>
         </article>
       </section>
 
@@ -277,18 +277,18 @@ export function AdminPage({ platform, auth }) {
       </section>
 
       <section className="panel ds-section">
-        <h2 className="ds-h2">Review Queue</h2>
+        <h2 className="ds-h2">AI Shorts Review Queue</h2>
         <div className="row wrap">
           <DarkSelect id="admin-review-filter" value={filterStatus} onChange={setFilterStatus} options={[{ value: 'all', label: 'All status' }, ...reviewStatuses.map((s) => ({ value: s, label: s }))]} />
           <input className="input" placeholder="Review note (required for reject)" value={reviewNote} onChange={(e) => setReviewNote(e.target.value)} />
         </div>
-        <div className="table-wrap"><table><thead><tr><th>Series</th><th>Status</th><th>Report</th><th>Flagged</th><th>Action</th></tr></thead><tbody>
+        <div className="table-wrap"><table><thead><tr><th>Title</th><th>Status</th><th>Report</th><th>Flagged</th><th>Action</th></tr></thead><tbody>
           {filteredSeries.length ? filteredSeries.map((item) => (
             <tr key={item.id}><td>{item.title}</td><td>{item.status}</td><td>{item.report_count || 0}</td><td>{item.flagged ? 'Yes' : 'No'}</td><td><div className="row wrap">
               <button className="btn btn-primary" type="button" onClick={async () => { await platform.actions.reviewSeries(item.id, 'approved', minLength(reviewNote, 2) ? reviewNote : 'Approved by admin'); setFeedback({ type: 'success', message: `${item.title} approved.` }); setReviewNote(''); }}>Approve</button>
               <button className="btn btn-ghost" type="button" onClick={async () => { if (!minLength(reviewNote, 4)) return setFeedback({ type: 'error', message: 'Please add a clear reject note (at least 4 chars).' }); await platform.actions.reviewSeries(item.id, 'rejected', reviewNote); setFeedback({ type: 'success', message: `${item.title} rejected.` }); setReviewNote(''); }}>Reject</button>
             </div></td></tr>
-          )) : <tr><td colSpan={5} className="small-text">No content in this filter yet.</td></tr>}
+          )) : <tr><td colSpan={5} className="small-text">No AI short in this filter yet.</td></tr>}
         </tbody></table></div>
       </section>
 
