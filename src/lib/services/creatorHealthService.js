@@ -37,8 +37,8 @@ export function buildQuotaAlerts({ snapshot, renewAt, unpaidOrders = [] }) {
   const daysToRenew = Math.max(Math.ceil((new Date(renewAt || '2026-05-01').getTime() - Date.now()) / (1000 * 60 * 60 * 24)), 0);
   const alerts = [
     {
-      key: 'series',
-      message: `You have ${snapshot.remaining.seriesLeft} active series slot${snapshot.remaining.seriesLeft === 1 ? '' : 's'} left`,
+      key: 'projects',
+      message: `You have ${snapshot.remaining.seriesLeft} active project slot${snapshot.remaining.seriesLeft === 1 ? '' : 's'} left`,
       state: snapshot.remaining.seriesLeft <= 0 ? 'exhausted' : snapshot.remaining.seriesLeft <= 1 ? 'near_limit' : 'normal',
       cta: 'Upgrade plan',
     },
@@ -58,7 +58,7 @@ export function buildQuotaAlerts({ snapshot, renewAt, unpaidOrders = [] }) {
     },
     {
       key: 'featured',
-      message: `Featured placement requests: ${snapshot.remaining.featuredRequestsLeft} Remaining · Resets on ${renewAt || '2026-05-01'}`,
+      message: `Featured placement requests: ${snapshot.remaining.featuredRequestsLeft} remaining · Resets on ${renewAt || '2026-05-01'}`,
       state: snapshot.remaining.featuredRequestsLeft <= 0 ? 'exhausted' : snapshot.remaining.featuredRequestsLeft <= 1 ? 'near_limit' : 'normal',
       cta: snapshot.remaining.featuredRequestsLeft <= 0 ? 'Upgrade to Studio' : 'Request featured placement',
     },
@@ -84,27 +84,27 @@ export function buildQuotaAlerts({ snapshot, renewAt, unpaidOrders = [] }) {
 
 export function buildCreatorActions({ snapshot, pendingSeriesCount, unpaidOrdersCount, draft }) {
   const actions = [];
-  if (pendingSeriesCount > 0) actions.push({ level: 'informational', title: `${pendingSeriesCount} series waiting for review`, cta: 'View review queue' });
+  if (pendingSeriesCount > 0) actions.push({ level: 'informational', title: `${pendingSeriesCount} AI short project${pendingSeriesCount === 1 ? '' : 's'} waiting for review`, cta: 'View review queue' });
   if (pct(snapshot.usage.usedStorageGb, snapshot.limits.monthlyAssetStorageLimitGb) >= 80) actions.push({ level: 'urgent', title: 'Storage above 80%', cta: 'Manage assets' });
-  if (unpaidOrdersCount > 0) actions.push({ level: 'urgent', title: `${unpaidOrdersCount} unpaid add-on order requires checkout`, cta: 'Go to services' });
-  if (!draft.trailer) actions.push({ level: 'recommended', title: 'Missing trailer asset for latest submission', cta: 'Upload trailer' });
+  if (unpaidOrdersCount > 0) actions.push({ level: 'urgent', title: `${unpaidOrdersCount} unpaid add-on order${unpaidOrdersCount === 1 ? '' : 's'} require checkout`, cta: 'Go to services' });
+  if (!draft.trailer) actions.push({ level: 'recommended', title: 'Missing trailer / teaser asset for latest submission', cta: 'Upload trailer' });
   if (!snapshot.limits.includedMotionPosterCount) actions.push({ level: 'recommended', title: 'Upgrade to Studio to unlock included Motion Poster', cta: 'Upgrade plan' });
-  actions.push({ level: 'informational', title: `${snapshot.remaining.featuredRequestsLeft} featured placement slots left`, cta: 'Request featured placement' });
+  actions.push({ level: 'informational', title: `${snapshot.remaining.featuredRequestsLeft} featured AI shorts placement slot${snapshot.remaining.featuredRequestsLeft === 1 ? '' : 's'} left`, cta: 'Request featured placement' });
   return actions;
 }
 
 export function getSubmissionChecklist({ draft, snapshot, creatorPlanName }) {
   const tagsCount = draft.tags.split(',').map((t) => t.trim()).filter(Boolean).length;
   const items = [
-    ['Title added', Boolean(draft.title.trim()), 'Add a marketable title with brand-safe naming.'],
+    ['Project title added', Boolean(draft.title.trim()), 'Add a marketable title with brand-safe naming.'],
     ['Synopsis added', draft.synopsis.trim().length >= 12, 'A concise synopsis improves review speed.'],
     ['Tags selected', tagsCount >= 1, 'At least one tag is required for discovery routing.'],
-    ['Poster uploaded', Boolean(draft.staticPoster), 'Poster is required for storefront listing.'],
-    ['Trailer added', Boolean(draft.trailer), 'Trailer is required for higher conversion.'],
-    ['At least 1 episode added', Boolean(draft.episodeUrl), 'At least one playable episode is required.'],
+    ['Poster uploaded', Boolean(draft.staticPoster), 'Poster is required for showcase listing.'],
+    ['Trailer / teaser added', Boolean(draft.trailer), 'A trailer or teaser improves conversion and discovery.'],
+    ['At least 1 main video added', Boolean(draft.episodeUrl || draft.episodes?.[0]?.url), 'At least one playable AI short video is required.'],
     ['Required metadata completed', Boolean(draft.category && draft.audience), 'Category and audience settings are mandatory.'],
-    ['Current plan supports submission', snapshot.remaining.seriesLeft > 0, `Plan ${creatorPlanName} has no remaining series slots.`],
-    ['Required assets complete', Boolean(draft.staticPoster && draft.thumbnail), 'Poster + thumbnail are required assets.'],
+    ['Current plan supports submission', snapshot.remaining.seriesLeft > 0, `Plan ${creatorPlanName} has no remaining active project slots.`],
+    ['Required assets complete', Boolean(draft.staticPoster && (draft.thumbnail || draft.squareThumbnail)), 'Poster + thumbnail are required assets.'],
     ['Motion Poster status clear', true, draft.motionPoster ? 'Included/Add-on selected and URL provided.' : 'Not selected yet.'],
   ];
 
