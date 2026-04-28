@@ -2,7 +2,7 @@ import { formatUsd } from '../data/monetization';
 
 export function EpisodeList({ episodes, currentEpisodeNumber, onSelect, membershipLocked = () => false }) {
   if (!episodes.length) {
-    return <p className="small-text">No episodes yet. Upload the first episode to start distribution.</p>;
+    return <p className="small-text">No videos yet. Upload the first trailer, preview, or main video to start distribution.</p>;
   }
 
   return (
@@ -16,9 +16,9 @@ export function EpisodeList({ episodes, currentEpisodeNumber, onSelect, membersh
             className={episode.number === currentEpisodeNumber ? 'ep-btn active' : 'ep-btn'}
             onClick={() => onSelect(episode.number)}
           >
-            <span>E{episode.number}</span>
+            <span>V{episode.number}</span>
             <small>{episode.title}</small>
-            {episode.isPreview ? <i>Preview</i> : <i>{locked ? `Unlock ${formatUsd(episode.unlockPriceUsd || 0.99)}` : 'Unlocked'}</i>}
+            {episode.isPreview ? <i>Preview video</i> : <i>{locked ? `Unlock ${formatUsd(episode.unlockPriceUsd || 0.99)}` : 'Unlocked'}</i>}
           </button>
         );
       })}
