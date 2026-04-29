@@ -4,7 +4,7 @@ export function VideoPlayerPlaceholder({ title, subtitle, canWatch, helper }) {
       <div className="player-screen">
         <p>{title}</p>
         <h2>{subtitle}</h2>
-        <small>{canWatch ? 'Playable (MVP placeholder)' : 'Locked: upgrade to Pro to watch full episode'}</small>
+        <small>{canWatch ? 'Playable (MVP placeholder)' : 'Locked: upgrade or unlock to watch this full video'}</small>
       </div>
       <div className="player-meta row split small-text">
         <span>{helper}</span>
