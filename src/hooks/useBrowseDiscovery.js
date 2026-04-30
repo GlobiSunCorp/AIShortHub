@@ -2,10 +2,9 @@ import { useMemo } from 'react';
 import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
 
 const CATEGORY_TAXONOMY = [
-  'Cinematic', 'Vertical', 'Animation', 'Music Video', 'Trailer', 'Commercial', 'Experimental',
-  'Sci-Fi', 'Horror', 'Comedy', 'Drama', 'Product Video',
-  'Romance', 'Revenge', 'Mystery', 'Urban', 'Fantasy', 'Workplace', 'Suspense', 'Historical',
-  'CEO / Billionaire', 'Marriage Contract', 'Rebirth / Return', 'Palace / Period', 'Campus / Youth', 'Thriller',
+  'Cinematic', 'Vertical', 'Animation', 'Music Video', 'Trailer', 'Commercial', 'Product Video', 'Experimental',
+  'Sci-Fi', 'Horror', 'Comedy', 'Drama', 'Fantasy', 'Suspense', 'Thriller', 'Historical',
+  'Romance', 'Mystery', 'Urban', 'Workplace', 'Campus / Youth', 'Rebirth / Return', 'Palace / Period',
 ];
 
 const SORT_OPTIONS = [
@@ -13,8 +12,17 @@ const SORT_OPTIONS = [
   'Recently Updated', 'Free Preview', 'Subscription Included', 'Paid Unlock',
 ];
 
-const QUICK_FILTERS = ['Free Preview', 'Full Access', 'Paid Unlock', 'Trending', 'New This Week'];
-const HOT_KEYWORDS = ['cinematic ai short', 'vertical trailer', 'ai music video', 'experimental short', 'product video'];
+const QUICK_FILTERS = ['Free Preview', 'Full Access', 'Paid Unlock', 'Trending', 'New This Week', 'Commercial Ready', 'Creator Showcase'];
+const HOT_KEYWORDS = [
+  'cinematic ai short',
+  'vertical trailer',
+  'ai music video',
+  'experimental short',
+  'product video',
+  'commercial ai video',
+  'animation short',
+  'creator showcase',
+];
 
 function textIncludes(text, query) {
   return (text || '').toLowerCase().includes(query);
@@ -30,6 +38,8 @@ function scoreMatch({ item, creatorName, query }) {
   if (textIncludes(creatorName, query)) score += 4;
   if (textIncludes(item.synopsis, query)) score += 3;
   if (textIncludes(item.category, query)) score += 2;
+  if (textIncludes(item.contentFormat, query)) score += 2;
+  if (textIncludes(item.creatorName, query)) score += 2;
   if (textIncludes(JSON.stringify(monetization), query)) score += 1;
   return score;
 }
@@ -41,6 +51,16 @@ function inferContentType(item) {
   if (hasPreview) return 'Free Preview';
   if (hasSubAccess) return 'Subscription Included';
   return 'Paid Unlock';
+}
+
+function matchesCommercialReady(item) {
+  const text = `${item.title || ''} ${item.category || ''} ${(item.tags || []).join(' ')} ${item.synopsis || ''}`.toLowerCase();
+  return text.includes('commercial') || text.includes('product') || text.includes('brand') || text.includes('promo');
+}
+
+function matchesCreatorShowcase(item) {
+  const text = `${item.title || ''} ${(item.tags || []).join(' ')} ${item.synopsis || ''}`.toLowerCase();
+  return text.includes('creator') || text.includes('showcase') || text.includes('experimental') || text.includes('cinematic');
 }
 
 export function useBrowseDiscovery(platform, filters) {
@@ -86,6 +106,8 @@ export function useBrowseDiscovery(platform, filters) {
       if (activeQuick === 'Paid Unlock') return item.contentType === 'Paid Unlock';
       if (activeQuick === 'Trending') return catalog.trending.some((trend) => trend.id === item.id);
       if (activeQuick === 'New This Week') return item.createdAt >= '2026-04-11';
+      if (activeQuick === 'Commercial Ready') return matchesCommercialReady(item);
+      if (activeQuick === 'Creator Showcase') return matchesCreatorShowcase(item);
       return true;
     });
 
