@@ -15,10 +15,15 @@ export function EpisodeList({ episodes, currentEpisodeNumber, onSelect, membersh
             type="button"
             className={episode.number === currentEpisodeNumber ? 'ep-btn active' : 'ep-btn'}
             onClick={() => onSelect(episode.number)}
+            title={`Open video ${episode.number}`}
           >
-            <span>V{episode.number}</span>
+            <span>Video {episode.number}</span>
             <small>{episode.title}</small>
-            {episode.isPreview ? <i>Preview video</i> : <i>{locked ? `Unlock ${formatUsd(episode.unlockPriceUsd || 0.99)}` : 'Unlocked'}</i>}
+            {episode.isPreview ? (
+              <i>Preview video</i>
+            ) : (
+              <i>{locked ? `Single-video unlock ${formatUsd(episode.unlockPriceUsd || 0.99)}` : 'Included in your current access'}</i>
+            )}
           </button>
         );
       })}
