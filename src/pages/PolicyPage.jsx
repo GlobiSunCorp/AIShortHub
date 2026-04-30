@@ -3,6 +3,7 @@ import { REFUND_POLICY_CONFIG } from '../data/monetization';
 const policies = {
   terms: {
     title: 'Terms of Service',
+    intro: 'Core platform rules for viewers, creators, payments, and AI-powered short video publishing.',
     points: [
       'Use lawful content only.',
       'No IP infringement, impersonation, fraud, or misleading AI-content claims.',
@@ -13,6 +14,7 @@ const policies = {
   },
   privacy: {
     title: 'Privacy Policy',
+    intro: 'What account, creator, order, and payment data is stored to keep the platform running.',
     points: [
       'We store account/profile/order/payment metadata for operations.',
       'We may store creator project metadata, asset links, review notes, and service-order history to operate the platform.',
@@ -22,10 +24,12 @@ const policies = {
   },
   refund: {
     title: 'Refund Matrix',
+    intro: 'Viewer plans, creator plans, and add-on services follow separate refund logic.',
     modules: [REFUND_POLICY_CONFIG.viewer, REFUND_POLICY_CONFIG.creator, REFUND_POLICY_CONFIG.addon],
   },
   creatorGuidelines: {
     title: 'Creator Guidelines',
+    intro: 'Submission standards for AI short projects, creator showcase quality, rights, and safety.',
     points: [
       'Provide complete metadata and truthful ownership / licensing statements.',
       'Upload poster, cover, trailer / teaser, thumbnail, and main video assets with platform-safe standards.',
@@ -37,6 +41,7 @@ const policies = {
   },
   contentPolicy: {
     title: 'Content Policy',
+    intro: 'How AI shorts, creator uploads, and flagged submissions are reviewed during pilot operations.',
     points: [
       'Statuses: draft, pending_review, approved/published, rejected.',
       'Review applies to AI shorts, trailers, animations, music videos, commercials, product videos, and experimental content.',
@@ -47,6 +52,7 @@ const policies = {
   },
   commissionPayout: {
     title: 'Commission & Payout Policy',
+    intro: 'Creator-friendly launch payout logic: low commission, ad-first monetization, and monthly settlement.',
     points: [
       'Creator-friendly launch commissions are 8% / 5% / 3% for Creator Basic / Creator Pro / Studio.',
       'Platform commission applies only after creator-generated revenue exists.',
@@ -61,11 +67,13 @@ export function PolicyPage({ type = 'terms' }) {
   const policy = policies[type] || policies.terms;
   return (
     <section className="panel stack-md">
+      <p className="kicker">Policy Center</p>
       <h1>{policy.title}</h1>
+      <p className="small-text">{policy.intro}</p>
       {policy.modules ? (
         <div className="grid cards-3">
           {policy.modules.map((item) => (
-            <article key={item.title} className="mini-card stack-sm">
+            <article key={item.title} className="mini-card stack-sm" style={{ borderRadius: '24px' }}>
               <h3>{item.title}</h3>
               <p className="small-text">{item.short}</p>
               <ul>
@@ -77,12 +85,18 @@ export function PolicyPage({ type = 'terms' }) {
           ))}
         </div>
       ) : (
-        <ul>
-          {policy.points.map((point) => (
-            <li key={point}>{point}</li>
-          ))}
-        </ul>
+        <article className="mini-card" style={{ borderRadius: '24px' }}>
+          <ul>
+            {policy.points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+        </article>
       )}
+      <article className="mini-card" style={{ borderRadius: '24px' }}>
+        <h3>Operator note</h3>
+        <p className="small-text">Soft launch should prioritize stable flows, transparent rights disclosure, and professional AI shorts review standards over aggressive growth shortcuts.</p>
+      </article>
     </section>
   );
 }
