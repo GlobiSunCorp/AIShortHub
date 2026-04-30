@@ -6,12 +6,29 @@ export function getCreatorDashboardSnapshot({ platform, auth }) {
   const creator = platform.creators.find((item) => item.profileId === userId) || null;
   const series = platform.series.filter((item) => item.creatorId === creator?.id);
   const serviceOrders = platform.serviceOrders.filter((item) => item.requesterId === userId);
+  const pendingReviewProjects = series.filter((item) => item.status === 'pending_review');
+  const publishedProjects = series.filter((item) => item.status === 'published');
+  const draftProjects = series.filter((item) => item.status === 'draft');
+
   return {
     membership,
     creator,
     series,
-    pendingReviewCount: series.filter((item) => item.status === 'pending_review').length,
+    projects: series,
+    activeProjects: series,
+    draftProjects,
+    pendingReviewProjects,
+    publishedProjects,
+    serviceOrders,
+    projectMetrics: {
+      totalProjects: series.length,
+      draftProjects: draftProjects.length,
+      pendingReviewProjects: pendingReviewProjects.length,
+      publishedProjects: publishedProjects.length,
+      pendingPaymentOrders: serviceOrders.filter((item) => item.status === 'pending_payment').length,
+    },
+    pendingReviewCount: pendingReviewProjects.length,
     pendingPaymentOrders: serviceOrders.filter((item) => item.status === 'pending_payment').length,
-    publishedCount: series.filter((item) => item.status === 'published').length,
+    publishedCount: publishedProjects.length,
   };
 }
