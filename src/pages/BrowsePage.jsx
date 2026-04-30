@@ -13,12 +13,33 @@ export function BrowsePage({ platform }) {
   });
   const discovery = useBrowseDiscovery(platform, filters);
   const suggestions = useMemo(() => discovery.suggestions.slice(0, 5), [discovery.suggestions]);
+  const totalResults = discovery.result.length;
+  const totalFormats = Math.max(discovery.categories.length - 1, 0);
 
   return (
     <div className="ds-page">
-      <section className="panel ds-section">
+      <section className="panel ds-section stack-md">
         <SectionTitle title="Browse" desc="Discover AI-powered short videos by format, genre, style, monetization mode, and creator profile." />
-        <p className="ds-meta">Smart discovery supports title/tag/creator/synopsis/style/format/payment keywords with guided suggestions.</p>
+        <p className="ds-meta">Smart discovery supports title, tag, creator, synopsis, style, format, and payment keywords with guided suggestions and low-content launch resilience.</p>
+
+        <div className="grid cards-3">
+          <article className="mini-card" style={{ borderRadius: '24px' }}>
+            <p className="ds-caption">Visible titles</p>
+            <p className="stat-value">{totalResults}</p>
+            <p className="ds-meta">Current filtered AI shorts ready to explore.</p>
+          </article>
+          <article className="mini-card" style={{ borderRadius: '24px' }}>
+            <p className="ds-caption">Formats / categories</p>
+            <p className="stat-value">{totalFormats}</p>
+            <p className="ds-meta">Cinematic, vertical, animation, music video, trailer, commercial, product video, and more.</p>
+          </article>
+          <article className="mini-card" style={{ borderRadius: '24px' }}>
+            <p className="ds-caption">Discovery mode</p>
+            <p className="stat-value">Smart</p>
+            <p className="ds-meta">Search can mix creator names, mood, format, genre, and monetization terms.</p>
+          </article>
+        </div>
+
         <div className="browse-filters">
           <label>
             Smart Search
@@ -44,6 +65,7 @@ export function BrowsePage({ platform }) {
             options={discovery.sortOptions.map((item) => ({ value: item, label: item }))}
           />
         </div>
+
         <div className="row wrap">
           {discovery.quickFilters.map((item) => (
             <button
@@ -51,11 +73,13 @@ export function BrowsePage({ platform }) {
               type="button"
               className={`filter-chip ${filters.quickFilter === item ? 'active-chip' : ''}`}
               onClick={() => setFilters((prev) => ({ ...prev, quickFilter: item }))}
+              title={`Filter by ${item}`}
             >
               {item}
             </button>
           ))}
         </div>
+
         <div className="row wrap">
           <strong className="ds-caption">Hot keywords:</strong>
           {discovery.hotKeywords.map((word) => (
@@ -64,13 +88,14 @@ export function BrowsePage({ platform }) {
             </button>
           ))}
         </div>
+
         {suggestions.length ? <p className="ds-meta">Suggestions: {suggestions.join(' · ')}</p> : null}
         {discovery.activeFilters.length ? <p className="ds-caption">Active filters: {discovery.activeFilters.join(' | ')}</p> : <p className="ds-caption">Active filters: none</p>}
       </section>
 
       {discovery.catalog.firstBatch.length && filters.query.trim() === '' ? (
         <section className="ds-section">
-          <SectionTitle title="Launch Starter Picks" desc="Curated featured entries for first-time viewers" />
+          <SectionTitle title="Launch Starter Picks" desc="Curated featured entries for first-time viewers who want one fast, high-confidence click." />
           <div className="grid cards-3">
             {discovery.catalog.firstBatch.map((item) => (
               <SeriesCard
@@ -84,21 +109,24 @@ export function BrowsePage({ platform }) {
         </section>
       ) : null}
 
-      <section className="grid cards-3">
-        {discovery.result.map((item) => (
-          <SeriesCard
-            key={item.id}
-            series={item}
-            episodeCount={discovery.catalog.episodeMap[item.id]?.total}
-            previewCount={discovery.catalog.episodeMap[item.id]?.preview}
-          />
-        ))}
+      <section className="ds-section">
+        <SectionTitle title="All discoverable AI shorts" desc="Browse currently available titles across free preview, subscriber access, and paid unlock formats." />
+        <div className="grid cards-3">
+          {discovery.result.map((item) => (
+            <SeriesCard
+              key={item.id}
+              series={item}
+              episodeCount={discovery.catalog.episodeMap[item.id]?.total}
+              previewCount={discovery.catalog.episodeMap[item.id]?.preview}
+            />
+          ))}
+        </div>
       </section>
 
       {discovery.result.length === 0 ? (
         <section className="empty-state">
           <h3 className="ds-h3">No exact match yet</h3>
-          <p className="ds-meta">Try broader keywords or switch quick filters. You can also start from trending picks below.</p>
+          <p className="ds-meta">Try broader keywords, switch quick filters, or jump into curated picks below. Browse is tuned for a growing AI shorts catalog, so broad searches usually perform better during soft launch.</p>
           <div className="grid cards-3">
             {discovery.fallbackRecommendations.map((item) => (
               <SeriesCard
