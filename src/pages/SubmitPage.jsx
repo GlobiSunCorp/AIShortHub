@@ -35,6 +35,28 @@ export function SubmitPage() {
     'Creator dashboard with quota, pricing, review, earnings, and service order tracking',
   ];
 
+  const packageChecklist = [
+    { label: 'Poster / cover', note: 'Strong first impression for Browse, Home, and title detail cards.' },
+    { label: 'Trailer / teaser', note: 'A short hook that explains the tone before viewers commit.' },
+    { label: 'Main video', note: 'At least one watchable AI short video, screener, or launch cut.' },
+    { label: 'Metadata', note: 'Title, synopsis, tags, category, audience, language, and format.' },
+    { label: 'Rights notes', note: 'Music, voice, likeness, brand, footage, and AI workflow disclosure.' },
+    { label: 'Commercial disclosure', note: 'Required for branded, product-led, sponsored, or claim-based submissions.' },
+  ];
+
+  const fitMatrix = [
+    { label: 'Best fit', value: 'Finished or near-finished AI short projects with a clear hook and public showcase package.' },
+    { label: 'Possible fit', value: 'Early concepts with strong trailer, poster, and proof-of-quality but limited final assets.' },
+    { label: 'Not ready yet', value: 'Loose tests without rights notes, metadata, trailer, or at least one watchable video asset.' },
+  ];
+
+  const afterSubmit = [
+    'Create or open your Creator Dashboard workspace.',
+    'Upload poster, trailer / teaser, main video, subtitles, and supporting assets.',
+    'Complete pricing, access, and monetization intent.',
+    'Submit for review and track status in Profile, Creator Studio, and notifications.',
+  ];
+
   return (
     <div className="ds-page stack-lg">
       <section className="panel ds-section stack-md">
@@ -71,6 +93,23 @@ export function SubmitPage() {
         </article>
       </section>
 
+      <section className="panel ds-section stack-md">
+        <div className="ds-section-heading">
+          <span className="kicker">Submission package</span>
+          <h2 className="ds-h2">What a ready project should include</h2>
+          <p className="ds-meta">A complete package helps review move faster and makes your AI short easier to feature, monetize, and promote.</p>
+        </div>
+        <div className="grid cards-3">
+          {packageChecklist.map((item) => (
+            <article key={item.label} className="mini-card" style={{ borderRadius: '24px' }}>
+              <p className="ds-caption">Required / recommended</p>
+              <h3 className="ds-h3">{item.label}</h3>
+              <p className="ds-meta">{item.note}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="grid cards-2 ds-section">
         <article className="panel">
           <h2 className="ds-h2">What we accept</h2>
@@ -103,6 +142,26 @@ export function SubmitPage() {
               <li key={item}>{item}</li>
             ))}
           </ul>
+        </article>
+      </section>
+
+      <section className="grid cards-2 ds-section">
+        <article className="panel stack-md">
+          <h2 className="ds-h2">Creator fit matrix</h2>
+          {fitMatrix.map((item) => (
+            <article key={item.label} className="mini-card" style={{ borderRadius: '22px' }}>
+              <p className="ds-caption">{item.label}</p>
+              <p className="ds-meta">{item.value}</p>
+            </article>
+          ))}
+        </article>
+        <article className="panel stack-md">
+          <h2 className="ds-h2">What happens after submit</h2>
+          <ol className="small-text">
+            {afterSubmit.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ol>
         </article>
       </section>
 
