@@ -33,7 +33,7 @@ export function getViewerPlanHighlights(planId) {
     ['Full access', plan.fullSeriesAccess ? 'Included' : 'Upgrade required'],
     ['Quality', plan.quality],
     ['Early access', plan.earlyAccess ? 'Included' : 'Optional with upgrade'],
-    ['Exclusive content', plan.exclusiveContent ? 'Included' : 'Optional with upgrade'],
+    ['Exclusive AI shorts', plan.exclusiveContent ? 'Included' : 'Optional with upgrade'],
     ['Continue / history / favorites', plan.watchTools ? 'Included' : 'Upgrade required'],
   ];
 }
@@ -44,8 +44,8 @@ export function getCreatorPlanHighlights(planId) {
     ['Current Creator Plan', plan.name],
     ['Review priority', plan.reviewPriority],
     ['Platform commission', formatCommission(plan.commissionRate)],
-    ['Active Series cap', `${plan.maxActiveSeries} active series`],
-    ['Episodes cap', `${plan.maxTotalEpisodes} total episodes`],
+    ['Active Projects cap', `${plan.maxActiveSeries} active projects`],
+    ['Videos cap', `${plan.maxTotalEpisodes} total videos`],
     ['Storage cap', formatStorageGb(plan.monthlyAssetStorageLimitGb)],
     ['Motion Poster', plan.includedMotionPosterCount ? `${plan.includedMotionPosterCount} Included` : 'Add-on'],
     ['Featured requests', plan.maxFeaturedRequestsPerCycle ? `${plan.maxFeaturedRequestsPerCycle} / cycle` : 'Add-on'],
