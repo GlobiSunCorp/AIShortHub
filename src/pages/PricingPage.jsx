@@ -241,11 +241,11 @@ export function PricingPage({ auth, platform }) {
                   <p className="small-text">{plan.accessNote}</p>
                   {isCurrent ? <p className="small-text" style={{ color: '#f3ecff', marginTop: '-0.15rem' }}>Your active viewer plan · renews with your account cycle.</p> : null}
                   <ul>
-                    <li>完整剧集：<FeatureCell value={plan.fullSeriesAccess} /></li>
-                    <li>清晰度：<FeatureCell value={plan.quality} /></li>
-                    <li>抢先看 <GlossaryTerm id="early_access" />：<FeatureCell value={plan.earlyAccess} /></li>
-                    <li>会员专属内容 <GlossaryTerm id="exclusive_content" />：<FeatureCell value={plan.exclusiveContent} /></li>
-                    <li>继续观看/收藏/历史：<FeatureCell value={plan.watchTools} /></li>
+                    <li>AI shorts access：<FeatureCell value={plan.fullSeriesAccess ? 'Full eligible catalog' : 'Trailer / teaser / preview only'} /></li>
+                    <li>Quality：<FeatureCell value={plan.quality} /></li>
+                    <li>Early access <GlossaryTerm id="early_access" />：<FeatureCell value={plan.earlyAccess} /></li>
+                    <li>Exclusive AI shorts <GlossaryTerm id="exclusive_content" />：<FeatureCell value={plan.exclusiveContent} /></li>
+                    <li>Continue watching / favorites / history：<FeatureCell value={plan.watchTools} /></li>
                   </ul>
                   <button type="button" className="btn btn-primary" style={getButtonStyle({ hovered: hoveredButton === buttonKey, primary: true })} disabled={loadingKey === `viewer-${plan.id}` || isCurrent} onMouseEnter={() => setHoveredButton(buttonKey)} onMouseLeave={() => setHoveredButton('')} onClick={() => requestViewerPlanChange(plan)}>
                     {loadingKey === `viewer-${plan.id}` ? '跳转支付中...' : isCurrent ? 'Current Plan' : `升级到 ${plan.name}`}
@@ -278,15 +278,15 @@ export function PricingPage({ auth, platform }) {
                   <p className="small-text">Platform Commission: {formatCommission(plan.commissionRate)} · {plan.commissionPolicy}</p>
                   {isCurrent ? <p className="small-text" style={{ color: '#f3ecff', marginTop: '-0.15rem' }}>Your active creator plan · tools and quota are unlocked.</p> : null}
                   <ul>
-                    <li>审核优先级：{plan.reviewPriority}</li>
-                    <li>活跃剧集上限：{plan.maxActiveSeries}</li>
-                    <li>分集总上限：{plan.maxTotalEpisodes}</li>
-                    <li>月素材存储：{formatStorageGb(plan.monthlyAssetStorageLimitGb)}</li>
-                    <li>广告分成资格 <GlossaryTerm id="ad_revenue_share" />：{plan.adRevenueShareEligible ? 'Included' : '—'}</li>
+                    <li>Review priority：{plan.reviewPriority}</li>
+                    <li>Active project cap：{plan.maxActiveSeries}</li>
+                    <li>Video cap：{plan.maxTotalEpisodes}</li>
+                    <li>Monthly asset storage：{formatStorageGb(plan.monthlyAssetStorageLimitGb)}</li>
+                    <li>Ad revenue share eligibility <GlossaryTerm id="ad_revenue_share" />：{plan.adRevenueShareEligible ? 'Included' : '—'}</li>
                     <li>Motion Poster <GlossaryTerm id="motion_poster" />：<FeatureCell value={plan.motionPoster} /></li>
-                    <li>推荐位资格 <GlossaryTerm id="featured_placement" />：<FeatureCell value={plan.featuredPlacementEligibility} /></li>
+                    <li>Featured placement eligibility <GlossaryTerm id="featured_placement" />：<FeatureCell value={plan.featuredPlacementEligibility} /></li>
                   </ul>
-                  {plan.id !== activeCreator.id ? <p className="small-text">增量权益：+{plan.maxActiveSeries - activeCreator.maxActiveSeries} series · +{plan.monthlyAssetStorageLimitGb - activeCreator.monthlyAssetStorageLimitGb}GB · 佣金降低 {Math.max(Math.round((activeCreator.commissionRate - plan.commissionRate) * 100), 0)}%。</p> : null}
+                  {plan.id !== activeCreator.id ? <p className="small-text">Incremental benefits：+{plan.maxActiveSeries - activeCreator.maxActiveSeries} projects · +{plan.monthlyAssetStorageLimitGb - activeCreator.monthlyAssetStorageLimitGb}GB · commission reduced by {Math.max(Math.round((activeCreator.commissionRate - plan.commissionRate) * 100), 0)}%。</p> : null}
                   <button type="button" className="btn btn-ghost" style={getButtonStyle({ hovered: hoveredButton === buttonKey, primary: false })} disabled={loadingKey === `creator-${plan.id}` || isCurrent} onMouseEnter={() => setHoveredButton(buttonKey)} onMouseLeave={() => setHoveredButton('')} onClick={() => requestCreatorPlanChange(plan)}>
                     {loadingKey === `creator-${plan.id}` ? '跳转支付中...' : isCurrent ? 'Current Plan' : `升级到 ${plan.name}`}
                   </button>
