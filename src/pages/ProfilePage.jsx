@@ -112,10 +112,10 @@ export function ProfilePage({ auth, platform }) {
   } = snapshot;
   const statusLabel = getStatusLabel(auth.userState, membership.tier, auth.user?.tier, membership.creatorPlan);
   const audienceGroup = getAudienceGroup({ auth, membership });
-  const latestSeries = uploads[0];
-  const monetization = latestSeries?.monetization;
+  const latestTitle = uploads[0];
+  const monetization = latestTitle?.monetization;
   const viewerSummary = viewerPlan.id === 'free'
-    ? 'Free access, previews first, upgrade any time for more full episodes and higher quality.'
+    ? 'Free access, previews first, upgrade any time for more AI shorts and higher quality.'
     : 'Paid viewer access is active. Browse and Profile now reflect your upgraded viewing tier.';
   const creatorSummary = creatorPlan
     ? `Creator tools, quota, and monetization controls are active for ${creatorPlan.name}.`
@@ -205,12 +205,12 @@ export function ProfilePage({ auth, platform }) {
         <section className="panel ds-section">
           <h2 className="ds-h2">Quota & Entitlements</h2>
           <div className="row wrap">
-            <UsageQuotaBadge label="Series" value={`${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`} tone={quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok'} details={[["Used", quota.usage.activeSeries], ["Remaining", quota.remaining.seriesLeft]]} cta={quota.upgradeHint} />
-            <UsageQuotaBadge label="Episodes" value={`${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes}`} details={[["Used", quota.usage.totalEpisodes], ["Remaining", quota.remaining.episodesLeft]]} />
+            <UsageQuotaBadge label="Projects" value={`${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}`} tone={quota.remaining.seriesLeft <= 1 ? 'warn' : 'ok'} details={[["Used", quota.usage.activeSeries], ["Remaining", quota.remaining.seriesLeft]]} cta={quota.upgradeHint} />
+            <UsageQuotaBadge label="Videos" value={`${quota.usage.totalEpisodes}/${quota.limits.maxTotalEpisodes}`} details={[["Used", quota.usage.totalEpisodes], ["Remaining", quota.remaining.episodesLeft]]} />
             <UsageQuotaBadge label="Storage" value={`${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB`} tone={quota.remaining.storageGbLeft <= 2 ? 'warn' : 'ok'} details={[["Used", `${quota.usage.usedStorageGb.toFixed(1)}GB`], ["Remaining", `${quota.remaining.storageGbLeft.toFixed(1)}GB`]]} cta={quota.upgradeHint} />
           </div>
           <CreatorPlanCard snapshot={quota} />
-          <PlanHealthCard data={{ healthStatus: getHealthStatus(quota), cycleLabel: quota.cycleLabel, metrics: [{ label: 'Series', value: `${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}` }, { label: 'Storage', value: `${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB` }], summary: [['Quota reset', cycle.quotaResetDate], ['Review priority', quota.plan.reviewPriority]] }} />
+          <PlanHealthCard data={{ healthStatus: getHealthStatus(quota), cycleLabel: quota.cycleLabel, metrics: [{ label: 'Projects', value: `${quota.usage.activeSeries}/${quota.limits.maxActiveSeries}` }, { label: 'Storage', value: `${quota.usage.usedStorageGb.toFixed(1)}GB/${quota.limits.monthlyAssetStorageLimitGb}GB` }], summary: [['Quota reset', cycle.quotaResetDate], ['Review priority', quota.plan.reviewPriority]] }} />
         </section>
       ) : null}
 
@@ -243,15 +243,15 @@ export function ProfilePage({ auth, platform }) {
       {monetization ? (
         <section className="panel ds-section">
           <h2 className="ds-h2">Creator-set pricing (latest title)</h2>
-          <p className="ds-meta">{latestSeries.title}</p>
+          <p className="ds-meta">{latestTitle.title}</p>
           <div className="grid cards-2">
             <article className="card-secondary">
               <p className="ds-caption">Title pricing <GlossaryTerm id="title_pricing" /></p>
               <p className="stat-value">{formatUsd(monetization.titlePriceUsd)}</p>
             </article>
             <article className="card-secondary">
-              <p className="ds-caption">Episode unlock <GlossaryTerm id="episode_unlock_price" /></p>
-              <p className="stat-value">{formatUsd(monetization.episodeUnlockPriceUsd)}</p>
+              <p className="ds-caption">Single-video unlock <GlossaryTerm id="episode_unlock_price" /></p>
+              <p className="stat-value">{formatUsd(monetization.singleVideoUnlockPriceUsd ?? monetization.episodeUnlockPriceUsd)}</p>
             </article>
           </div>
         </section>
