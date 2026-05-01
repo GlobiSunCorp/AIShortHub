@@ -12,9 +12,9 @@ export function HowPricingWorksPanel({ viewerSummary, creatorSummary }) {
           bullets={[
             `Subscription unlocks: ${viewerSummary.unlocks}`,
             viewerSummary.stillPaid,
-            'Trailer and preview episodes can stay free while paid episodes remain clearly marked.',
+            'Trailer, teaser, and preview videos can stay free while main videos remain clearly marked.',
           ]}
-          footer="If a title is creator-priced, you can still unlock only one episode instead of full title."
+          footer="If a title is creator-priced, you can still unlock only one video instead of the full title."
         />
         <BillingExplainerCard
           title="For creators: what you keep"
