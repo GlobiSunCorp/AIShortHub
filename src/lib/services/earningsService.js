@@ -8,6 +8,7 @@ export function getCreatorEarningsSnapshot({ platform, creatorId }) {
     subscriptionShare: 0,
     singleTitleSales: 0,
     episodeUnlockSales: 0,
+    singleVideoSales: 0,
     addOnServiceCosts: 0,
     platformCommission: 0,
     netEarnings: 0,
@@ -18,11 +19,12 @@ export function getCreatorEarningsSnapshot({ platform, creatorId }) {
 }
 
 export function getEarningsBreakdown(snapshot) {
+  const singleVideoSales = Number(snapshot.singleVideoSales ?? snapshot.episodeUnlockSales ?? 0);
   const incomeItems = [
     ['Advertising revenue', snapshot.advertisingRevenue],
-    ['Subscription share', snapshot.subscriptionShare],
+    ['Subscription pool share', snapshot.subscriptionShare],
     ['Single-title sales', snapshot.singleTitleSales],
-    ['Episode unlock sales', snapshot.episodeUnlockSales],
+    ['Single-video sales', singleVideoSales],
   ];
   const deductions = [
     ['Add-on service costs', snapshot.addOnServiceCosts],
