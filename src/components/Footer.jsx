@@ -5,8 +5,8 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <div className="container stack-sm">
-        <p>AIShortHub pilot · Real auth/data/storage/payment structure with mock fallback.</p>
-        <p>Support: {SUPPORT_CONTACT_CONFIG.supportEmail} · Creator Ops: {SUPPORT_CONTACT_CONFIG.creatorOpsEmail} · Policy: {SUPPORT_CONTACT_CONFIG.policyEmail}</p>
+        <p><strong>AIShortHub</strong> is operated by GlobiSun Multimedia Corp.</p>
+        <p>Contact: <a href="mailto:contact@globisunmultimedia.com">contact@globisunmultimedia.com</a> · Support: {SUPPORT_CONTACT_CONFIG.supportEmail}</p>
         <div className="row wrap small-text">
           <Link to="/faq">FAQ</Link>
           <Link to="/terms">Terms</Link>
@@ -17,6 +17,7 @@ export function Footer() {
           <Link to="/content-policy">Content Policy</Link>
           <Link to="/commission-payout">Commission & Payout</Link>
         </div>
+        <p>© 2026 GlobiSun Multimedia Corp. All rights reserved.</p>
       </div>
     </footer>
   );

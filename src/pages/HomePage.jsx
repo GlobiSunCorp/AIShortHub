@@ -15,7 +15,6 @@ const PUBLIC_HERO_DEFAULTS = {
   secondaryCtaLabel: 'Submit Your Work',
   creatorCtaLabel: 'For Creators',
   eyebrow: 'AI shorts discovery',
-  kicker: 'Global creator showcase',
 };
 
 function useHeroViewport() {
@@ -78,31 +77,21 @@ function PublicHeroPoster({ src, alt, imageStyle }) {
   );
 }
 
-function PublicHome({ catalog, takeRate, platformConfig }) {
+function PublicHome({ catalog, platformConfig }) {
   const heroConfig = platformConfig?.homeHero || {};
   const { isMobile, isTablet } = useHeroViewport();
-  const allSeries = catalog.allSeries || [];
-  const featured =
-    allSeries.find((item) => item.id === heroConfig.featuredSeriesId) ||
-    catalog.firstBatch[0] ||
-    catalog.trending[0] ||
-    catalog.latest[0] ||
-    null;
   const featuredTitle = heroConfig.title || PUBLIC_HERO_DEFAULTS.title;
   const featuredSynopsis = heroConfig.synopsis || PUBLIC_HERO_DEFAULTS.synopsis;
-  const previewCount = catalog.episodeMap[featured?.id]?.preview || 1;
-  const totalCount = catalog.episodeMap[featured?.id]?.total || 12;
   const posterUrl = heroConfig.posterUrl || publicHeroPoster;
   const primaryCtaLabel = heroConfig.primaryCtaLabel || PUBLIC_HERO_DEFAULTS.primaryCtaLabel;
   const secondaryCtaLabel = heroConfig.secondaryCtaLabel || PUBLIC_HERO_DEFAULTS.secondaryCtaLabel;
   const creatorCtaLabel = heroConfig.creatorCtaLabel || PUBLIC_HERO_DEFAULTS.creatorCtaLabel;
   const eyebrow = heroConfig.eyebrow || PUBLIC_HERO_DEFAULTS.eyebrow;
-  const kicker = heroConfig.kicker || PUBLIC_HERO_DEFAULTS.kicker;
 
   const heroFrameStyle = useMemo(() => {
-    if (isMobile) return { aspectRatio: '9 / 16', minHeight: 'clamp(540px, 86vh, 820px)', maxHeight: 'none' };
-    if (isTablet) return { aspectRatio: '4 / 5', minHeight: '0', maxHeight: 'none' };
-    return { aspectRatio: '16 / 9', minHeight: '0', maxHeight: 'min(82vh, 860px)' };
+    if (isMobile) return { minHeight: '0' };
+    if (isTablet) return { minHeight: '0' };
+    return { minHeight: '0' };
   }, [isMobile, isTablet]);
 
   const heroImageStyle = useMemo(
@@ -113,52 +102,72 @@ function PublicHome({ catalog, takeRate, platformConfig }) {
   return (
     <div className="ds-page home-public">
       <section className="public-home-shell">
-        <Link className="public-home-poster cover-link" to={featured ? `/series/${featured.id}` : '/browse'} style={heroFrameStyle}>
-          <PublicHeroPoster src={posterUrl} alt={featuredTitle} imageStyle={heroImageStyle} />
-          <div className="public-home-poster-scrim" />
-          <div className="public-home-poster-top">
-            <span className="public-home-kicker">{kicker}</span>
+        <div className="public-home-poster" style={heroFrameStyle}>
+          <div className="public-home-format-tabs" aria-label="Content formats">
+            <span className="format-tab active">Vertical Short Drama</span>
+            <span className="format-tab">Horizontal Short Drama</span>
+            <span className="format-tab muted">Cinematic <small>In development</small></span>
           </div>
 
-          <div className="public-home-poster-center">
-            <div className="public-home-play-button" aria-hidden="true">
-              <span className="public-home-play-icon">▶</span>
-            </div>
-          </div>
-
-          <div className="public-home-poster-bottom">
+          <div className="public-home-hero-layout">
             <div className="public-home-title-block">
               <p className="public-home-eyebrow">{eyebrow}</p>
               <h1>{featuredTitle}</h1>
               <p className="public-home-description">{featuredSynopsis}</p>
+              <div className="row wrap public-home-actions">
+                <Link className="btn btn-primary btn-cta public-home-primary" to="/browse">{primaryCtaLabel}</Link>
+                <Link className="btn btn-ghost btn-cta-secondary public-home-secondary" to="/submit">{secondaryCtaLabel}</Link>
+                <Link className="btn btn-ghost public-home-tertiary" to="/pricing?intent=creator&plan=creator_pro">{creatorCtaLabel}</Link>
+              </div>
             </div>
 
-            <div className="public-home-hero-meta">
-              <span className="meta-pill">AI shorts</span>
-              <span className="meta-pill">Trailers · music videos · animation</span>
-              <span className="meta-pill">Creator take rate starts low</span>
-            </div>
+            <div className="format-showcase-scroll" aria-label="Short drama format showcase">
+              <article className="format-window format-window-vertical">
+                <PublicHeroPoster src={posterUrl} alt="I Swapped Bodies With the Football Captain vertical series" imageStyle={heroImageStyle} />
+                <div className="format-window-scrim" />
+                <div className="format-window-copy">
+                  <span className="status ok">9:16 · Episode 1</span>
+                  <h2>I Swapped Bodies With the Football Captain</h2>
+                  <p>Original vertical AI short drama.</p>
+                  <Link className="btn btn-primary" to="/browse">Explore the series</Link>
+                </div>
+              </article>
 
-            <div className="row wrap public-home-actions">
-              <span className="btn btn-primary btn-cta public-home-primary">{primaryCtaLabel}</span>
-              <span className="btn btn-ghost btn-cta-secondary public-home-secondary">{secondaryCtaLabel}</span>
-              <span className="btn btn-ghost public-home-tertiary">{creatorCtaLabel}</span>
+              <article className="format-window format-window-horizontal">
+                <PublicHeroPoster src={posterUrl} alt="Horizontal AI short drama showcase" imageStyle={{ objectPosition: 'center 32%' }} />
+                <div className="format-window-scrim" />
+                <div className="format-window-copy">
+                  <span className="status">16:9 · Coming soon</span>
+                  <h2>Horizontal Short Drama</h2>
+                  <p>Widescreen stories and cinematic trailers are in production.</p>
+                </div>
+              </article>
             </div>
           </div>
-        </Link>
+        </div>
+
+        <section className="panel company-intro" aria-labelledby="company-intro-title">
+          <p className="kicker">Operated by</p>
+          <h2 className="ds-h2" id="company-intro-title">GlobiSun Multimedia Corp.</h2>
+          <p className="ds-meta">
+            AIShortHub is an AI-native entertainment studio operated by GlobiSun Multimedia Corp., creating original cinematic short-form series for global audiences.
+          </p>
+        </section>
 
         <section className="grid cards-3 public-home-note-grid">
           <article className="mini-card public-home-note-card">
-            <h3 className="ds-h3">For viewers</h3>
-            <p className="ds-meta">Discover AI shorts across cinematic stories, trailers, animation, music videos, commercials, and experiments.</p>
+            <p className="kicker">Current Project</p>
+            <h3 className="ds-h3">I Swapped Bodies With the Football Captain</h3>
+            <p className="ds-meta">An original cinematic AI short drama series.</p>
           </article>
           <article className="mini-card public-home-note-card">
-            <h3 className="ds-h3">For creators</h3>
-            <p className="ds-meta">Showcase AI-powered short videos without letting creator tools hijack the first viewer impression.</p>
+            <h3 className="ds-h3">For global audiences</h3>
+            <p className="ds-meta">Discover original AI-powered cinematic stories and short-form entertainment.</p>
           </article>
           <article className="mini-card public-home-note-card">
-            <h3 className="ds-h3">Soft-launch economics</h3>
-            <p className="ds-meta">Default take rate is {(takeRate * 100).toFixed(0)}% now, with room to launch lower by plan tier.</p>
+            <p className="kicker">Contact</p>
+            <h3 className="ds-h3">GlobiSun Multimedia Corp.</h3>
+            <a className="info-link" href="mailto:contact@globisunmultimedia.com">contact@globisunmultimedia.com</a>
           </article>
         </section>
       </section>
@@ -297,12 +306,11 @@ function CreatorHome({ auth, membership, catalog }) {
 
 export function HomePage({ auth, platform }) {
   const catalog = getCatalogSnapshot(platform);
-  const takeRate = Number(platform?.platformConfig?.platformTakeRate ?? 0.2);
   const membership = resolveMembership(auth, platform);
   const creatorMode = auth?.isLoggedIn && (['creator', 'admin'].includes(auth.userState) || Boolean(membership.creatorPlan));
   const viewerMode = auth?.isLoggedIn && !creatorMode;
 
   if (creatorMode) return <CreatorHome auth={auth} membership={membership} catalog={catalog} />;
   if (viewerMode) return <ViewerHome auth={auth} catalog={catalog} />;
-  return <PublicHome catalog={catalog} takeRate={takeRate} platformConfig={platform?.platformConfig} />;
+  return <PublicHome catalog={catalog} platformConfig={platform?.platformConfig} />;
 }
