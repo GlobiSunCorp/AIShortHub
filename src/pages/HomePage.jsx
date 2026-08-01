@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
@@ -47,15 +48,25 @@ function PublicHome({ catalog, platformConfig }) {
   const secondaryCtaLabel = heroConfig.secondaryCtaLabel || PUBLIC_HERO_DEFAULTS.secondaryCtaLabel;
   const creatorCtaLabel = heroConfig.creatorCtaLabel || PUBLIC_HERO_DEFAULTS.creatorCtaLabel;
   const eyebrow = heroConfig.eyebrow || PUBLIC_HERO_DEFAULTS.eyebrow;
+  const [showcaseIndex, setShowcaseIndex] = useState(0);
+  const showcaseLabels = ['Vertical Short Drama', 'Horizontal Short Drama', 'Cinematic'];
 
   return (
     <div className="ds-page home-public">
       <section className="public-home-shell">
         <div className="public-home-poster">
           <div className="public-home-format-tabs" aria-label="Content formats">
-            <span className="format-tab active">Vertical Short Drama</span>
-            <span className="format-tab">Horizontal Short Drama</span>
-            <span className="format-tab muted">Cinematic <small>In development</small></span>
+            {showcaseLabels.map((label, index) => (
+              <button
+                key={label}
+                type="button"
+                className={`format-tab ${showcaseIndex === index ? 'active' : ''} ${index === 2 ? 'muted' : ''}`.trim()}
+                onClick={() => setShowcaseIndex(index)}
+                aria-pressed={showcaseIndex === index}
+              >
+                {label}{index === 2 ? <small>In development</small> : null}
+              </button>
+            ))}
           </div>
 
           <div className="public-home-hero-layout">
@@ -70,30 +81,63 @@ function PublicHome({ catalog, platformConfig }) {
               </div>
             </div>
 
-            <div className="format-showcase-scroll" aria-label="Short drama format showcase">
-              <article className="format-window format-window-vertical">
-                <div className="format-window-art format-window-art-vertical" aria-hidden="true">
-                  <span className="format-art-number">01</span>
-                  <span className="format-art-word">BODY<br />SWAP</span>
-                </div>
-                <div className="format-window-copy">
-                  <span className="format-label">9:16 Original · Episode 1</span>
-                  <h2>I Swapped Bodies With the Football Captain</h2>
-                  <Link className="format-window-link" to="/browse">View project →</Link>
-                </div>
-              </article>
+            <div className="showcase-carousel" aria-label="Short drama format showcase">
+              <button
+                type="button"
+                className="showcase-arrow showcase-arrow-left"
+                onClick={() => setShowcaseIndex((showcaseIndex + 2) % 3)}
+                aria-label="Previous format"
+              >
+                ‹
+              </button>
+              <div className="showcase-viewport">
+                <div className="showcase-track" style={{ '--showcase-index': showcaseIndex }}>
+                  <section className="showcase-slide showcase-slide-vertical" aria-label="Vertical short dramas">
+                    <article className="format-window format-window-vertical is-featured">
+                      <div className="format-window-art format-window-art-vertical" aria-hidden="true">
+                        <span className="format-art-number">01</span>
+                        <span className="format-art-word">BODY<br />SWAP</span>
+                      </div>
+                      <div className="format-window-copy">
+                        <span className="format-label">9:16 Original · Episode 1</span>
+                        <h2>I Swapped Bodies With the Football Captain</h2>
+                        <Link className="format-window-link" to="/browse">View project →</Link>
+                      </div>
+                    </article>
+                    <article className="format-window format-window-vertical format-window-placeholder">
+                      <div className="format-window-art format-window-art-violet" aria-hidden="true"><span className="format-art-number">02</span></div>
+                      <div className="format-window-copy"><span className="format-label">9:16 Original</span><h2>New Series</h2><p>Coming soon</p></div>
+                    </article>
+                    <article className="format-window format-window-vertical format-window-placeholder">
+                      <div className="format-window-art format-window-art-blue" aria-hidden="true"><span className="format-art-number">03</span></div>
+                      <div className="format-window-copy"><span className="format-label">Creator Spotlight</span><h2>Your Story Here</h2><Link className="format-window-link" to="/submit">Submit your work →</Link></div>
+                    </article>
+                  </section>
 
-              <article className="format-window format-window-horizontal">
-                <div className="format-window-art format-window-art-horizontal" aria-hidden="true">
-                  <span className="format-art-number">02</span>
-                  <span className="format-art-word">WIDE<br />STORIES</span>
+                  <section className="showcase-slide showcase-slide-horizontal" aria-label="Horizontal short dramas">
+                    {['Widescreen Originals', 'Cinematic Trailers', 'Global Stories'].map((title, index) => (
+                      <article className="format-window format-window-horizontal" key={title}>
+                        <div className={`format-window-art format-window-art-horizontal format-window-art-horizontal-${index + 1}`} aria-hidden="true"><span className="format-art-number">0{index + 1}</span></div>
+                        <div className="format-window-copy"><span className="format-label">16:9 · Coming soon</span><h2>{title}</h2></div>
+                      </article>
+                    ))}
+                  </section>
+
+                  <section className="showcase-slide showcase-slide-cinematic" aria-label="Cinematic projects in development">
+                    <p className="public-home-eyebrow">In development</p>
+                    <h2>Cinematic AI stories are coming next.</h2>
+                    <p>Longer-form visual storytelling is currently in development at GlobiSun Multimedia Corp.</p>
+                  </section>
                 </div>
-                <div className="format-window-copy">
-                  <span className="format-label">16:9 Original · Coming soon</span>
-                  <h2>Horizontal Short Drama</h2>
-                  <p>Widescreen stories and cinematic trailers.</p>
-                </div>
-              </article>
+              </div>
+              <button
+                type="button"
+                className="showcase-arrow showcase-arrow-right"
+                onClick={() => setShowcaseIndex((showcaseIndex + 1) % 3)}
+                aria-label="Next format"
+              >
+                ›
+              </button>
             </div>
           </div>
         </div>
