@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
 import { Link } from '../lib/router';
 import { SectionTitle } from '../components/SectionTitle';
 import { SeriesCard } from '../components/SeriesCard';
 import { OnboardingGuide } from '../components/OnboardingGuide';
 import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
 import { resolveMembership } from '../hooks/usePlanAccess';
-import { publicHeroPoster } from '../assets/publicHeroPoster';
 
 const PUBLIC_HERO_DEFAULTS = {
   title: 'The Hub for AI-Powered Short Videos',
@@ -16,24 +14,6 @@ const PUBLIC_HERO_DEFAULTS = {
   creatorCtaLabel: 'For Creators',
   eyebrow: 'AI shorts discovery',
 };
-
-function useHeroViewport() {
-  const readViewport = () => {
-    if (typeof window === 'undefined') return { isMobile: false, isTablet: false };
-    const width = window.innerWidth || 1440;
-    return { isMobile: width <= 640, isTablet: width > 640 && width <= 900 };
-  };
-
-  const [viewport, setViewport] = useState(readViewport);
-
-  useEffect(() => {
-    const onResize = () => setViewport(readViewport());
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
-  return viewport;
-}
 
 function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', emptyText }) {
   return (
@@ -59,50 +39,19 @@ function HomeCollection({ title, desc, items, episodeMap, columns = 'cards-3', e
   );
 }
 
-function PublicHeroPoster({ src, alt, imageStyle }) {
-  const [resolvedSrc, setResolvedSrc] = useState(src || publicHeroPoster);
-
-  useEffect(() => {
-    setResolvedSrc(src || publicHeroPoster);
-  }, [src]);
-
-  return (
-    <img
-      className="public-home-poster-image"
-      src={resolvedSrc || publicHeroPoster}
-      alt={alt}
-      style={imageStyle}
-      onError={() => setResolvedSrc(publicHeroPoster)}
-    />
-  );
-}
-
 function PublicHome({ catalog, platformConfig }) {
   const heroConfig = platformConfig?.homeHero || {};
-  const { isMobile, isTablet } = useHeroViewport();
   const featuredTitle = heroConfig.title || PUBLIC_HERO_DEFAULTS.title;
   const featuredSynopsis = heroConfig.synopsis || PUBLIC_HERO_DEFAULTS.synopsis;
-  const posterUrl = heroConfig.posterUrl || publicHeroPoster;
   const primaryCtaLabel = heroConfig.primaryCtaLabel || PUBLIC_HERO_DEFAULTS.primaryCtaLabel;
   const secondaryCtaLabel = heroConfig.secondaryCtaLabel || PUBLIC_HERO_DEFAULTS.secondaryCtaLabel;
   const creatorCtaLabel = heroConfig.creatorCtaLabel || PUBLIC_HERO_DEFAULTS.creatorCtaLabel;
   const eyebrow = heroConfig.eyebrow || PUBLIC_HERO_DEFAULTS.eyebrow;
 
-  const heroFrameStyle = useMemo(() => {
-    if (isMobile) return { minHeight: '0' };
-    if (isTablet) return { minHeight: '0' };
-    return { minHeight: '0' };
-  }, [isMobile, isTablet]);
-
-  const heroImageStyle = useMemo(
-    () => ({ objectPosition: isMobile ? 'center 24%' : isTablet ? 'center 28%' : 'center 32%' }),
-    [isMobile, isTablet]
-  );
-
   return (
     <div className="ds-page home-public">
       <section className="public-home-shell">
-        <div className="public-home-poster" style={heroFrameStyle}>
+        <div className="public-home-poster">
           <div className="public-home-format-tabs" aria-label="Content formats">
             <span className="format-tab active">Vertical Short Drama</span>
             <span className="format-tab">Horizontal Short Drama</span>
@@ -117,29 +66,32 @@ function PublicHome({ catalog, platformConfig }) {
               <div className="row wrap public-home-actions">
                 <Link className="btn btn-primary btn-cta public-home-primary" to="/browse">{primaryCtaLabel}</Link>
                 <Link className="btn btn-ghost btn-cta-secondary public-home-secondary" to="/submit">{secondaryCtaLabel}</Link>
-                <Link className="btn btn-ghost public-home-tertiary" to="/pricing?intent=creator&plan=creator_pro">{creatorCtaLabel}</Link>
+                <Link className="public-home-creator-link" to="/pricing?intent=creator&plan=creator_pro">{creatorCtaLabel} →</Link>
               </div>
             </div>
 
             <div className="format-showcase-scroll" aria-label="Short drama format showcase">
               <article className="format-window format-window-vertical">
-                <PublicHeroPoster src={posterUrl} alt="I Swapped Bodies With the Football Captain vertical series" imageStyle={heroImageStyle} />
-                <div className="format-window-scrim" />
+                <div className="format-window-art format-window-art-vertical" aria-hidden="true">
+                  <span className="format-art-number">01</span>
+                  <span className="format-art-word">BODY<br />SWAP</span>
+                </div>
                 <div className="format-window-copy">
-                  <span className="status ok">9:16 · Episode 1</span>
+                  <span className="format-label">9:16 Original · Episode 1</span>
                   <h2>I Swapped Bodies With the Football Captain</h2>
-                  <p>Original vertical AI short drama.</p>
-                  <Link className="btn btn-primary" to="/browse">Explore the series</Link>
+                  <Link className="format-window-link" to="/browse">View project →</Link>
                 </div>
               </article>
 
               <article className="format-window format-window-horizontal">
-                <PublicHeroPoster src={posterUrl} alt="Horizontal AI short drama showcase" imageStyle={{ objectPosition: 'center 32%' }} />
-                <div className="format-window-scrim" />
+                <div className="format-window-art format-window-art-horizontal" aria-hidden="true">
+                  <span className="format-art-number">02</span>
+                  <span className="format-art-word">WIDE<br />STORIES</span>
+                </div>
                 <div className="format-window-copy">
-                  <span className="status">16:9 · Coming soon</span>
+                  <span className="format-label">16:9 Original · Coming soon</span>
                   <h2>Horizontal Short Drama</h2>
-                  <p>Widescreen stories and cinematic trailers are in production.</p>
+                  <p>Widescreen stories and cinematic trailers.</p>
                 </div>
               </article>
             </div>
