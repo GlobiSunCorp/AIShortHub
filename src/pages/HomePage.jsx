@@ -99,10 +99,6 @@ function PublicHome({ catalog, platformConfig }) {
                         <img className="format-window-cover" src={bodySwapPoster} alt="I Swapped Bodies With the Football Captain" />
                         <span className="format-art-number">01</span>
                       </div>
-                      <div className="format-window-copy">
-                        <span className="format-label">9:16 Original · Episode 1</span>
-                        <h2>I Swapped Bodies With the Football Captain</h2>
-                      </div>
                     </article>
                     <article className="format-window format-window-vertical format-window-placeholder">
                       <div className="format-window-art format-window-art-violet" aria-hidden="true"><span className="format-art-number">02</span></div>

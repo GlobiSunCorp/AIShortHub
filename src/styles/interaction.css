@@ -332,8 +332,8 @@ button.press-feedback,
 }
 
 .format-window-vertical {
-  width: min(100%, 320px);
-  aspect-ratio: 9 / 16;
+  width: min(100%, 360px);
+  aspect-ratio: 3 / 4;
 }
 
 .format-window-horizontal {
@@ -355,17 +355,8 @@ button.press-feedback,
   object-position: center;
 }
 
-.is-featured .format-window-art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  width: auto;
-  height: auto;
-  right: 0;
-  top: 0;
-  border-radius: 0;
-  background: linear-gradient(180deg, transparent 48%, rgba(5, 6, 12, 0.16) 62%, rgba(5, 6, 12, 0.96) 100%);
-}
+.is-featured .format-window-art::before,
+.is-featured .format-window-art::after { display: none; }
 
 .format-window-art::before,
 .format-window-art::after {
