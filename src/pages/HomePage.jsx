@@ -5,6 +5,7 @@ import { SeriesCard } from '../components/SeriesCard';
 import { OnboardingGuide } from '../components/OnboardingGuide';
 import { getCatalogSnapshot } from '../lib/selectors/getCatalogSnapshot';
 import { resolveMembership } from '../hooks/usePlanAccess';
+import bodySwapPoster from '../assets/body-swap-poster.png';
 
 const PUBLIC_HERO_DEFAULTS = {
   title: 'The Hub for AI-Powered Short Videos',
@@ -94,23 +95,22 @@ function PublicHome({ catalog, platformConfig }) {
                 <div className="showcase-track" style={{ '--showcase-index': showcaseIndex }}>
                   <section className="showcase-slide showcase-slide-vertical" aria-label="Vertical short dramas">
                     <article className="format-window format-window-vertical is-featured">
-                      <div className="format-window-art format-window-art-vertical" aria-hidden="true">
+                      <div className="format-window-art format-window-art-vertical">
+                        <img className="format-window-cover" src={bodySwapPoster} alt="I Swapped Bodies With the Football Captain" />
                         <span className="format-art-number">01</span>
-                        <span className="format-art-word">BODY<br />SWAP</span>
                       </div>
                       <div className="format-window-copy">
                         <span className="format-label">9:16 Original · Episode 1</span>
                         <h2>I Swapped Bodies With the Football Captain</h2>
-                        <Link className="format-window-link" to="/browse">View project →</Link>
                       </div>
                     </article>
                     <article className="format-window format-window-vertical format-window-placeholder">
                       <div className="format-window-art format-window-art-violet" aria-hidden="true"><span className="format-art-number">02</span></div>
-                      <div className="format-window-copy"><span className="format-label">9:16 Original</span><h2>New Series</h2><p>Coming soon</p></div>
+                      <div className="format-window-copy"><h2>Coming soon</h2></div>
                     </article>
                     <article className="format-window format-window-vertical format-window-placeholder">
                       <div className="format-window-art format-window-art-blue" aria-hidden="true"><span className="format-art-number">03</span></div>
-                      <div className="format-window-copy"><span className="format-label">Creator Spotlight</span><h2>Your Story Here</h2><Link className="format-window-link" to="/submit">Submit your work →</Link></div>
+                      <div className="format-window-copy"><h2>Coming soon</h2></div>
                     </article>
                   </section>
 
